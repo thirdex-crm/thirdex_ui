@@ -70,7 +70,7 @@ const MapBox = ({ locations, loading }) => {
   );
 };
 
-const SessionChart = () => {
+const SessionChart = ({ selectedName, status, caseId, dateOpenedFilter }) => {
   const [locationCoords, setLocationCoords] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,8 +78,12 @@ const SessionChart = () => {
     const fetchLocations = async () => {
       try {
         setLoading(true);
-        const res = await getApi(urls.session.fetch);
-        const sessions = res?.data?.allSession || [];
+        const queryParams = new URLSearchParams({ page: 1, limit: 1000 });
+        if (status) queryParams.append('status', status === 'active');
+        if (caseId) queryParams.append('uniqueId', caseId);
+        if (dateOpenedFilter) queryParams.append('date', new Date(dateOpenedFilter).toISOString().split('T')[0]);
+        const res = await getApi(`${urls.session.fetchWithPagination}?${queryParams.toString()}`);
+        const sessions = res?.data?.data || [];
 
         const locationMap = {};
         sessions.forEach((session) => {
@@ -114,7 +118,7 @@ const SessionChart = () => {
     };
 
     fetchLocations();
-  }, []);
+  }, [selectedName, status, caseId, dateOpenedFilter]);
 
   return (
     <Grid item xs={12}>

@@ -8,7 +8,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGridApiContext } from '@mui/x-data-grid';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
-const KeyIndicatorsList = () => {
+const KeyIndicatorsList = ({ countryOfOriginFilter, selectedName, status }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [riskFactors, setRiskFactors] = useState([]);
@@ -48,8 +48,14 @@ const KeyIndicatorsList = () => {
         const indicators = configRes?.data?.allConfiguration?.filter((item) => item.configurationType === 'Key Indicators') || [];
         setRiskFactors(indicators);
 
-        const response = await getApi(urls.serviceuser.getAllServicesUser);
-        const allUsers = response?.data?.allUser || [];
+        // Build filtered user query — same pattern as other report list components
+        const queryParams = new URLSearchParams({ role: 'service_user', limit: 1000 });
+        if (countryOfOriginFilter) queryParams.append('country', countryOfOriginFilter);
+        if (selectedName) queryParams.append('name', selectedName);
+        if (status) queryParams.append('status', status === 'active');
+
+        const response = await getApi(`${urls.serviceuser.fetchWithPagination}?${queryParams.toString()}`);
+        const allUsers = response?.data?.data || [];
 
         const idCountMap = {};
         indicators.forEach((item) => {
@@ -79,7 +85,7 @@ const KeyIndicatorsList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [countryOfOriginFilter, selectedName, status]);
 
   return (
     <Box sx={{ p: 2, backgroundColor: '#fff' }}>

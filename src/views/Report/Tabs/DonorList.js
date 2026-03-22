@@ -11,7 +11,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGridApiContext } from '@mui/x-data-grid';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
-const CaseList = ({ selectedName, status, caseId, dateOpenedFilter }) => {
+const CaseList = ({ selectedName, status, startDate, endDate }) => {
   const [loading, setLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -120,12 +120,8 @@ const CaseList = ({ selectedName, status, caseId, dateOpenedFilter }) => {
         }
         if (status) queryParams.append('status', status === 'active');
 
-        if (caseId) queryParams.append('uniqueId', caseId);
-
-        if (dateOpenedFilter && dateOpenedFilter !== '') {
-          const formattedDate = new Date(dateOpenedFilter).toISOString().split('T')[0];
-          queryParams.append('createdAt', formattedDate);
-        }
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
         const response = await getApi(`${urls.transaction.fetchWithPagination}?${queryParams.toString()}`);
 
         const allTransaction = response?.data?.data || [];
@@ -155,7 +151,7 @@ const CaseList = ({ selectedName, status, caseId, dateOpenedFilter }) => {
     };
 
     fetchDonor();
-  }, [paginationModel, selectedName, status, caseId, dateOpenedFilter]);
+  }, [paginationModel, selectedName, status, startDate, endDate]);
   const CustomHeader = () => {
     const apiRef = useGridApiContext();
 

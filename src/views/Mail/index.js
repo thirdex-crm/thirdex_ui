@@ -60,7 +60,7 @@ const Mail = () => {
           </Stack>
 
           <Tooltip title="Info" arrow>
-            <IconButton>
+            <IconButton onClick={() => navigate('/view-mailing-data', { state: { id: params.row.id } })}>
               <InfoIcon sx={{ color: '#49494c' }} />
             </IconButton>
           </Tooltip>

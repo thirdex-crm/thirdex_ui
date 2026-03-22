@@ -175,7 +175,7 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                   minWidth: 0
                 }}
               >
-                <Chart />
+                <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
               </Box>
             </Box>
           </>

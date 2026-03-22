@@ -1,4 +1,4 @@
-import { Button, Grid, MenuItem, TextField, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -48,17 +48,28 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     {
       field: 'status',
       headerName: 'Status',
-      width: 80,
-      renderCell: (params) => (
-        <Button
-          size="small"
-          variant="outlined"
-          sx={{ p: 0, m: 0, pr: 0.5, pl: 0.5, borderRadius: '15px', color: '#737586', border: '1px solid #737586', fontSize: '0.65rem' }}
-          startIcon={<CheckIcon />}
-        >
-          {params.value || '-'}
-        </Button>
-      )
+      width: 90,
+      renderCell: (params) => {
+        const val = params.value;
+        const colorMap = {
+          Open:    { bg: '#E6F9F0', color: '#1A7A4A', border: '#A3D9BC' },
+          Closed:  { bg: '#FEE8E8', color: '#C0392B', border: '#F5AEAE' },
+          Pending: { bg: '#FFF4E0', color: '#B07A00', border: '#F5D68A' }
+        };
+        const style = colorMap[val] || { bg: '#F0F0F0', color: '#737586', border: '#ccc' };
+        return (
+          <Box sx={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            px: 1, py: 0.3, borderRadius: '12px',
+            backgroundColor: style.bg, border: `1px solid ${style.border}`
+          }}>
+            <CheckIcon sx={{ fontSize: '11px', color: style.color }} />
+            <Typography sx={{ fontSize: '11px', fontWeight: 600, color: style.color, lineHeight: 1 }}>
+              {val || '-'}
+            </Typography>
+          </Box>
+        );
+      }
     },
     {
       field: 'country',
@@ -161,7 +172,7 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
         queryParams.append('name', selectedName);
       }
 
-      if (status) queryParams.append('status', status === 'active');
+      if (status) queryParams.append('status', status === 'active' ? 'open' : 'close');
 
       if (caseId) queryParams.append('uniqueId', caseId);
 
@@ -195,7 +206,7 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
           serviceUser: `${firstName} ${lastName}`.trim() || '',
           service: user?.serviceId?.name || '',
           owner: user?.serviceId?.name || '',
-          status: user?.isActive === true ? 'Open' : 'Closed',
+          status: user?.status === 'open' ? 'Open' : user?.status === 'close' ? 'Closed' : user?.status === 'pending' ? 'Pending' : '-',
           ethicity: user?.serviceUserId?.personalInfo?.ethnicity || '-',
           country: countryName,
           countryFlag: matchedCountry?.flag || ''

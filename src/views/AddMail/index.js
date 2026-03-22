@@ -189,7 +189,11 @@ const MailingListForm = () => {
     setFilters(validatedFilters);
   };
 
-  const getLabel = (field) => field?.replace('personalInfo.', '')?.replace('contactInfo.', '')?.replace('emergencyContact.', '');
+  const getLabel = (option) => {
+    if (!option) return '';
+    if (typeof option === 'string') return option.replace('personalInfo.', '').replace('contactInfo.', '').replace('emergencyContact.', '');
+    return option.label || '';
+  };
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -362,9 +366,10 @@ const MailingListForm = () => {
                     <Autocomplete
                       size="small"
                       options={fieldOptions}
-                      value={filter.field || null}
-                      onChange={(event, newValue) => handleFilterChange(filter.id, 'field', newValue)}
+                      value={fieldOptions.find((o) => o.value === filter.field) || null}
+                      onChange={(event, newValue) => handleFilterChange(filter.id, 'field', newValue?.value || '')}
                       disableClearable
+                      isOptionEqualToValue={(option, value) => option?.value === (typeof value === 'string' ? value : value?.value)}
                       getOptionLabel={(option) => getLabel(option)}
                       renderInput={(params) => (
                         <TextField

@@ -3,7 +3,7 @@ import { Box, Tabs, Tab, Grid } from '@mui/material';
 import DonorList from './DonorList';
 import FilterPanel from 'components/FilterPanel';
 
-const Service = ({ selectedName, status, caseId, dateOpenedFilter,FilterPanelProp }) => {
+const Service = ({ selectedName, status, startDate, endDate, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -59,7 +59,7 @@ const Service = ({ selectedName, status, caseId, dateOpenedFilter,FilterPanelPro
                 minWidth: 0
               }}
             >
-            <DonorList selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
+            <DonorList selectedName={selectedName} status={status} startDate={startDate} endDate={endDate} />
              
             </Box>
           </Box>

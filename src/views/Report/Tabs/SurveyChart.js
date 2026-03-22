@@ -5,7 +5,7 @@ import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 
-const Chart = () => {
+const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter }) => {
   const [riskLabels, setRiskLabels] = useState([]);
   const [riskBarData, setRiskBarData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,9 +14,17 @@ const Chart = () => {
     const fetchChartData = async () => {
       try {
         setLoading(true);
-        const [userRes, configRes] = await Promise.all([getApi(urls.serviceuser.getAllServicesUser), getApi(urls.configuration.fetch)]);
+        const queryParams = new URLSearchParams({ page: 1, limit: 1000, role: 'service_user' });
+        if (countryOfOriginFilter) queryParams.append('country', countryOfOriginFilter);
+        if (selectedName) queryParams.append('name', selectedName);
+        if (status) queryParams.append('status', status === 'active');
+        if (caseId) queryParams.append('uniqueId', caseId);
+        const [userRes, configRes] = await Promise.all([
+          getApi(`${urls.serviceuser.fetchWithPagination}?${queryParams.toString()}`),
+          getApi(urls.configuration.fetch)
+        ]);
 
-        const attendees = userRes?.data?.allUser || [];
+        const attendees = userRes?.data?.data || [];
 
         const keyIndicatorConfig = configRes?.data?.allConfiguration?.filter((item) => item.configurationType === 'Key Indicators') || [];
 
@@ -56,7 +64,7 @@ const Chart = () => {
     };
 
     fetchChartData();
-  }, []);
+  }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
 
   return (
     <Grid item xs={12}>

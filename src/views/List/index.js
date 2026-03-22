@@ -24,43 +24,38 @@ const List = () => {
   const navigate = useNavigate();
   const [showFilter, setShowFilter] = useState(true);
   const [listFilters, setListFilters] = useState([]);
-  const [listName, setListName] = useState('');
-  const [sessionName, setSessionNameFilter] = useState('');
   const [listType, setListType] = useState('Service user');
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmUnarchiveOpen, setConfirmUnarchiveOpen] = useState(false);
-  const [includeServiceuser, setIncludeServiceuser] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [rows, setRows] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [includeArchives, setIncludeArchives] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10
   });
-  const [tag, setTag] = useState('');
-  const [tagOptions, setTagOptions] = useState([]);
 
   const handleFilter = async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
 
-      if (listName && listName !== '') {
-        queryParams.append('name', listName);
-      }
-
-      if (tag && tag !== '') {
-        queryParams.append('tag', tag);
-      }
-
       if (searchQuery && searchQuery.trim() !== '') {
         queryParams.append('search', searchQuery.trim());
+      }
+
+      if (startDate) {
+        queryParams.append('startDate', new Date(startDate).toISOString());
+      }
+      if (endDate) {
+        queryParams.append('endDate', new Date(endDate).toISOString());
       }
 
       queryParams.append('page', paginationModel.page + 1);
@@ -108,6 +103,13 @@ const List = () => {
         queryParams.append('archive', 'false');
       }
 
+      if (startDate) {
+        queryParams.append('startDate', new Date(startDate).toISOString());
+      }
+      if (endDate) {
+        queryParams.append('endDate', new Date(endDate).toISOString());
+      }
+
       const response = await getApi(`${urls.list.fetchWithPagination}?${queryParams.toString()}`);
       const allLists = response?.data?.data || [];
       const pagination = response?.data?.meta || {};
@@ -141,37 +143,24 @@ const List = () => {
   }, [includeArchives]);
 
   useEffect(() => {
-    if (listName || searchQuery || isFiltered || tag) {
+    if (searchQuery || isFiltered || startDate || endDate) {
       handleFilter();
     }
-  }, [listName || searchQuery || tag]);
+  }, [searchQuery, startDate, endDate]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
   const handleReset = () => {
-    setListName('');
+    setStartDate('');
+    setEndDate('');
     setIsFiltered(false);
     setIncludeArchives(false);
     fetchLists();
   };
-  const fetchtTagData = async () => {
-    try {
-      const response = await getApi(urls.tag.getAllTags);
-
-      const options = response?.data?.allTags?.map((item) => ({
-        value: item._id,
-        label: item.name
-      }));
-      setTagOptions(options);
-    } catch (error) {
-      console.error('Error fetching config:', error);
-    }
-  };
 
   useEffect(() => {
     fetchLists();
-    fetchtTagData();
   }, [paginationModel]);
   const columns = [
     {
@@ -295,13 +284,13 @@ const List = () => {
       <Grid container spacing={2}>
         <FilterPanel
           showFilter={showFilter}
-          listNames={listFilters}
-          listNameFilter={listName}
-          setListNameFilter={(value) => setListName(value)}
-          tags={tagOptions}
-          tagFilter={tag}
-          setTagFilter={(value) => setTag(value)}
-          selectedFilters={['listNameFilter', 'tagFilter']}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          includeArchives={includeArchives}
+          setIncludeArchives={setIncludeArchives}
+          selectedFilters={['dateRange', 'includeArchives']}
           onReset={handleReset}
         />
         <Grid item xs={9}>

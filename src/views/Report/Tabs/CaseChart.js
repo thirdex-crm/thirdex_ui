@@ -6,7 +6,7 @@ import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 
-const Chart = () => {
+const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter }) => {
   const [ethnicityData, setEthnicityData] = useState([]);
   const [ageRangePieData, setAgeRangePieData] = useState([]);
   const [ageBarData, setAgeBarData] = useState([0, 0, 0, 0, 0]);
@@ -18,8 +18,15 @@ const Chart = () => {
       try {
         setLoading(true);
 
-        const response = await getApi(urls.case.fetch);
-        const cases = response.data;
+        const queryParams = new URLSearchParams({ page: 1, limit: 1000 });
+        if (countryOfOriginFilter) queryParams.append('country', countryOfOriginFilter);
+        if (selectedName) queryParams.append('name', selectedName);
+        if (status) queryParams.append('status', status === 'active' ? 'open' : 'close');
+        if (caseId) queryParams.append('uniqueId', caseId);
+        if (dateOpenedFilter) queryParams.append('caseOpened', new Date(dateOpenedFilter).toISOString().split('T')[0]);
+
+        const response = await getApi(`${urls.case.fetchWithPagination}?${queryParams.toString()}`);
+        const cases = response.data?.data || [];
 
         const ethnicityCount = {
           'Black / Black British - Caribbean / African': 0,
@@ -32,7 +39,7 @@ const Chart = () => {
         };
 
         cases.forEach((item) => {
-          const ethnicity = item?.userServiceDetails?.personalInfo?.ethnicity || 'Other';
+          const ethnicity = item?.serviceUserId?.personalInfo?.ethnicity || 'Other';
 
           if (ethnicity.includes('Black')) {
             ethnicityCount['Black / Black British - Caribbean / African']++;
@@ -71,7 +78,7 @@ const Chart = () => {
         const today = new Date();
 
         cases.forEach((item) => {
-          const dobStr = item?.userServiceDetails?.personalInfo?.dateOfBirth;
+          const dobStr = item?.serviceUserId?.personalInfo?.dateOfBirth;
           if (dobStr) {
             const dob = new Date(dobStr);
             const age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
@@ -101,7 +108,7 @@ const Chart = () => {
         };
 
         cases.forEach((item) => {
-          const dobStr = item?.userServiceDetails?.personalInfo?.dateOfBirth;
+          const dobStr = item?.serviceUserId?.personalInfo?.dateOfBirth;
           if (dobStr) {
             const dob = new Date(dobStr);
             const age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
@@ -125,7 +132,7 @@ const Chart = () => {
         };
 
         cases.forEach((item) => {
-          const gender = item?.userServiceDetails?.personalInfo?.gender?.toLowerCase().trim();
+          const gender = item?.serviceUserId?.personalInfo?.gender?.toLowerCase().trim();
 
           if (gender === 'male') genderCount.Male++;
           else if (gender === 'female') genderCount.Female++;
@@ -143,7 +150,7 @@ const Chart = () => {
     };
 
     fetchData();
-  }, []);
+  }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
   const staticEthnicityConfig = [
     { id: 1, label: 'Black / Black British - Caribbean / African', color: '#133144', labelColor: '#fff' },
     { id: 2, label: 'Asian / Asian British', color: '#86E5FC', labelColor: '#000' },

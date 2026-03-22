@@ -30,7 +30,7 @@ import { urls } from 'common/urls';
 import { useEffect } from 'react';
 import { Autocomplete } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import { caseFieldOptions, channelOptions, fieldOptions, formFieldOptions, mailingListFieldOptions, serviceFieldOptions, transactionFieldOptions } from 'common/constants';
+import { caseFieldOptions, channelOptions, ethnicityOptions, fieldOptions, formFieldOptions, mailingListFieldOptions, serviceFieldOptions, transactionFieldOptions } from 'common/constants';
 
 const AddListForm = () => {
   const location = useLocation();
@@ -72,20 +72,7 @@ const AddListForm = () => {
     }
   });
 
-  const [filters, setFilters] = useState([
-    {
-      id: 1,
-      logic: 'AND',
-      field: '',
-      comparison: '',
-      value: '',
-      errors: {
-        field: false,
-        comparison: false,
-        value: false
-      }
-    }
-  ]);
+  const [filters, setFilters] = useState([]);
 
   const handleFilterChange = (id, field, value) => {
     setFilters((prev) =>
@@ -141,10 +128,11 @@ const AddListForm = () => {
     let hasError = false;
 
     const validatedFilters = filters.map((filter) => {
+      const valueEmpty = Array.isArray(filter.value) ? filter.value.length === 0 : !filter.value?.trim();
       const newErrors = {
         field: !filter.field?.trim(),
         comparison: !filter.comparison?.trim(),
-        value: !filter.value?.trim()
+        value: valueEmpty
       };
 
       if (newErrors?.field || newErrors?.comparison || newErrors?.value) {
@@ -159,10 +147,6 @@ const AddListForm = () => {
 
     if (hasError) {
       setFilters(validatedFilters);
-      const firstErrorIndex = validatedFilters.findIndex(
-        (filter) => filter.errors.field || filter.errors.comparison || filter.errors.value
-      );
-
       setIsloading(false);
       return;
     }
@@ -171,28 +155,37 @@ const AddListForm = () => {
       const formData = {
         ...data,
         name: data.listName || '',
-        tags: data.tags.map((tag) => tag._id) || '',
+        tags: (data.tags || []).map((tag) => tag._id),
         channelSettings: data.channelSettings || '',
         purposeSettings: data.purposeSettings || '',
         listType: state?.type || '',
-        filters: validatedFilters.map(({ errors, ...rest }) => rest)
+        filters: validatedFilters.map(({ errors, ...rest }) => ({
+          ...rest,
+          value: Array.isArray(rest.value) ? rest.value.join(', ') : rest.value
+        }))
       };
       const response = await postApi(urls.list.create, formData);
       toast.success('List added successfully');
-      navigate('/list');
+      const newListId = response?.data?.newList?._id;
+      if (newListId) {
+        navigate('/list-view', { state: { id: newListId, listType: state?.type || '' } });
+      } else {
+        navigate('/list');
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Error Adding Mail');
+      toast.error('Error Adding List');
     } finally {
       setIsloading(false);
     }
   };
   const onError = () => {
     const validatedFilters = filters.map((filter) => {
+      const valueEmpty = Array.isArray(filter.value) ? filter.value.length === 0 : !filter.value?.trim();
       const newErrors = {
         field: !filter.field?.trim(),
         comparison: !filter.comparison?.trim(),
-        value: !filter.value?.trim()
+        value: valueEmpty
       };
 
       return {
@@ -255,7 +248,6 @@ const AddListForm = () => {
             <Controller
               name="tags"
               control={control}
-              rules={{ required: 'This field is required' }}
               render={({ field, fieldState }) => (
                 <Autocomplete
                   multiple
@@ -473,8 +465,8 @@ const AddListForm = () => {
                       <InputLabel>Field</InputLabel>
                       <Select value={filter.field} onChange={(e) => handleFilterChange(filter.id, 'field', e.target.value)} label="Field">
                         {filterFieldOptions?.map((option) => (
-                          <MenuItem key={option} value={option}>
-                            {option}
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
                           </MenuItem>
                         ))}
                       </Select>
@@ -482,42 +474,53 @@ const AddListForm = () => {
                     </FormControl>
                   </Grid>
                   <Grid item xs={3}>
-                    <Select
-                      fullWidth
-                      size="small"
-                      value={filter.comparison}
-                      onChange={(e) => handleFilterChange(filter.id, 'comparison', e.target.value)}
-                      displayEmpty
-                      error={filter.errors?.value}
-                      helperText={filter.errors?.value ? 'Value is required' : ''}
-                    >
-                      <MenuItem value="" disabled>
-                        Select Comparison
-                      </MenuItem>
-                      <MenuItem value="equals">Equals</MenuItem>
-                      <MenuItem value="not_equals">Not Equals</MenuItem>
-                      <MenuItem value="contains">Contains</MenuItem>
-                      <MenuItem value="not_contains">Not Contains</MenuItem>
-                      <MenuItem value="greater_than">Greater Than</MenuItem>
-                      <MenuItem value="less_than">Less Than</MenuItem>
-                    </Select>
-                    {filter.errors?.comparison && (
-                      <Typography variant="caption" color="error">
-                        Comparison is required
-                      </Typography>
-                    )}
+                    <FormControl fullWidth size="small" error={filter.errors?.comparison}>
+                      <InputLabel>Comparison</InputLabel>
+                      <Select
+                        value={filter.comparison}
+                        onChange={(e) => handleFilterChange(filter.id, 'comparison', e.target.value)}
+                        label="Comparison"
+                      >
+                        <MenuItem value="equals">Equals</MenuItem>
+                        <MenuItem value="not_equals">Not Equals</MenuItem>
+                        <MenuItem value="contains">Contains</MenuItem>
+                        <MenuItem value="not_contains">Not Contains</MenuItem>
+                        <MenuItem value="greater_than">Greater Than</MenuItem>
+                        <MenuItem value="less_than">Less Than</MenuItem>
+                      </Select>
+                      {filter.errors?.comparison && <FormHelperText>Comparison is required</FormHelperText>}
+                    </FormControl>
                   </Grid>
 
                   <Grid item xs={2}>
-                    <TextField
-                      fullWidth
-                      label="Value"
-                      size="small"
-                      value={filter.value}
-                      onChange={(e) => handleFilterChange(filter.id, 'value', e.target.value)}
-                      error={filter.errors?.value}
-                      helperText={filter.errors?.value ? 'Value is required' : ''}
-                    />
+                    {filter.field === 'personalInfo.ethnicity' ? (
+                      <Autocomplete
+                        multiple
+                        options={ethnicityOptions}
+                        getOptionLabel={(option) => option}
+                        value={Array.isArray(filter.value) ? filter.value : (filter.value ? filter.value.split(', ').filter(Boolean) : [])}
+                        onChange={(_, selected) => handleFilterChange(filter.id, 'value', selected)}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Value"
+                            size="small"
+                            error={filter.errors?.value}
+                            helperText={filter.errors?.value ? 'Value is required' : ''}
+                          />
+                        )}
+                      />
+                    ) : (
+                      <TextField
+                        fullWidth
+                        label="Value"
+                        size="small"
+                        value={filter.value}
+                        onChange={(e) => handleFilterChange(filter.id, 'value', e.target.value)}
+                        error={filter.errors?.value}
+                        helperText={filter.errors?.value ? 'Value is required' : ''}
+                      />
+                    )}
                   </Grid>
                   <Grid item xs={2}>
                     <Box display="flex" alignItems="center">

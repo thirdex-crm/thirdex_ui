@@ -7,7 +7,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import PrintStyles from 'themes/print.js';
-const Service = ({ selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
+const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -103,7 +103,7 @@ const Service = ({ selectedName, status, caseId, dateOpenedFilter, FilterPanelPr
                 minWidth: 0
               }}
             >
-              <Chart />
+              <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
             </Box>
           </Box>
               </>
@@ -139,7 +139,7 @@ const Service = ({ selectedName, status, caseId, dateOpenedFilter, FilterPanelPr
                 minWidth: 0
               }}
             >
-              <DonorList selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
+              <DonorList countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
             </Box>
           </Box>
         )}

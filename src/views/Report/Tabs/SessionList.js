@@ -1,4 +1,4 @@
-import { Button, Grid, MenuItem, TextField, Typography, IconButton, InputBase } from '@mui/material';
+import { Grid, Typography, IconButton, InputBase } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGridApiContext } from '@mui/x-data-grid';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
@@ -17,7 +17,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import config from '../../../config';
 
-const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter1 }) => {
+const CaseList = ({ countryOfOriginFilter, selectedName, status, dateOpenedFilter1 }) => {
   const [rows, setRows] = useState([]);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -25,9 +25,6 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
   });
   const [loading, setLoading] = useState(true);
   const [totalRows, setTotalRows] = useState(0);
-  const [dateOpenedFilter, setDateOpenedFilter] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isFiltered, setIsFiltered] = useState(false);
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
 
   useEffect(() => {
@@ -51,20 +48,14 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
           limit: paginationModel.pageSize
         });
 
-        if (countryOfOriginFilter) {
-          const selectedCountry = countriesWithFlags.find((country) => country.value === countryOfOriginFilter);
-          if (selectedCountry) {
-            queryParams.append('country', selectedCountry.label);
-          }
-        }
-
         if (selectedName) {
           queryParams.append('name', selectedName);
         }
 
-        if (status) queryParams.append('status', status === 'active');
+        // countryOfOriginFilter is already a Configuration ObjectId (set from configCountries in Report/index.js)
+        if (countryOfOriginFilter) queryParams.append('country', countryOfOriginFilter);
 
-        if (caseId) queryParams.append('uniqueId', caseId);
+        if (status) queryParams.append('status', status === 'active');
 
         if (dateOpenedFilter1 && dateOpenedFilter1 !== '') {
           const formattedDate = new Date(dateOpenedFilter1).toISOString().split('T')[0];
@@ -77,21 +68,22 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
         const pagination = response?.data?.meta || { total: 0 };
 
         const transformedRows = data.map((item, index) => {
-          const personalInfo = item?.serviceuser?.personalInfo || {};
-          const fullName = personalInfo.name || '';
-          const caseid = item?.serviceuser?.uniqueId;
-          const countryName = item?.country || '-';
-          const matchedCountry = countriesWithFlags.find((c) => c.label.toLowerCase() === countryName.toLowerCase());
+          // serviceuser refs admin model — fields are flat (name/firstName/lastName, no personalInfo)
+          const su = item?.serviceuser;
+          const fullName = `${su?.firstName || ''} ${su?.lastName || ''}`.trim() || su?.name || '-';
+          // country is a populated Configuration object — extract its name
+          const countryObj = item?.country;
+          const countryName = countryObj && typeof countryObj === 'object' ? countryObj?.name : (countryObj || '-');
+          const matchedCountry = countriesWithFlags.find((c) => c.label.toLowerCase() === (countryName || '').toLowerCase());
 
           return {
             id: item._id || index,
-            caseid: caseid || '-',
-            serviceUser: fullName || '-',
+            sNo: index + 1,
+            serviceUser: fullName,
             dob: item.date ? dayjs(item.date).format('DD/MM/YYYY') : '-',
-            status: item.isActive ? 'Open' : 'Closed',
-            country: item.country || '-',
+            status: item.isActive ? 'Active' : 'Inactive',
+            country: countryName || '-',
             countryFlag: matchedCountry?.flag || '',
-            ethicity: item.serviceuser?.personalInfo?.ethnicity || '-',
             owner: item.serviceId?.name || '-'
           };
         });
@@ -107,86 +99,14 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     };
 
     fetchData();
-  }, [countriesWithFlags, paginationModel, countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter1]);
-
-  const handleFilter = async () => {
-    try {
-      const queryParams = new URLSearchParams();
-
-      if (serviceType && serviceType !== '') {
-        queryParams.append('serviceId', serviceType);
-      }
-      if (status) queryParams.append('status', status === 'active');
-      if (owner && owner !== '') {
-        queryParams.append('serviceType', owner);
-      }
-      if (dateOpenedFilter && dateOpenedFilter !== '') {
-        const formattedDate = new Date(dateOpenedFilter).toISOString().split('T')[0];
-        queryParams.append('createdAt', formattedDate);
-      }
-
-      if (searchQuery && searchQuery !== '') {
-        queryParams.append('search', searchQuery);
-      }
-
-      const queryString = queryParams.toString();
-      const url = `${urls.case.fetchWithPagination}?${queryParams.toString()}`;
-
-      const response = await getApi(url);
-
-      const filteredCases = response?.data?.data || [];
-      const pagination = response?.data?.meta || { total: 0 };
-
-      const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB');
-      };
-
-      const formattedUsers = filteredCases.map((user, index) => {
-        const personalInfo = user?.serviceuser?.personalInfo || {};
-        const fullName = personalInfo.name || '';
-
-        return {
-          id: user?._id,
-          serialNumber: `RD-${(index + 1).toString().padStart(3, '0')}`,
-          dateOpened: formatDate(user?.caseOpened),
-          dateClosed: formatDate(user?.caseClosed),
-          serviceUser: fullName,
-          service: user?.serviceId?.name || '',
-          owner: user?.serviceId?.name || '',
-          status: user?.isActive === true ? 'Open' : 'Closed'
-        };
-      });
-
-      setRows(formattedUsers);
-      setTotalRows(pagination?.total);
-      setIsFiltered(true);
-    } catch (error) {
-      console.error('Failed to fetch filtered cases:', error);
-    }
-  };
-
-  const handleReset = () => {
-    setDateOpenedFilter('');
-  };
-
-  useEffect(() => {
-    if (status || dateOpenedFilter || searchQuery || isFiltered) {
-      handleFilter();
-    }
-  }, [status, dateOpenedFilter, searchQuery, isFiltered]);
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  }, [countriesWithFlags, paginationModel, countryOfOriginFilter, selectedName, status, dateOpenedFilter1]);
 
   const columns = [
     {
-      field: 'caseid',
-      headerName: 'Case ID',
-      flex: 1,
-      renderCell: (params) => <Typography sx={{ fontSize: '12px' }}>{params?.value || '-'}</Typography>
+      field: 'sNo',
+      headerName: '#',
+      width: 60,
+      renderCell: (params) => <Typography sx={{ fontSize: '12px' }}>{params?.value}</Typography>
     },
     {
       field: 'serviceUser',
@@ -196,7 +116,7 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     },
     {
       field: 'dob',
-      headerName: 'Date Opened',
+      headerName: 'Session Date',
       flex: 1,
       renderCell: (params) => <Typography sx={{ fontSize: '12px' }}>{params?.value || '-'}</Typography>
     },
@@ -204,27 +124,26 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
       field: 'status',
       headerName: 'Status',
       flex: 1,
-      renderCell: (params) => (
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<CheckIcon />}
-          sx={{
-            p: 0,
-            pr: 0.5,
-            pl: 0.5,
-            m: 0,
-            borderRadius: '15px',
-            color: '#737586',
-            border: '1px solid #737586',
-            textTransform: 'none',
-            fontSize: '0.65rem',
-            minWidth: 0
-          }}
-        >
-          {params.value || '-'}
-        </Button>
-      )
+      renderCell: (params) => {
+        const val = params.value;
+        const colorMap = {
+          Active:   { bg: '#E6F9F0', color: '#1A7A4A', border: '#A3D9BC' },
+          Inactive: { bg: '#FEE8E8', color: '#C0392B', border: '#F5AEAE' }
+        };
+        const style = colorMap[val] || { bg: '#F0F0F0', color: '#737586', border: '#ccc' };
+        return (
+          <Box sx={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            px: 1, py: 0.3, borderRadius: '12px',
+            backgroundColor: style.bg, border: `1px solid ${style.border}`
+          }}>
+            <CheckIcon sx={{ fontSize: '11px', color: style.color }} />
+            <Typography sx={{ fontSize: '11px', fontWeight: 600, color: style.color, lineHeight: 1 }}>
+              {val || '-'}
+            </Typography>
+          </Box>
+        );
+      }
     },
     {
       field: 'country',
@@ -239,13 +158,7 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     },
     {
       field: 'owner',
-      headerName: 'Owner',
-      flex: 1,
-      renderCell: (params) => <Typography sx={{ fontSize: '12px' }}>{params?.value || '-'}</Typography>
-    },
-    {
-      field: 'ethicity',
-      headerName: 'Ethicity',
+      headerName: 'Service',
       flex: 1,
       renderCell: (params) => <Typography sx={{ fontSize: '12px' }}>{params?.value || '-'}</Typography>
     }

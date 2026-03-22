@@ -113,7 +113,7 @@ const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpene
                   minWidth: 0
                 }}
               >
-                <Chart />
+                <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
               </Box>
             </Box>
           </>
@@ -152,8 +152,6 @@ const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpene
                 countryOfOriginFilter={countryOfOriginFilter}
                 selectedName={selectedName}
                 status={status}
-                caseId={caseId}
-                dateOpenedFilter={dateOpenedFilter}
               />
             </Box>
           </Box>

@@ -1,10 +1,11 @@
 import React from 'react';
-import { Card, Grid, IconButton, Tooltip, Typography, InputBase, Button, Menu, MenuItem } from '@mui/material';
+import { Card, Grid, IconButton, Tooltip, Typography, InputBase, Button, Menu, MenuItem, Dialog, DialogContent, DialogTitle, Switch, FormControlLabel, Divider } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import { useState, useEffect } from 'react';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { getApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -21,6 +22,10 @@ const ListView = () => {
   const [rows, setRows] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [listData, setListData] = useState();
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [separateFiles, setSeparateFiles] = useState(false);
+  const [combineAddress, setCombineAddress] = useState(false);
+  const [addToTimeline, setAddToTimeline] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10
@@ -99,7 +104,108 @@ const ListView = () => {
             </IconButton>
             {'Lists'}
           </Typography>
+
+          <Tooltip title="Download" arrow>
+            <IconButton
+              onClick={() => setDownloadOpen(true)}
+              sx={{
+                backgroundColor: '#009fc7',
+                color: 'white',
+                borderRadius: '10px',
+                width: 40,
+                height: 40,
+                '&:hover': { backgroundColor: '#007da3' }
+              }}
+            >
+              <FileDownloadOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
+
+        {/* Download Dialog */}
+        <Dialog open={downloadOpen} onClose={() => setDownloadOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 600, fontSize: '16px' }}>Download</DialogTitle>
+          <Divider />
+          <DialogContent>
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2">Create separate files for each communication channel</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <IconButton size="small" onClick={() => setSeparateFiles(false)} sx={{ p: 0 }}>
+                    <Typography fontSize="14px" color="error">✕</Typography>
+                  </IconButton>
+                  <Switch
+                    checked={separateFiles}
+                    onChange={(e) => setSeparateFiles(e.target.checked)}
+                    size="small"
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {separateFiles ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2">Combine people at the same address into one row in the download file</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <IconButton size="small" onClick={() => setCombineAddress(false)} sx={{ p: 0 }}>
+                    <Typography fontSize="14px" color="error">✕</Typography>
+                  </IconButton>
+                  <Switch
+                    checked={combineAddress}
+                    onChange={(e) => setCombineAddress(e.target.checked)}
+                    size="small"
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {combineAddress ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ border: '2px solid #f5a623', borderRadius: 2, p: 1.5 }}
+              >
+                <Typography variant="body2">Add Activities to Timeline</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <IconButton size="small" onClick={() => setAddToTimeline(false)} sx={{ p: 0 }}>
+                    <Typography fontSize="14px" color="error">✕</Typography>
+                  </IconButton>
+                  <Switch
+                    checked={addToTimeline}
+                    onChange={(e) => setAddToTimeline(e.target.checked)}
+                    size="small"
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {addToTimeline ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="flex-end" gap={2} mt={1}>
+                <Button
+                  variant="contained"
+                  onClick={() => setDownloadOpen(false)}
+                  sx={{ backgroundColor: '#f5a623', '&:hover': { backgroundColor: '#d4911a' }, color: '#fff', borderRadius: '20px', textTransform: 'none' }}
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => setDownloadOpen(false)}
+                  sx={{ backgroundColor: '#009fc7', '&:hover': { backgroundColor: '#007da3' }, borderRadius: '20px', textTransform: 'none' }}
+                >
+                  Prepare Download
+                </Button>
+              </Box>
+            </Box>
+          </DialogContent>
+        </Dialog>
         <Box width="100%">
           <Card style={{ height: '100vh' }}>
             <DataGrid

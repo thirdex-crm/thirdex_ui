@@ -8,7 +8,7 @@ import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 
-const Chart = () => {
+const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter }) => {
   const [ethnicityData, setEthnicityData] = useState([]);
   const [ageRangePieData, setAgeRangePieData] = useState([]);
   const [genderBarData, setGenderBarData] = useState([0, 0, 0, 0]);
@@ -21,8 +21,12 @@ const Chart = () => {
       try {
         setLoading(true);
 
-        const response = await getApi(urls.attendees.fetch);
-        const attendee = response.data.data;
+        const queryParams = new URLSearchParams({ page: 1, limit: 1000 });
+        if (countryOfOriginFilter) queryParams.append('country', countryOfOriginFilter);
+        if (selectedName) queryParams.append('name', selectedName);
+        if (caseId) queryParams.append('uniqueId', caseId);
+        const response = await getApi(`${urls.attendees.fetchWithPagination}?${queryParams.toString()}`);
+        const attendee = response.data?.data || [];
 
         const ethnicityCount = {
           'Black / Black British - Caribbean / African': 0,
@@ -128,7 +132,7 @@ const Chart = () => {
     };
 
     fetchData();
-  }, []);
+  }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
 
   const staticEthnicityConfig = [
     { id: 1, label: 'Black / Black British - Caribbean / African', color: '#133144', labelColor: '#fff' },

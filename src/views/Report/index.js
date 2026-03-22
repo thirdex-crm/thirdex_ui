@@ -17,6 +17,44 @@ const statusFilter = [
   { value: 'inactive', label: 'Inactive' }
 ];
 
+const caseStatusFilter = [
+  { value: 'active', label: 'Open' },
+  { value: 'inactive', label: 'Closed' }
+];
+
+const tabFilterConfig = {
+  '1': { // Service User
+    selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter'],
+    customDateLabel: 'Date of Birth',
+    statuses: statusFilter
+  },
+  '2': { // Cases — Open/Closed labels match case status
+    selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter', 'caseIdFilter'],
+    customDateLabel: 'Date Opened',
+    statuses: caseStatusFilter
+  },
+  '3': { // Sessions — no Case ID (sessions have no case reference)
+    selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter'],
+    customDateLabel: 'Session Date',
+    statuses: statusFilter
+  },
+  '4': { // Key Indicators
+    selectedFilters: ['countryOfOriginFilter', 'nameFilter', 'statusFilter'],
+    customDateLabel: 'By Date',
+    statuses: statusFilter
+  },
+  '5': { // Attendance — status/date not supported by BE
+    selectedFilters: ['countryOfOriginFilter', 'nameFilter', 'caseIdFilter'],
+    customDateLabel: 'By Date',
+    statuses: statusFilter
+  },
+  '6': { // Donor — date range filter via startDate/endDate
+    selectedFilters: ['dateRange', 'nameFilter', 'statusFilter'],
+    customDateLabel: 'By Date',
+    statuses: statusFilter
+  }
+};
+
 const dateAddedFilters = [
   { value: 'today', label: 'Today' },
   { value: 'week', label: 'Last 7 Days' },
@@ -29,11 +67,15 @@ const Report = () => {
   const [showFilter, setShowFilter] = useState(true);
   const [status, setStatus] = useState('');
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [name, setNameFilter] = useState('');
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
+  const [configCountries, setConfigCountries] = useState([]);
   const [caseId, setCaseIdFilter] = useState('');
   const [countryOfOriginFilter, setCountryOfOriginFilter] = useState('');
   const [nameFilterOptions, setNameFilterOptions] = useState([]);
+  const [donorNameOptions, setDonorNameOptions] = useState([]);
   const [selectedName, setSelectedName] = useState('');
   const [uniqueIds, setUniqueIds] = useState([]);
 
@@ -44,6 +86,8 @@ const Report = () => {
     setStatus('');
     setCaseIdFilter('');
     setDateOpenedFilter('');
+    setStartDate('');
+    setEndDate('');
   };
 
   useEffect(() => {
@@ -59,52 +103,86 @@ const Report = () => {
       });
   }, []);
 
+  // Fetch Configuration countries for Sessions tab (uses ObjectId as value)
+  useEffect(() => {
+    getApi(urls.configuration.fetch)
+      .then((res) => {
+        const allConfig = res?.data?.allConfiguration || [];
+        const countryConfigs = allConfig.filter((item) => item?.configurationType === 'Country' || item?.name);
+        setConfigCountries(
+          countryConfigs.map((item) => ({
+            value: item._id,   // ObjectId — sent directly to session API
+            label: item.name
+          }))
+        );
+      })
+      .catch(() => {});
+  }, []);
+
   const fetchUserName = async () => {
     try {
       const response = await getApi(`${urls.serviceuser.fetchWithPagination}`);
-
       const users = response?.data?.data || [];
-
       const nameOptions = users.map((user) => ({
         value: user._id,
         label: `${user.personalInfo?.firstName || ''} ${user.personalInfo?.lastName || ''}`.trim()
       }));
-
       const uniqueIdList = users.map((user) => ({
         value: user._id,
         label: user.uniqueId
       }));
-
       setUniqueIds(uniqueIdList);
-
       setNameFilterOptions(nameOptions);
     } catch (error) {
       console.error('Error fetching user names:', error);
     }
   };
 
+  const fetchDonorNames = async () => {
+    try {
+      const response = await getApi(`${urls.serviceuser.fetchWithPagination}?role=donor&limit=1000`);
+      const donors = response?.data?.data || [];
+      setDonorNameOptions(
+        donors.map((d) => ({
+          value: d._id,
+          label: `${d.personalInfo?.firstName || ''} ${d.personalInfo?.lastName || ''}`.trim() ||
+                 d.companyInformation?.companyName || '-'
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching donor names:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUserName();
+    fetchDonorNames();
   }, []);
-const FilterPanelProp ={
+const FilterPanelProp = {
                     showFilter:true,
-                    statuses: statusFilter,
+                    statuses: (tabFilterConfig[value] || tabFilterConfig['1']).statuses,
                     statusFilter: status,
                     setStatusFilter: setStatus,
                     dateAddedFilters,
                     dateOpenedFilter,
                     setDateOpenedFilter,
-                    names: nameFilterOptions,
+                    startDate,
+                    setStartDate,
+                    endDate,
+                    setEndDate,
+                    // Donor tab uses donor names; Sessions tab uses configCountries
+                    names: value === '6' ? donorNameOptions : nameFilterOptions,
                     nameFilter: selectedName,
                     setNameFilter: setSelectedName,
                     caseIds: uniqueIds,
                     caseIdFilter: caseId,
                     setCaseIdFilter,
-                    countriesWithFlags,
+                    // Sessions tab uses configCountries (ObjectId values) so country filter works correctly
+                    countriesWithFlags: value === '3' ? configCountries : countriesWithFlags,
                     countryOfOriginFilter,
                     setCountryOfOriginFilter,
-                    selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter', 'caseIdFilter'],
-                    customDateLabel: 'By Date',
+                    selectedFilters: (tabFilterConfig[value] || tabFilterConfig['1']).selectedFilters,
+                    customDateLabel: (tabFilterConfig[value] || tabFilterConfig['1']).customDateLabel,
                   }
   return (
     <>
@@ -391,7 +469,7 @@ const FilterPanelProp ={
                   minWidth: 0,
                 }}
               >
-                <Donor selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} FilterPanelProp={FilterPanelProp} />
+                <Donor selectedName={selectedName} status={status} startDate={startDate} endDate={endDate} FilterPanelProp={FilterPanelProp} />
               </Box>
             </TabPanel>)}
           </TabContext>

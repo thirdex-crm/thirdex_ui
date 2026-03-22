@@ -80,7 +80,7 @@ const ViewMailingListData = () => {
                     </Stack>
 
                     <Tooltip title="Info" arrow>
-                        <IconButton>
+                        <IconButton onClick={() => navigate('/view-people', { state: { id: params.row.id } })}>
                             <InfoIcon sx={{ color: '#49494c' }} />
                         </IconButton>
                     </Tooltip>
