@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { getApi, updateApiPatch } from 'common/apiClient';
 import moment from 'moment';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import SubmissionDialog from './SubmissionDialog';
 import toast from 'react-hot-toast';

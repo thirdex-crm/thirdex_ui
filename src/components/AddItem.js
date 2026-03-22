@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import GiftAidDialog from './GiftAiddialog';
 import Attendee from './AttendeeDialog';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import EmailInboundDialog from './InboundDialog';
 import { ROLES } from 'common/constants';
 import { getApi } from 'common/apiClient';

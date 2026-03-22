@@ -14,10 +14,16 @@ const Card = () => {
   const navigate = useNavigate();
 
   const getAllForms = async () => {
-    const fromUrl = urls?.dashboard?.getMedia;
-    const response = await getApi(fromUrl);
-    if (response?.success) {
-      setMediaList(response.data);
+    try {
+      const fromUrl = urls?.dashboard?.getMedia;
+      const response = await getApi(fromUrl);
+      if (response?.success) {
+        setMediaList(response.data);
+      } else {
+        setMediaList([]);
+      }
+    } catch (error) {
+      setMediaList([]);
     }
   };
 

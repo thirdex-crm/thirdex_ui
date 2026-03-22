@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { Grid, MenuItem, TextField, Stack, Select, Typography } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Grid, MenuItem, Stack, Select, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Chart from 'react-apexcharts';
 import SkeletonTotalGrowthBarChart from 'ui-component/cards/Skeleton/TotalGrowthBarChart';
@@ -15,8 +14,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
   const [loading, setLoading] = useState(true);
 
   const theme = useTheme();
-  const customization = useSelector((state) => state.customization);
-  const { primary, secondary, text } = theme.palette;
+  const { text } = theme.palette;
 
   const chartOptions = {
     chart: { id: 'bar-chart', stacked: true, toolbar: { show: false } },
@@ -61,7 +59,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
       theme: 'light'
     }
   };
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -80,11 +78,11 @@ const TotalGrowthBarChart = ({ isLoading }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [range]);
 
   useEffect(() => {
     fetchChartData();
-  }, [range]);
+  }, [fetchChartData]);
 
   return (
     <>

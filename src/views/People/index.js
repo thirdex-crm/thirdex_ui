@@ -320,7 +320,7 @@ const PeopleManagement = () => {
             setStartDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
-            selectedFilters={['districtFilter', 'startDate', 'endDate', 'genderFilter', 'includeArchives']}
+            selectedFilters={['districtFilter', 'dateRange', 'genderFilter', 'includeArchives']}
             includeArchives={includeArchives}
             setIncludeArchives={setIncludeArchives}
             onReset={handleReset}

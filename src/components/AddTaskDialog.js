@@ -5,6 +5,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { postApi, getApi, updateApi } from 'common/apiClient';
 import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 const AddTaskDialog = ({ open, handleClose, onClose, fetchTimeLineData,userId }) => {
   const [adminList, setAdminList] = useState([]);
   const [isLoading, setIsloading] = useState(false);
@@ -117,19 +120,19 @@ const AddTaskDialog = ({ open, handleClose, onClose, fetchTimeLineData,userId })
               />
             </div>
 
-            <TextField
-              type="date"
-              value={task?.dueDate}
-              onChange={handleChange('dueDate')}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              sx={{ width: '50%' }}
-              inputProps={{
-                style: {
-                  cursor: 'pointer'
-                }
-              }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Due Date"
+                value={task?.dueDate ? dayjs(task.dueDate) : null}
+                onChange={(newValue) => {
+                  setTask((prev) => ({
+                    ...prev,
+                    dueDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : ''
+                  }));
+                }}
+                renderInput={(params) => <TextField {...params} size="small" sx={{ width: '50%' }} />}
+              />
+            </LocalizationProvider>
 
             <Grid container justifyContent="space-between" alignItems="center">
               <Grid item>

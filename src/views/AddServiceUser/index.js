@@ -135,33 +135,33 @@ const AddCaseForm = ({ onCancel }) => {
       })) || [],
     serviceSections: editdata?.Service?.length
       ? editdata.Service.map((item) => ({
-          serviceName: item.serviceName?._id || '',
-          startDate: item.startDate || null,
-          lastDate: item.lastDate || null,
-          referrerName: item.referrerName || '',
-          referrerJob: item.referrerJob || '',
-          referrerPhone: item.referrerPhone || '',
-          referrerEmail: item.referrerEmail || '',
-          emergencyPhone: item.emergencyPhone || '',
-          emergencyEmail: item.emergencyEmail || '',
-          referralType: item.referralType || '',
-          referredDate: item.referredDate || null
-        }))
+        serviceName: item.serviceName?._id || '',
+        startDate: item.startDate || null,
+        lastDate: item.lastDate || null,
+        referrerName: item.referrerName || '',
+        referrerJob: item.referrerJob || '',
+        referrerPhone: item.referrerPhone || '',
+        referrerEmail: item.referrerEmail || '',
+        emergencyPhone: item.emergencyPhone || '',
+        emergencyEmail: item.emergencyEmail || '',
+        referralType: item.referralType || '',
+        referredDate: item.referredDate || null
+      }))
       : [
-          {
-            serviceName: '',
-            startDate: null,
-            lastDate: null,
-            referrerName: '',
-            referrerJob: '',
-            referrerPhone: '',
-            referrerEmail: '',
-            emergencyPhone: '',
-            emergencyEmail: '',
-            referralType: '',
-            referredDate: null
-          }
-        ]
+        {
+          serviceName: '',
+          startDate: null,
+          lastDate: null,
+          referrerName: '',
+          referrerJob: '',
+          referrerPhone: '',
+          referrerEmail: '',
+          emergencyPhone: '',
+          emergencyEmail: '',
+          referralType: '',
+          referredDate: null
+        }
+      ]
   };
   console.log('defaultFormValues------------------', defaultFormValues);
   const {
@@ -855,8 +855,8 @@ const AddCaseForm = ({ onCancel }) => {
                                         ? typeof field.value === 'object'
                                           ? field.value.name || ''
                                           : typeof field.value === 'string'
-                                          ? field.value.split('/').pop() // extract file name from string
-                                          : ''
+                                            ? field.value.split('/').pop() // extract file name from string
+                                            : ''
                                         : ''
                                     }
                                     placeholder="Profile image"
@@ -1445,8 +1445,8 @@ const AddCaseForm = ({ onCancel }) => {
                                         ? typeof field.value === 'object' && field.value.name
                                           ? field.value.name
                                           : typeof field.value === 'string'
-                                          ? field.value.split('/').pop()
-                                          : ''
+                                            ? field.value.split('/').pop()
+                                            : ''
                                         : ''
                                     }
                                     placeholder="Attachments"
@@ -2083,16 +2083,16 @@ const AddCaseForm = ({ onCancel }) => {
                             // Normalize value: if it's array of IDs → convert to objects from options
                             const selected = Array.isArray(field.value)
                               ? field.value
-                                  .map((val) => {
-                                    if (typeof val === 'string' || typeof val === 'number') {
-                                      return options.find((opt) => opt.value === val);
-                                    }
-                                    return {
-                                      label: val?.name,
-                                      value: val?._id
-                                    };
-                                  })
-                                  .filter(Boolean)
+                                .map((val) => {
+                                  if (typeof val === 'string' || typeof val === 'number') {
+                                    return options.find((opt) => opt.value === val);
+                                  }
+                                  return {
+                                    label: val?.name,
+                                    value: val?._id
+                                  };
+                                })
+                                .filter(Boolean)
                               : [];
 
                             return (
@@ -2129,7 +2129,7 @@ const AddCaseForm = ({ onCancel }) => {
 
               {tabIndex === 3 && (
                 <>
-                  <Box sx={{ px: 1, py: 1, maxWidth: '1200px', mx: 'auto' }}>
+                  <Box sx={{ px: 1, py: 1 }}>
                     {fields.map((item, index) => (
                       <Grid
                         container

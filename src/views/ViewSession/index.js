@@ -1,21 +1,30 @@
 import React from 'react';
-import { Box, Grid, Typography, Paper, Chip, Button, IconButton, Divider, Stack, Tooltip } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  Chip,
+  Button,
+  IconButton,
+  Divider,
+  Stack,
+  Tooltip
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TagIcon from '@mui/icons-material/LocalOffer';
-import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useEffect, useState } from 'react';
 import { urls } from 'common/urls';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { getApi, updateApi } from 'common/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import HomeRepairServiceOutlinedIcon from '@mui/icons-material/HomeRepairServiceOutlined';
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import { imageUrl } from 'common/urls';
-import OptionsPopover from 'components/AddFilter';
 import Diversity2OutlinedIcon from '@mui/icons-material/Diversity2Outlined';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import { DataGrid } from '@mui/x-data-grid';
@@ -23,7 +32,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import toast from 'react-hot-toast';
 import AddAttendeeDialog from 'components/AddAttendeeDialog';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ManageSessionPopover from 'components/ManageSessionPopover';
 
 const ServiceDetails = () => {
   const location = useLocation();
@@ -55,6 +65,7 @@ const ServiceDetails = () => {
     setAnchorEl(event.currentTarget);
   };
   const open = Boolean(anchorEl);
+  const serviceDetailsId = sessionData?.[0]?.serviceId?._id || session?.serviceId?._id || session?.serviceId;
   const formatDate = (date) => {
     if (!date) return 'N/A';
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -208,7 +219,7 @@ const ServiceDetails = () => {
                 <InfoIcon sx={{ color: '#49494c' }} />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Delete" arrow>
+            <Tooltip title="Remove attendee" arrow>
               <IconButton
                 sx={{ color: '#49494c' }}
                 onClick={(e) => {
@@ -216,7 +227,7 @@ const ServiceDetails = () => {
                   handleDeleteClick(params.row);
                 }}
               >
-                <DeleteIcon sx={{ color: 'red' }} />
+                <CloseIcon sx={{ color: '#FF4D49' }} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -264,10 +275,7 @@ const ServiceDetails = () => {
                 </Box>
                 <Button
                   variant="contained"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    navigate('/add-session', { state: { session } });
-                  }}
+                  onClick={handleClick}
                   sx={{
                     borderRadius: '6px',
                     width: '12%',
@@ -283,8 +291,7 @@ const ServiceDetails = () => {
                     }
                   }}
                 >
-                  <EditOutlinedIcon sx={{ fontSize: 16 }} />
-                  Edit
+                  Manage
                 </Button>
               </Box>
               <Divider sx={{ mb: 2 }} />
@@ -431,7 +438,7 @@ const ServiceDetails = () => {
                   <Chip
                     label={sessionData[0].file}
                     size="small"
-                    onDelete={() => {}}
+                    onDelete={() => { }}
                     deleteIcon={
                       <CancelIcon
                         sx={{
@@ -491,7 +498,7 @@ const ServiceDetails = () => {
                             key={i}
                             label={tag}
                             size="small"
-                            onDelete={() => {}}
+                            onDelete={() => { }}
                             deleteIcon={
                               <CancelIcon
                                 sx={{
@@ -618,6 +625,14 @@ const ServiceDetails = () => {
           </Grid>
         </Grid>
       </Box>
+
+      <ManageSessionPopover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        data={sessionData?.[0] || session}
+        serviceId={serviceDetailsId}
+      />
     </>
   );
 };

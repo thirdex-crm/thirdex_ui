@@ -366,7 +366,7 @@ const Case = () => {
             owners={ownerFilters}
             ownerFilter={caseOwner}
             setOwnerFilter={(value) => setOwner(value)}
-            selectedFilters={['serviceFilter', 'statusFilter', 'startDate', 'endDate', 'ownerFilter']}
+            selectedFilters={['serviceFilter', 'statusFilter', 'dateRange', 'ownerFilter']}
             customDateLabel="Date Opened"
             onReset={handleReset}
           />

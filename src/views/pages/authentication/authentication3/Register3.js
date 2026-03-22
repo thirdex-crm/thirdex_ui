@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import { Divider, Grid, Stack, Typography, useMediaQuery, Box } from '@mui/material';
+import { Grid, Typography, Box, Stack } from '@mui/material';
 
 // project imports
 import AuthWrapper1 from '../AuthWrapper1.js';
@@ -8,16 +7,14 @@ import AuthCardWrapper from '../AuthCardWrapper.js';
 import AuthRegister from '../auth-forms/AuthRegister.js';
 import Logo from 'layout/MainLayout/LogoSection';
 import LoginImage from 'assets/images/login-image.png';
-import { height } from '@mui/system';
 
 // ===============================|| AUTH3 - REGISTER ||=============================== //
 
 const Register = () => {
   const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-   <AuthWrapper1>
+    <AuthWrapper1>
       <Grid container sx={{ height: '100vh', overflow: 'hidden', backgroundColor: '#053146' }}>
         <Grid
           item

@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Avatar, Box, ButtonBase, Typography, Button, TextField } from '@mui/material';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { Avatar, Box, ButtonBase, Typography, Popover } from '@mui/material';
+import { LocalizationProvider, StaticDatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 // project imports
 import LogoSection from '../LogoSection';
@@ -29,9 +30,9 @@ const getFormattedDate = (date) => {
 
 const Header = ({ handleLeftDrawerToggle }) => {
   const theme = useTheme();
-  const today = new Date();
-  const datePickerRef = useRef(null);
+  const today = dayjs();
   const [selectedDate, setSelectedDate] = useState(today);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleDateClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -89,19 +90,25 @@ const Header = ({ handleLeftDrawerToggle }) => {
         <Typography variant="h6" sx={{ fontWeight: 300, fontSize: '12px', textAlign: 'left' }}>
           Today is
         </Typography>
-        <ButtonBase onClick={() => datePickerRef.current.setOpen(true)} sx={{ cursor: 'pointer', textDecoration: 'none' }}>
+        <ButtonBase onClick={handleDateClick} sx={{ cursor: 'pointer', textDecoration: 'none' }}>
           <Typography variant="h5" sx={{ fontWeight: 500, fontSize: '16px', textAlign: 'left', ml: '-70px' }}>
-            {getFormattedDate(selectedDate)}
+            {getFormattedDate(selectedDate.toDate ? selectedDate.toDate() : selectedDate)}
           </Typography>
-
-          <DatePicker
-            id="date-picker"
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            customInput={<></>}
-            ref={datePickerRef}
-          />
         </ButtonBase>
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <StaticDatePicker
+              displayStaticWrapperAs="desktop"
+              value={selectedDate}
+              onChange={handleDateChange}
+            />
+          </LocalizationProvider>
+        </Popover>
       </Box>
       <NotificationSection />
       <ProfileSection />

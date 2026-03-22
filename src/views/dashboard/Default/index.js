@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Grid, Divider, Dialog, DialogTitle, DialogContent, DialogActions, Button, MenuItem, TextField } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -16,7 +16,6 @@ import EmptyCard from './EmptyCard';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import { toast } from 'react-toastify';
-import { gridSpacing } from 'store/constant';
 import { useNavigate } from 'react-router-dom';
 
 const STORAGE_KEY = 'dashboard_components_order';
@@ -62,8 +61,13 @@ const SortableItem = ({ id, children }) => {
     </div>
   );
 };
+
+SortableItem.propTypes = {
+  id: PropTypes.string.isRequired,
+  children: PropTypes.node
+};
+
 const Dashboard = () => {
-  const theme = useTheme();
   const [isLoading, setLoading] = useState(true);
   const [totalDonation, setTotalDonation] = useState([]);
   const [totalSession, setTotalSession] = useState([]);
@@ -76,7 +80,7 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [servicesName, setServicesName] = useState([]);
-  const [searchQueryService, setSearchQueryService] = useState('');
+  const [searchQueryService] = useState('');
   const [selectedServiceId, setSelectedServiceId] = useState('');
   const navigate = useNavigate();
 
@@ -122,12 +126,16 @@ const Dashboard = () => {
   };
   useEffect(() => {
     const fetchServices = async () => {
-      const queryParams = new URLSearchParams();
-      if (searchQueryService && searchQueryService !== '') {
-        queryParams.append('search', searchQueryService);
+      try {
+        const queryParams = new URLSearchParams();
+        if (searchQueryService && searchQueryService !== '') {
+          queryParams.append('search', searchQueryService);
+        }
+        const response = await getApi(`${urls.service.fetchWithPagination}?${queryParams.toString()}`);
+        setServicesName(response?.data?.data || []);
+      } catch (error) {
+        setServicesName([]);
       }
-      const response = await getApi(`${urls.service.fetchWithPagination}?${queryParams.toString()}`);
-      setServicesName(response?.data?.data);
     };
     fetchServices();
   }, [searchQueryService]);

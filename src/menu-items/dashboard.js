@@ -37,6 +37,7 @@ const icons = {
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
 const dashboard = {
+  id: 'main-navigation',
   type: 'group',
   children: [
     {

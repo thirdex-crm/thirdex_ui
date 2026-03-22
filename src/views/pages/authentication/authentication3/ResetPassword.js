@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { Grid, Typography, Box, Button, TextField, InputAdornment, IconButton, Stack } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -17,8 +17,6 @@ import toast from 'react-hot-toast';
 const ResetPassword = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
-  const email = location?.state?.email;
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -32,7 +30,7 @@ const ResetPassword = () => {
         return;
       }
 
-      const res = await postApi(urls.login.resetPassword, {
+      await postApi(urls.login.resetPassword, {
         token,
         newPassword: values.password
       });

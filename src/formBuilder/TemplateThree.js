@@ -2,6 +2,9 @@ import React from 'react'
 import { Formik, useFormik } from "formik";
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Checkbox, Divider, FormControl, FormControlLabel, FormGroup, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const TemplateThree = ({ formData, setPreview, setSelectedTemplate }) => {
 
@@ -119,13 +122,22 @@ const TemplateThree = ({ formData, setPreview, setSelectedTemplate }) => {
                         <Box sx={{ bgcolor: '#E9DFC3', p: '20px', borderRadius: '1px' }}>
                             <FormControl sx={{ minWidth: '50%' }}>
                                 <FormLabel sx={{ color: '#000' }}>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='standard'
-                                    type='date'
-                                    name={field?.name}
-                                    placeholder={field?.placeholder}
-                                    value={formik?.values[field?.name]}
-                                    onChange={formik?.handleChange} />
+                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                    <DatePicker
+                                                                        value={formik?.values[field?.name] ? dayjs(formik.values[field.name]) : null}
+                                                                        onChange={(newValue) => {
+                                                                            formik.setFieldValue(field?.name, newValue ? dayjs(newValue).format('YYYY-MM-DD') : '');
+                                                                        }}
+                                                                        renderInput={(params) => (
+                                                                            <TextField
+                                                                                {...params}
+                                                                                variant='standard'
+                                                                                name={field?.name}
+                                                                                placeholder={field?.placeholder}
+                                                                            />
+                                                                        )}
+                                                                    />
+                                                                </LocalizationProvider>
                             </FormControl>
                         </Box>
                     );

@@ -20,6 +20,9 @@ import { urls } from 'common/urls';
 import { postApi } from 'common/apiClient';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import toast from 'react-hot-toast';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 const TemplateOne = ({ formData, setFormData, setPreview, setSelectedTemplate, onClose, getAllForms, setPreset, formValues }) => {
 
     //temporary solution
@@ -188,14 +191,15 @@ const TemplateOne = ({ formData, setFormData, setPreview, setSelectedTemplate, o
                         }}>
                             <FormControl sx={{ minWidth: '50%' }}>
                                 <FormLabel>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='standard'
-                                    type='date'
-                                    name={field?.name}
-                                // placeholder={field?.placeholder}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange}
-                                />
+                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                    <DatePicker
+                                                                        value={formik?.values[field?.name] ? dayjs(formik.values[field.name]) : null}
+                                                                        onChange={(newValue) => {
+                                                                            formik.setFieldValue(field?.name, newValue ? dayjs(newValue).format('YYYY-MM-DD') : '');
+                                                                        }}
+                                                                        renderInput={(params) => <TextField {...params} variant="standard" name={field?.name} />}
+                                                                    />
+                                                                </LocalizationProvider>
                             </FormControl>
                         </Box>
                     );

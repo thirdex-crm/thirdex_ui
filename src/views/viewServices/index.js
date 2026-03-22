@@ -1,7 +1,5 @@
 import React from 'react';
 import { Box, Grid, Typography, Paper, Chip, Button, IconButton, Divider, Stack } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import TagIcon from '@mui/icons-material/LocalOffer';
 import { useLocation } from 'react-router-dom';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useEffect, useState } from 'react';

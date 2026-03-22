@@ -163,6 +163,16 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
               >
                 On {caseNoteData?.date ? moment(caseNoteData.date).format('DD/MM/YYYY') : '-'}
               </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'block',
+                  color: 'text.secondary',
+                  fontSize: '12px'
+                }}
+              >
+                Signature: {caseNoteData?.createdBy?.firstName || '-'} {caseNoteData?.createdBy?.lastName || ''}
+              </Typography>
             </Box>
           </Box>
 

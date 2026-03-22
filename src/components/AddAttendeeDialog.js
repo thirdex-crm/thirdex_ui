@@ -18,7 +18,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { getApi, postApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 export default function AddAttendeeDialog({ open, onClose, sessionId, fetchpeopleAttendee }) {
   const [selectedUserId, setSelectedUserId] = useState('');

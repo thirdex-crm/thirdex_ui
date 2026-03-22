@@ -1,6 +1,28 @@
 import axios from 'axios';
 import { getToken } from 'utils/auth';
 
+const handleApiError = (error) => {
+  const statusCode = error?.response?.status;
+  const errorMessage = error?.response?.data?.message || 'Error fetching';
+
+  if (statusCode === 401) {
+    localStorage.removeItem('token');
+
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.assign('/login');
+    }
+
+    return {
+      success: false,
+      unauthorized: true,
+      message: errorMessage
+    };
+  }
+
+  console.error(errorMessage);
+  throw error;
+};
+
 const getAuthHeaders = (isFormData = false, headers = {}) => {
   const token = getToken();
 
@@ -19,9 +41,7 @@ export const postApi = async (url, data, headers = {}) => {
     const response = await axios.post(url, data, { headers: defaultHeaders });
     return response?.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Error fetching';
-    console.error(errorMessage);
-    throw error;
+    return handleApiError(error);
   }
 };
 
@@ -35,9 +55,7 @@ export const getApi = async (url, params = {}, headers = {}) => {
     });
     return response?.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Error fetching';
-    console.error(errorMessage);
-    throw error;
+    return handleApiError(error);
   }
 };
 
@@ -49,9 +67,7 @@ export const updateApi = async (url, data, headers = {}) => {
     const response = await axios.put(url, data, { headers: defaultHeaders });
     return response?.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Error fetching';
-    console.error(errorMessage);
-    throw error;
+    return handleApiError(error);
   }
 };
 
@@ -63,9 +79,7 @@ export const updateApiPatch = async (url, data, headers = {}) => {
     const response = await axios.patch(url, data, { headers: defaultHeaders });
     return response?.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Error fetching';
-    console.error(errorMessage);
-    throw error;
+    return handleApiError(error);
   }
 };
 
@@ -76,8 +90,6 @@ export const deleteApi = async (url, headers = {}) => {
     const response = await axios.delete(url, { headers: defaultHeaders });
     return response?.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Error fetching';
-    console.error(errorMessage);
-    throw error;
+    return handleApiError(error);
   }
 };

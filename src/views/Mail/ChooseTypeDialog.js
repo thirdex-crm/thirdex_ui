@@ -9,7 +9,7 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import SpaIcon from '@mui/icons-material/Spa';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const ChooseTypeDialog = ({ open, onClose }) => {
     const navigate = useNavigate();

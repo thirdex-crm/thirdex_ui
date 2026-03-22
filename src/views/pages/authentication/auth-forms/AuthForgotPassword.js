@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useTheme } from '@mui/material/styles';
-import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, OutlinedInput, Typography } from '@mui/material';
+import { Button, FormControl, FormHelperText, Grid, InputLabel, OutlinedInput, Typography } from '@mui/material';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import toast from 'react-hot-toast';
@@ -9,7 +8,6 @@ import { urls } from 'common/urls';
 import { postApi } from 'common/apiClient';
 
 const ForgotPassword3 = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const handleSendOtp = async (values) => {

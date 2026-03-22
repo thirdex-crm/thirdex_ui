@@ -28,6 +28,10 @@ import { getApi, updateApi, updateApiPatch } from 'common/apiClient';
 import AddIcon from '@mui/icons-material/Add';
 import DialogActions from '@mui/material/DialogActions';
 import CloseIcon from '@mui/icons-material/Close';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { useLocation } from 'react-router-dom';
 
 AppTasks.propTypes = {
   title: PropTypes.string,
@@ -49,17 +53,18 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
   const [range, setRange] = useState('This Year');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+  const location = useLocation();
   const [editMode, setEditMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleteTask, setDeleteTask] = useState('');
   const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTask, setDeleteTask] = useState(null);
 
-  const limit = 10;
   const initialTaskState = {
     details: '',
-    assignedTo: '',
     dueDate: '',
+    assignedTo: '',
     isCompleted: false,
     notification: false
   };
@@ -357,16 +362,21 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              fullWidth
-              type="date"
-              label="Due Date"
-              value={task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''}
-              onChange={handleChange('dueDate')}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              onPointerDown={(e) => e.stopPropagation()}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Due Date"
+                value={task.dueDate ? dayjs(task.dueDate) : null}
+                onChange={(newValue) => {
+                  setTask((prev) => ({
+                    ...prev,
+                    dueDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : ''
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} fullWidth size="small" onPointerDown={(e) => e.stopPropagation()} />
+                )}
+              />
+            </LocalizationProvider>
 
             <Grid container justifyContent="space-between" alignItems="center">
               <Grid item>

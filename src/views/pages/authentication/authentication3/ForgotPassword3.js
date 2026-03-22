@@ -1,18 +1,14 @@
-import { Link } from 'react-router-dom';
-
 import { useTheme } from '@mui/material/styles';
-import { Divider, Grid, Stack, Typography, useMediaQuery, Box } from '@mui/material';
+import { Grid, Typography, Box } from '@mui/material';
 
 import AuthWrapper1 from '../AuthWrapper1.js';
 import AuthCardWrapper from '../AuthCardWrapper.js';
 import ForgotPassword3 from '../auth-forms/AuthForgotPassword.js';
 import Logo from 'layout/MainLayout/LogoSection';
-import AuthFooter from 'ui-component/cards/AuthFooter.js';
 import LoginImage from 'assets/images/login-image.png';
 
 const ForgotPassword = () => {
   const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <AuthWrapper1>

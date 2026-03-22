@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
@@ -26,7 +25,6 @@ import { postApi } from 'common/apiClient';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const AuthRegister = ({ ...others }) => {
-  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

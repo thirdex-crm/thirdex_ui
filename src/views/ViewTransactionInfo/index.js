@@ -1,7 +1,7 @@
 import { Card, Grid, IconButton, Stack, Typography, Divider } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 

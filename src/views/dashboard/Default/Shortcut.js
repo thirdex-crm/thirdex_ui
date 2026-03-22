@@ -9,7 +9,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import Diversity2Icon from '@mui/icons-material/Diversity2';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 const Shortcut = ({ icon, title, path }) => {
     const navigate = useNavigate()
 

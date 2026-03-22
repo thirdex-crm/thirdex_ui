@@ -4,7 +4,7 @@ import AntSwitch from 'components/AntSwitch';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { getApi, postApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
@@ -26,7 +26,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
     caseId: caseid
   });
 
-  const [contactPurposeEntry, setContactPurposeEntry] = useState([]);
+  const [contactTypeEntry, setContactTypeEntry] = useState([]);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [caseNoteData, setCaseNoteData] = useState();
@@ -77,16 +77,16 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
   }, [caseNoteData, caseid]);
 
   useEffect(() => {
-    const fetchContactPurposes = async () => {
+    const fetchContactTypes = async () => {
       try {
         const res = await getApi(urls.configuration.fetch);
-        const options = res?.data?.allConfiguration?.filter((item) => item.configurationType === 'Contact Purpose');
-        setContactPurposeEntry(options || []);
+        const options = res?.data?.allConfiguration?.filter((item) => item.configurationType === 'Contact Types');
+        setContactTypeEntry(options || []);
       } catch (err) {
-        console.error('Error fetching contact purposes:', err);
+        console.error('Error fetching contact types:', err);
       }
     };
-    fetchContactPurposes();
+    fetchContactTypes();
   }, []);
 
   const handleUploadClick = () => fileInputRef.current?.click();
@@ -113,7 +113,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
     if (!formData.time) newErrors.time = 'Time is required';
     if (!formData.notes?.trim()) newErrors.notes = 'Case Notes are required';
     if (!formData.subject?.trim()) newErrors.subject = 'Subject is required';
-    if (!formData.contactPurpose) newErrors.contactPurpose = 'Contact Purpose is required';
+    if (!formData.contactPurpose) newErrors.contactPurpose = 'Contact Type is required';
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -218,7 +218,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
               error={Boolean(errors.contactPurpose)}
               helperText={errors.contactPurpose}
             >
-              {contactPurposeEntry.map((option) => (
+              {contactTypeEntry.map((option) => (
                 <MenuItem key={option._id} value={option._id}>
                   {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
                 </MenuItem>

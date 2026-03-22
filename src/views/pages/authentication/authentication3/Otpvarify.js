@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useTheme } from '@mui/material/styles';
-import { Grid, Typography, useMediaQuery, Box, Stack, TextField, Button } from '@mui/material';
+import { Grid, Typography, Box, Stack, TextField, Button } from '@mui/material';
 
 import AuthWrapper1 from '../AuthWrapper1.js';
 import AuthCardWrapper from '../AuthCardWrapper.js';
@@ -16,7 +15,6 @@ import toast from 'react-hot-toast';
 
 const VerifyOtp = () => {
   const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
   const navigate = useNavigate();
   const email = location?.state?.email;

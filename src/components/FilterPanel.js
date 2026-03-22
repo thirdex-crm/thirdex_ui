@@ -1,13 +1,18 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect } from 'react';
-import { Grid, Card, Typography, Box, MenuItem, Chip, TextField, Button, Autocomplete, FormControlLabel, Checkbox } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import React, { useEffect, useState } from 'react';
+import { Grid, Card, Typography, Box, MenuItem, Chip, TextField, Button, Autocomplete, FormControlLabel, Checkbox, InputAdornment, Popover, IconButton } from '@mui/material';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ClearIcon from '@mui/icons-material/Clear';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateRangePicker } from 'react-date-range';
+import { enGB } from 'date-fns/locale';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 const FilterPanel = ({
   startDate,
@@ -119,6 +124,20 @@ const FilterPanel = ({
   dateSubmitted,
   setDateSubmitted
 }) => {
+  const [dateRanges, setDateRanges] = useState({});
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [activeFilterKey, setActiveFilterKey] = useState(null);
+  const [selectionRange, setSelectionRange] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection'
+  });
+  const [tempSelectionRange, setTempSelectionRange] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection'
+  });
+
   useEffect(() => {
     if (!dateAddedFilter || !setDateAddedFilter) return;
     setDateAddedFilter(null);
@@ -162,11 +181,33 @@ const FilterPanel = ({
     if (formTitle) setFormTitle('');
     if (dateCreated) setDateCreated('');
     if (dateSubmitted) setDateSubmitted('');
+    // Reset date range states
+    setDateRanges({});
+    setSelectionRange({
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
+    });
   };
 
   if (!showFilter) return null;
 
+  const parseDate = (value) => {
+    if (!value) return null;
+    const parsed = dayjs(value);
+    return parsed.isValid() ? parsed.toDate() : null;
+  };
+
+  const formatDate = (value) => {
+    if (!value) return '';
+    return dayjs(value).format('YYYY-MM-DD');
+  };
+
   const filterMapping = {
+    dateRange: {
+      label: 'Date Range',
+      type: 'dateRange'
+    },
     startDate: {
       label: 'Start Date',
       onChange: setStartDate,
@@ -425,15 +466,16 @@ const FilterPanel = ({
   };
 
   return (
-    <Grid item xs={3}>
-      <Card
-        sx={{
-          p: 2,
-          backgroundColor: '#ffffff',
-          borderRadius: 2,
-          border: '1px solid #e0e0e0'
-        }}
-      >
+    <>
+      <Grid item xs={3}>
+        <Card
+          sx={{
+            p: 2,
+            backgroundColor: '#ffffff',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0'
+          }}
+        >
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center">
             <FilterAltOutlinedIcon sx={{ color: '#808191' }} />
@@ -460,51 +502,320 @@ const FilterPanel = ({
           {selectedFilters?.map((filterKey) => {
             const filter = filterMapping[filterKey];
             if (!filter) return null;
-            if (filter.type === 'date') {
+
+            // Skip startDate and endDate separately if dateRange is in the list
+            if ((filterKey === 'startDate' || filterKey === 'endDate') && selectedFilters.includes('dateRange')) {
+              return null;
+            }
+
+            // Handle combined date range picker
+            if (filter.type === 'dateRange') {
+              const startValue = parseDate(startDate);
+              const endValue = parseDate(endDate);
+
+              const getDisplayValue = () => {
+                if (startValue && endValue) {
+                  return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
+                } else if (startValue) {
+                  return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
+                }
+                return '';
+              };
+
+              const handleOpenPicker = (event) => {
+                setActiveFilterKey(filterKey);
+                const range = {
+                  startDate: startValue || new Date(),
+                  endDate: endValue || new Date(),
+                  key: 'selection'
+                };
+                setSelectionRange(range);
+                setTempSelectionRange(range);
+                setAnchorEl(event.currentTarget);
+              };
+
+              const handleClosePicker = () => {
+                setAnchorEl(null);
+                setActiveFilterKey(null);
+              };
+
+              const handleDateChange = (ranges) => {
+                const { selection } = ranges;
+                setTempSelectionRange(selection);
+              };
+
+              const handleApply = () => {
+                setSelectionRange(tempSelectionRange);
+                const formattedStart = formatDate(tempSelectionRange.startDate);
+                const formattedEnd = formatDate(tempSelectionRange.endDate);
+
+                if (setStartDate) setStartDate(formattedStart || '');
+                if (setEndDate) setEndDate(formattedEnd || '');
+                handleClosePicker();
+              };
+
+              const handleClearDates = (e) => {
+                e.stopPropagation();
+                if (setStartDate) setStartDate('');
+                if (setEndDate) setEndDate('');
+                setSelectionRange({
+                  startDate: new Date(),
+                  endDate: new Date(),
+                  key: 'selection'
+                });
+                setTempSelectionRange({
+                  startDate: new Date(),
+                  endDate: new Date(),
+                  key: 'selection'
+                });
+              };
+
               return (
-                <LocalizationProvider key={filterKey} dateAdapter={AdapterDayjs}>
-                  <DatePicker
+                <Box key={filterKey}>
+                  <TextField
+                    fullWidth
+                    size="small"
                     label={filter.label}
-                    value={filter.value || null}
-                    onChange={(newValue) => {
-                      if (newValue) {
-                        const formattedDate = newValue.format('YYYY-MM-DD');
-                        filter.onChange(formattedDate);
-                      } else {
-                        filter.onChange(null);
-                      }
-                    }}
-                    renderInput={(params) => <TextField {...params} fullWidth size="small" />}
-                    PopperProps={{
-                      modifiers: [
-                        {
-                          name: 'offset',
-                          options: {
-                            offset: [0, 8]
-                          }
-                        }
-                      ],
-                      sx: {
-                        '& .MuiPaper-root': {
-                          width: 220,
-                          height: 320,
-                          marginLeft: '50px',
-                          overflow: 'hidden'
-                        },
-                        '& .MuiCalendarPicker-root': {
-                          width: 240,
-                          height: 320,
-                          margin: 0,
-                          overflow: 'hidden'
-                        },
-                        '& .MuiPickersFadeTransitionGroup-root': {
-                          width: 220,
-                          overflow: 'hidden'
-                        }
-                      }
+                    value={getDisplayValue()}
+                    placeholder="Select date range"
+                    onClick={handleOpenPicker}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {(startValue || endValue) && (
+                            <IconButton
+                              size="small"
+                              onClick={handleClearDates}
+                              sx={{ mr: 0.5, p: 0.5 }}
+                            >
+                              <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
+                            </IconButton>
+                          )}
+                          <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
+                        </InputAdornment>
+                      ),
+                      sx: { cursor: 'pointer' }
                     }}
                   />
-                </LocalizationProvider>
+                  <Popover
+                    open={Boolean(anchorEl) && activeFilterKey === filterKey}
+                    anchorEl={anchorEl}
+                    onClose={handleClosePicker}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'left',
+                    }}
+                    PaperProps={{
+                      sx: {
+                        mt: 1,
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                        borderRadius: 2,
+                      }
+                    }}
+                  >
+                    <Box>
+                      <DateRangePicker
+                        ranges={[tempSelectionRange]}
+                        onChange={handleDateChange}
+                        months={2}
+                        direction="horizontal"
+                        showSelectionPreview={true}
+                        moveRangeOnFirstSelection={false}
+                        rangeColors={['#4ba1f8']}
+                        color="#4ba1f8"
+                        locale={enGB}
+                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
+                        <Button
+                          variant="outlined"
+                          onClick={handleClosePicker}
+                          sx={{ color: '#808191', borderColor: '#e0e0e0' }}
+                        >
+                          Close
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={handleApply}
+                          sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
+                        >
+                          Apply
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Popover>
+                </Box>
+              );
+            }
+
+            if (filter.type === 'date') {
+              const supportsGlobalRange = typeof setStartDate === 'function' && typeof setEndDate === 'function';
+              const localRange = dateRanges[filterKey] || { from: null, to: null };
+
+              const startValue = supportsGlobalRange ? parseDate(startDate) : parseDate(localRange.from);
+              const endValue = supportsGlobalRange ? parseDate(endDate) : parseDate(localRange.to || filter.value);
+
+              // Format display value for single input
+              const getDisplayValue = () => {
+                if (startValue && endValue) {
+                  return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
+                } else if (startValue) {
+                  return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
+                }
+                return '';
+              };
+
+              const handleOpenPicker = (event) => {
+                setActiveFilterKey(filterKey);
+                const range = {
+                  startDate: startValue || new Date(),
+                  endDate: endValue || new Date(),
+                  key: 'selection'
+                };
+                setSelectionRange(range);
+                setTempSelectionRange(range);
+                setAnchorEl(event.currentTarget);
+              };
+
+              const handleClosePicker = () => {
+                setAnchorEl(null);
+                setActiveFilterKey(null);
+              };
+
+              const handleDateChange = (ranges) => {
+                const { selection } = ranges;
+                setTempSelectionRange(selection);
+              };
+
+              const handleApply = () => {
+                setSelectionRange(tempSelectionRange);
+                const formattedStart = formatDate(tempSelectionRange.startDate);
+                const formattedEnd = formatDate(tempSelectionRange.endDate);
+
+                if (supportsGlobalRange) {
+                  setStartDate(formattedStart || '');
+                  setEndDate(formattedEnd || '');
+                }
+
+                setDateRanges((prev) => ({
+                  ...prev,
+                  [filterKey]: {
+                    from: formattedStart || '',
+                    to: formattedEnd || ''
+                  }
+                }));
+
+                if (typeof filter.onChange === 'function') {
+                  filter.onChange(formattedEnd || null);
+                }
+                handleClosePicker();
+              };
+
+              const handleClearDates = (e) => {
+                e.stopPropagation();
+                if (supportsGlobalRange) {
+                  setStartDate('');
+                  setEndDate('');
+                }
+                setDateRanges((prev) => ({
+                  ...prev,
+                  [filterKey]: { from: '', to: '' }
+                }));
+                if (typeof filter.onChange === 'function') {
+                  filter.onChange(null);
+                }
+                const emptyRange = {
+                  startDate: new Date(),
+                  endDate: new Date(),
+                  key: 'selection'
+                };
+                setSelectionRange(emptyRange);
+                setTempSelectionRange(emptyRange);
+              };
+
+              return (
+                <Box key={filterKey}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label={filter.label}
+                    value={getDisplayValue()}
+                    placeholder="Select date range"
+                    onClick={handleOpenPicker}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {(startValue || endValue) && (
+                            <IconButton
+                              size="small"
+                              onClick={handleClearDates}
+                              sx={{ mr: 0.5, p: 0.5 }}
+                            >
+                              <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
+                            </IconButton>
+                          )}
+                          <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
+                        </InputAdornment>
+                      ),
+                      sx: { cursor: 'pointer' }
+                    }}
+                  />
+                  <Popover
+                    open={Boolean(anchorEl) && activeFilterKey === filterKey}
+                    anchorEl={anchorEl}
+                    onClose={handleClosePicker}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'left',
+                    }}
+                    PaperProps={{
+                      sx: {
+                        mt: 1,
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                        borderRadius: 2,
+                      }
+                    }}
+                  >
+                    <Box>
+                      <DateRangePicker
+                        ranges={[tempSelectionRange]}
+                        onChange={handleDateChange}
+                        months={2}
+                        direction="horizontal"
+                        showSelectionPreview={true}
+                        moveRangeOnFirstSelection={false}
+                        rangeColors={['#4ba1f8']}
+                        color="#4ba1f8"
+                        locale={enGB}
+                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
+                        <Button
+                          variant="outlined"
+                          onClick={handleClosePicker}
+                          sx={{ color: '#808191', borderColor: '#e0e0e0' }}
+                        >
+                          Close
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={handleApply}
+                          sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
+                        >
+                          Apply
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Popover>
+                </Box>
               );
             }
 
@@ -536,7 +847,11 @@ const FilterPanel = ({
                                   ? '#c62828'
                                   : selected?.toLowerCase() === 'pending'
                                   ? '#f9a825'
-                                  : 'white',
+                                  : selected?.toLowerCase() === 'approved'
+                                  ? '#41c048'
+                                  : selected?.toLowerCase() === 'rejected'
+                                  ? '#d32f2f'
+                                  : '#333',
                               backgroundColor:
                                 selected?.toLowerCase() === 'active'
                                   ? '#e5f8fe'
@@ -548,6 +863,10 @@ const FilterPanel = ({
                                   ? '#FDA191'
                                   : selected?.toLowerCase() === 'pending'
                                   ? '#FFF68D'
+                                  : selected?.toLowerCase() === 'approved'
+                                  ? '#eefbe5'
+                                  : selected?.toLowerCase() === 'rejected'
+                                  ? '#ffeae9'
                                   : '#e0e0e0',
 
                               fontWeight: 500,
@@ -575,7 +894,11 @@ const FilterPanel = ({
                                 ? '#c62828'
                                 : option.value?.toLowerCase() === 'pending'
                                 ? '#f9a825'
-                                : 'white',
+                                : option.value?.toLowerCase() === 'approved'
+                                ? '#41c048'
+                                : option.value?.toLowerCase() === 'rejected'
+                                ? '#d32f2f'
+                                : '#333',
                             backgroundColor:
                               option.value?.toLowerCase() === 'active'
                                 ? '#e5f8fe'
@@ -587,6 +910,10 @@ const FilterPanel = ({
                                 ? '#FDA191'
                                 : option.value?.toLowerCase() === 'pending'
                                 ? '#FFF68D'
+                                : option.value?.toLowerCase() === 'approved'
+                                ? '#eefbe5'
+                                : option.value?.toLowerCase() === 'rejected'
+                                ? '#ffeae9'
                                 : '#e0e0e0',
 
                             fontWeight: 500
@@ -666,6 +993,7 @@ const FilterPanel = ({
         </Box>
       </Card>
     </Grid>
+    </>
   );
 };
 

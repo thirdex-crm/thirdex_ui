@@ -11,7 +11,7 @@ import { drawerWidth } from 'store/constant';
 import { TOGGLE_MINI_SIDEBAR } from 'store/actions';
 import { IconChevronRight } from '@tabler/icons';
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open, miniSidebar }) => ({
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'miniSidebar' })(({ theme, open, miniSidebar }) => ({
   ...theme.typography.mainContent,
   borderBottomLeftRadius: 0,
   borderBottomRightRadius: 0,
@@ -19,13 +19,13 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
     'margin',
     open
       ? {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen
-        }
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen
+      }
       : {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen
-        }
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      }
   ),
   [theme.breakpoints.up('md')]: {
     marginLeft: miniSidebar ? 0 : open ? 0 : -(drawerWidth - 20),

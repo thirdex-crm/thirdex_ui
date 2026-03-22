@@ -337,7 +337,8 @@ const CaseDetailsPage = () => {
                   <IconButton onClick={() => navigate(-1)}>
                     <KeyboardBackspaceIcon sx={{ fontSize: 20, color: 'black' }} />
                   </IconButton>
-                  {serviceDetails?.name} Case
+                  {(caseData?.uniqueId || 'Case')} - {serviceuserDetails?.personalInfo?.firstName || '-'}{' '}
+                  {serviceuserDetails?.personalInfo?.lastName || ''}
                 </Typography>
               </Stack>
 
@@ -599,12 +600,12 @@ const CaseDetailsPage = () => {
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography fontWeight={500}>Date Opened</Typography>
+                    <Typography fontWeight={500}>Opened</Typography>
                     <Typography color="text.secondary">{caseData?.caseOpened ? formatDate(caseData.caseOpened) : '-'}</Typography>
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography fontWeight={500}>Date Closed</Typography>
+                    <Typography fontWeight={500}>Closed</Typography>
                     <Typography color="text.secondary">{caseData?.caseClosed ? formatDate(caseData.caseClosed) : '-'}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
@@ -618,7 +619,7 @@ const CaseDetailsPage = () => {
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography fontWeight={500}>Total hours</Typography>
+                    <Typography fontWeight={500}>Total Hours</Typography>
                     <Typography color="text.secondary">
                       {(() => {
                         if (!caseData?.caseOpened || !caseData?.caseClosed) return '0 hrs';

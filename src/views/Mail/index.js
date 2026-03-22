@@ -367,7 +367,7 @@ const Mail = () => {
               setTagFilter={(value) => setTag(value)}
               includeArchives={includeArchives}
             setIncludeArchives={setIncludeArchives}
-              selectedFilters={['startDate','endDate','includeArchives']}
+              selectedFilters={['dateRange','includeArchives']}
               onReset={handleReset}
             />
             <Grid item xs={9}>

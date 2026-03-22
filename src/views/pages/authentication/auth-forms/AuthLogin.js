@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
-  Checkbox,
   FormControl,
-  FormControlLabel,
   FormHelperText,
   IconButton,
   InputAdornment,
@@ -22,17 +19,14 @@ import toast from 'react-hot-toast';
 import { Formik } from 'formik';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { urls } from 'common/urls';
 import { postApi } from 'common/apiClient';
 import { useGoogleLogin } from '@react-oauth/google';
 
-
 const AuthLogin = ({ ...others }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,7 +69,7 @@ const AuthLogin = ({ ...others }) => {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().required('Password is required')
         })}
-        onSubmit={async (values, { setErrors, setStatus }) => {
+        onSubmit={async (values) => {
           try {
             setIsSubmitting(true);
             const response = await postApi(`${urls.login.login}`, values);
@@ -107,7 +101,7 @@ const AuthLogin = ({ ...others }) => {
           }
         }}
       >
-        {({ errors, handleBlur, handleChange, handleSubmit, touched, values, isValid, dirty }) => (
+        {({ errors, handleBlur, handleChange, handleSubmit, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
             <FormControl
               fullWidth

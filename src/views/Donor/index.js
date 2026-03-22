@@ -346,7 +346,7 @@ const Donor = () => {
               setCampaignFilter={setCampaignFilter}
               includeArchives={includeArchives}
               setIncludeArchives={setIncludeArchives}
-              selectedFilters={['donorTypeFilter', 'startDate', 'endDate', 'campaignFilter']}
+              selectedFilters={['donorTypeFilter', 'dateRange', 'campaignFilter']}
               customDateLabel="By Date"
               onReset={handleReset}
             />

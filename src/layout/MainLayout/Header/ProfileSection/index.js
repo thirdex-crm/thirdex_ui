@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -523,19 +526,19 @@ const ProfileSection = () => {
               />
             </div>
 
-            <TextField
-              type="date"
-              value={task?.dueDate}
-              onChange={handleChange('dueDate')}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              sx={{ width: '50%' }}
-              inputProps={{
-                style: {
-                  cursor: 'pointer'
-                }
-              }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Due Date"
+                value={task?.dueDate ? dayjs(task.dueDate) : null}
+                onChange={(newValue) => {
+                  setTask((prev) => ({
+                    ...prev,
+                    dueDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : ''
+                  }));
+                }}
+                renderInput={(params) => <TextField {...params} size="small" sx={{ width: '50%' }} />}
+              />
+            </LocalizationProvider>
 
             <Grid container justifyContent="space-between" alignItems="center">
               <Grid item>

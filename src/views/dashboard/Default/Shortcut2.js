@@ -4,7 +4,7 @@ import { Card, Typography } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import AirplayIcon from '@mui/icons-material/Airplay';
 import { IconSeeding, IconClipboardData} from '@tabler/icons';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const Shortcut2 = ({ icon, title, path, onClick }) => {
   const navigate = useNavigate();

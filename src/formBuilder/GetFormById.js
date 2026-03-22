@@ -5,11 +5,14 @@ import { urls } from 'common/urls'
 import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react'
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { Formik, useFormik } from "formik";
 import DescriptionIcon from '@mui/icons-material/Description';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const GetFormById = () => {
 
@@ -230,13 +233,22 @@ const GetFormById = () => {
                   {field?.required &&
                     <span style={{ color: 'red' }}> *</span>}
                 </FormLabel>
-                <TextField
-                  variant='standard'
-                  type='date'
-                  name={field?.label}
-                  placeholder={field?.placeholder}
-                  value={formik?.values[field?.label]}
-                  onChange={formik?.handleChange} />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={formik?.values[field?.label] ? dayjs(formik.values[field.label]) : null}
+                    onChange={(newValue) => {
+                      formik.setFieldValue(field?.label, newValue ? dayjs(newValue).format('YYYY-MM-DD') : '');
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant='standard'
+                        name={field?.label}
+                        placeholder={field?.placeholder}
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
                 <FormHelperText sx={{ color: '#d93227' }}>{formik.errors[field.label]}</FormHelperText>
               </FormControl>
             </Box>

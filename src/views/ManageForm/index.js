@@ -10,7 +10,7 @@ import { urls } from 'common/urls.js';
 import { getApi } from 'common/apiClient.js';
 import { useEffect } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader.js';
 import CustomHeader from 'components/CustomHeader.js';
 

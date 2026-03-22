@@ -391,7 +391,7 @@ const Financial = () => {
             campaigns={campaignTypeOptions}
             campaignFilter={campaignName}
             setCampaignFilter={(value) => setCampaignName(value)}
-            selectedFilters={['startDate','endDate',"campaignFilter",]}
+            selectedFilters={['dateRange',"campaignFilter",]}
             onReset={handleReset}
             customDateLabel="By Date"
           />

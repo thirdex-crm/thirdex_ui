@@ -10,8 +10,8 @@ import moment from 'moment';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 
 const statusFilter = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' }
+  { value: 'APPROVED', label: 'Approved' },
+  { value: 'REJECTED', label: 'Rejected' }
 ];
 
 const dateAddedFilters = [
@@ -75,6 +75,8 @@ export default function TabbedDataGrid() {
     pageSize: 10
   });
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const filteredRows = allRows.filter((row) => (tabValue === 0 ? row.status === 'APPROVED' : row.status === 'REJECTED'));
 
@@ -92,6 +94,15 @@ export default function TabbedDataGrid() {
     if (dateOpenedFilter) {
       const formattedDate = new Date(dateOpenedFilter).toISOString().split('T')[0];
       queryParams.append('date', formattedDate);
+    }
+    if (status) {
+      queryParams.append('status', status);
+    }
+    if (startDate) {
+      queryParams.append('startDate', moment(startDate).format('YYYY-MM-DD'));
+    }
+    if (endDate) {
+      queryParams.append('endDate', moment(endDate).format('YYYY-MM-DD'));
     }
     const fromUrl = `${urls?.responses?.submit}?${queryParams.toString()}`;
     const response = await getApi(fromUrl);
@@ -116,7 +127,7 @@ export default function TabbedDataGrid() {
   };
   useEffect(() => {
     getAllResponse();
-  }, [nameFilter, searchQuery, dateOpenedFilter, paginationModel, tabValue]);
+  }, [nameFilter, searchQuery, dateOpenedFilter, status, startDate, endDate, paginationModel, tabValue]);
 
   const getResponse = async () => {
     const url = `${urls?.responses?.submit}?limit=10000`;
@@ -222,6 +233,7 @@ export default function TabbedDataGrid() {
         <FilterPanel
           showFilter={showFilter}
           statuses={statusFilter}
+          statusFilter={status}
           setStatusFilter={setStatus}
           dateAddedFilters={dateAddedFilters}
           dateOpenedFilter={dateOpenedFilter}
@@ -229,7 +241,11 @@ export default function TabbedDataGrid() {
           names={namesFilter}
           nameFilter={nameFilter}
           setNameFilter={setNameFilter}
-          selectedFilters={['nameFilter', 'statusFilter', 'dateOpenedFilter']}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          selectedFilters={['nameFilter', 'statusFilter', 'dateRange']}
         />
         <Grid item xs={9}>
           <Box sx={{ width: '100%' }}>

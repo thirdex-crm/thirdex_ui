@@ -421,7 +421,6 @@ const AddCaseForm = () => {
               <Grid item xs={12} md={6}>
                 <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
                   <Grid container spacing={2}>
-                    {/* Notes */}
                     <Grid item xs={12}>
                       <Controller
                         name="notes"
@@ -442,7 +441,7 @@ const AddCaseForm = () => {
                         render={({ field }) => (
                           <TextField
                             {...field}
-                            label="Notes"
+                            label="Service Description"
                             multiline
                             minRows={13}
                             fullWidth
@@ -454,7 +453,6 @@ const AddCaseForm = () => {
                       />
                     </Grid>
 
-                    {/* Attachments Field */}
                     <Grid item xs={12} md={12}>
                       <Controller
                         name="attachment"
