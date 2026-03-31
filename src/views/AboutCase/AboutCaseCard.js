@@ -1,17 +1,43 @@
 import React from 'react';
-import { Card, Typography, Box, Grid, Chip, Link } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PropTypes from 'prop-types';
+import { Card, Typography, Box, Grid, Link, Tooltip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import StatusChip from './StatusChip';
 import moment from 'moment';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import { useEffect, useState } from 'react';
+import { imageUrl } from 'common/urls';
 
-const AboutCaseCard = ({ sessionData, caseId }) => {
-  const opened = moment(sessionData?.caseOpened);
-  const closed = moment(sessionData?.caseClosed);
-  const durationInHours = closed.diff(opened, 'hours', true);
+const AboutCaseCard = ({ sessionData }) => {
+  const formatHoursLabel = (value) => {
+    const numericValue = Number(value || 0);
+    const wholeHours = Math.floor(numericValue);
+    const minutes = Math.round((numericValue - wholeHours) * 60);
+
+    return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} mins`;
+  };
+
+  const resolveAttachmentUrl = (filePath) => {
+    if (!filePath) return '';
+
+    const normalizedPath = filePath.replace(/\\/g, '/');
+
+    if (normalizedPath.startsWith('https://') || normalizedPath.startsWith('http://')) {
+      return normalizedPath;
+    }
+
+    const uploadsSegment = '/uploads/';
+    const uploadsIndex = normalizedPath.lastIndexOf(uploadsSegment);
+    const relativePath = uploadsIndex >= 0 ? normalizedPath.slice(uploadsIndex + 1) : normalizedPath.replace(/^\/+/, '');
+
+    return `${imageUrl.replace(/\/$/, '')}/${relativePath}`;
+  };
+
   const [loading, setLoading] = useState(true);
+  const attachmentPath = sessionData?.file || '';
+  const attachmentUrl = resolveAttachmentUrl(attachmentPath);
+  const attachmentName = attachmentPath ? attachmentPath.replace(/\\/g, '/').split('/').pop() : '';
+
   useEffect(() => {
     if (sessionData) {
       setLoading(false);
@@ -83,8 +109,7 @@ const AboutCaseCard = ({ sessionData, caseId }) => {
                 Case Owner :
               </Box>{' '}
               <Box component="span" sx={{ fontWeight: '400', fontSize: '12px', lineHeight: '24px' }}>
-                {sessionData?.caseOwnerDetails?.[0]?.name }
-                
+                {sessionData?.caseOwnerDetails?.[0]?.name}
               </Box>
             </Typography>
 
@@ -124,7 +149,7 @@ const AboutCaseCard = ({ sessionData, caseId }) => {
                   px: 1
                 }}
               >
-                {durationInHours.toFixed(2)} hr
+                {formatHoursLabel(sessionData?.totalCaseNoteHours)}
               </Box>
             </Typography>
             <Typography>
@@ -138,9 +163,23 @@ const AboutCaseCard = ({ sessionData, caseId }) => {
               <Box component="span" sx={{ fontWeight: '600', fontSize: '12px', lineHeight: '24px', marginRight: '8px' }}>
                 Attachments :
               </Box>{' '}
-              <Box component="span" sx={{ fontWeight: '400', fontSize: '12px', lineHeight: '24px' }}>
-                1 File
-              </Box>
+              {attachmentUrl ? (
+                <Tooltip title={attachmentName || 'View attachment'}>
+                  <Link
+                    href={attachmentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="none"
+                    sx={{ display: 'inline-flex', verticalAlign: 'middle', color: '#5f5a57' }}
+                  >
+                    <DescriptionOutlinedIcon sx={{ fontSize: 28 }} />
+                  </Link>
+                </Tooltip>
+              ) : (
+                <Box component="span" sx={{ fontWeight: '400', fontSize: '12px', lineHeight: '24px' }}>
+                  0 Files
+                </Box>
+              )}
             </Typography>
 
             <Typography>
@@ -156,6 +195,28 @@ const AboutCaseCard = ({ sessionData, caseId }) => {
       )}
     </Card>
   );
+};
+
+AboutCaseCard.propTypes = {
+  sessionData: PropTypes.shape({
+    file: PropTypes.string,
+    uniqueId: PropTypes.string,
+    totalCaseNoteHours: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    status: PropTypes.string,
+    caseOpened: PropTypes.string,
+    caseClosed: PropTypes.string,
+    userServiceDetails: PropTypes.shape({
+      personalInfo: PropTypes.shape({
+        firstName: PropTypes.string,
+        lastName: PropTypes.string
+      })
+    }),
+    caseOwnerDetails: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string
+      })
+    )
+  })
 };
 
 export default AboutCaseCard;

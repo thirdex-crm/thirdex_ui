@@ -1,7 +1,6 @@
 import { Box, Button, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import React from 'react';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -22,6 +21,14 @@ const AboutCaseNote = () => {
   const [loading, setLoading] = useState(true);
 
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const formatHoursLabel = (value) => {
+    const numericValue = Number(value || 0);
+    const wholeHours = Math.floor(numericValue);
+    const minutes = Math.round((numericValue - wholeHours) * 60);
+
+    return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} mins`;
+  };
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -45,10 +52,6 @@ const AboutCaseNote = () => {
 
     fetchCaseNotes();
   }, [caseData?.id]);
-  const opened = moment(caseNoteData?.caseId?.caseOpened);
-  const closed = moment(caseNoteData?.caseId?.caseClosed);
-  const durationInHours = closed.diff(opened, 'hours', true);
-
   return (
     <>
       <Grid item xs={12} mb={2}>
@@ -100,7 +103,7 @@ const AboutCaseNote = () => {
                       Date:
                     </Box>
                     <Box component="span" sx={{ fontWeight: 400, fontSize: '12px' }}>
-                      {caseNoteData?.date ? moment(caseNoteData.caseOpened).format('DD/MM/YYYY') : '-'}
+                      {caseNoteData?.date ? moment(caseNoteData.date).format('DD/MM/YYYY') : '-'}
                     </Box>
                   </Typography>
                   <Typography>
@@ -142,7 +145,7 @@ const AboutCaseNote = () => {
                         px: 1
                       }}
                     >
-                      {durationInHours.toFixed(2)} hr
+                      {formatHoursLabel(caseNoteData?.time)}
                     </Box>
                   </Typography>
                   <Typography>

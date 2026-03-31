@@ -5,13 +5,10 @@ import InfoIcon from '@mui/icons-material/Info';
 import { IconSeeding } from '@tabler/icons';
 import { urls, imageUrl } from 'common/urls';
 import { getApi } from 'common/apiClient';
-import { useNavigate } from 'react-router-dom';
 
 const Card = () => {
   const [mediaList, setMediaList] = useState([]);
-  const [search, setSearch] = useState('');
   const [imgErrors, setImgErrors] = useState({});
-  const navigate = useNavigate();
 
   const getAllForms = async () => {
     try {
@@ -31,9 +28,7 @@ const Card = () => {
     getAllForms();
   }, []);
 
-  const filteredMedia = mediaList.filter(
-    (item) => item?.fileName?.toLowerCase().includes(search?.toLowerCase()) || item?.name?.toLowerCase().includes(search?.toLowerCase())
-  );
+  const filteredMedia = mediaList;
 
   return (
     <Box sx={{ bgcolor: '#fff', p: 1, borderRadius: '10px', height: '430px' }}>

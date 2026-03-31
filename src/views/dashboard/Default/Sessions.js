@@ -1,6 +1,7 @@
+import PropTypes from 'prop-types';
 import { Divider, Select, MenuItem, TextField, Button, InputAdornment, Typography, Grid, IconButton, Pagination } from '@mui/material';
 import { Box, Stack } from '@mui/system';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchIcon from '@mui/icons-material/Search';
 import { urls } from 'common/urls';
@@ -8,16 +9,14 @@ import { getApi } from 'common/apiClient';
 import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 
-const SessionItem = ({ sessionId, sessionData, id, date, time, title, description, summary, presenter, props }) => {
+const SessionItem = ({ sessionId, sessionData, serviceId, date, time, title, description, summary, presenter }) => {
   const navigate = useNavigate();
-  console.log(`sessionId`, sessionId);
-  console.log(`serivce id `, id?._id);
 
   const handleEditClick = () => {
     navigate('/add-session', {
       state: {
         session: sessionData,
-        serviceData: id
+        serviceData: serviceId
       }
     });
   };
@@ -118,6 +117,18 @@ const SessionItem = ({ sessionId, sessionData, id, date, time, title, descriptio
   );
 };
 
+SessionItem.propTypes = {
+  sessionId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  sessionData: PropTypes.object,
+  serviceId: PropTypes.oneOfType([PropTypes.string, PropTypes.shape({ _id: PropTypes.string })]),
+  date: PropTypes.string,
+  time: PropTypes.string,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  summary: PropTypes.string,
+  presenter: PropTypes.string
+};
+
 const Sessions = () => {
   const [allSession, setAllSession] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,9 +138,7 @@ const Sessions = () => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
-  const navigate = useNavigate();
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
       const queryParams = {
@@ -171,10 +180,10 @@ const Sessions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, range, search]);
   useEffect(() => {
     fetchDashboardData();
-  }, [search, range, page]);
+  }, [fetchDashboardData]);
 
   return (
     <Box
@@ -244,9 +253,15 @@ const Sessions = () => {
         {loading ? (
           <SingleRowLoader />
         ) : allSession.length > 0 ? (
-          allSession.map((session, index) => {
+          allSession.map((session) => {
             return (
-              <SessionItem key={index} {...session} id={session.serviceId} sessionId={session?.id} sessionData={session?.sessionData} />
+              <SessionItem
+                key={session.id}
+                {...session}
+                serviceId={session.serviceId}
+                sessionId={session?.id}
+                sessionData={session?.sessionData}
+              />
             );
           })
         ) : (

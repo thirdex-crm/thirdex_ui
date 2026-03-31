@@ -1,13 +1,8 @@
-import { Box, Chip, Typography } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import LoopIcon from '@mui/icons-material/Loop';
+import PropTypes from 'prop-types';
+import { Chip } from '@mui/material';
 
 const StatusChip = ({ status }) => {
   const normalizedStatus = status;
-  const iconSize = 16;
-
-  let icon = null;
   let color = '';
   let bgColor = '';
 
@@ -30,6 +25,8 @@ const StatusChip = ({ status }) => {
       //   color = '#2e7d32';
       bgColor = '#91FD91';
       break;
+    case 'Closed':
+    case 'closed':
     case 'Close':
     case 'close':
       // icon = (
@@ -74,7 +71,6 @@ const StatusChip = ({ status }) => {
   return (
     <Chip
       label={normalizedStatus || '-'}
-      icon={icon}
       variant="filled"
       size="small"
       sx={{
@@ -91,6 +87,10 @@ const StatusChip = ({ status }) => {
       }}
     />
   );
+};
+
+StatusChip.propTypes = {
+  status: PropTypes.string
 };
 
 export default StatusChip;
