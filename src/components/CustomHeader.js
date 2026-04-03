@@ -1,5 +1,6 @@
-import { Box, Typography, Menu, MenuItem, Button, IconButton, Tooltip } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+/* eslint-disable react/prop-types */
+import { Box, Typography, Menu, MenuItem, Button, Tooltip } from '@mui/material';
+import { GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import { useState } from 'react';
 import LibraryAddCheckOutlinedIcon from '@mui/icons-material/LibraryAddCheckOutlined';
 import ArchiveIcon from '@mui/icons-material/Archive';
@@ -14,8 +15,6 @@ const CustomHeader = ({
   entityType = '',
   title = '',
   selectedIds = [],
-  onBulkDelete = () => {},
-  onBulkArchive = () => {},
   exportEnabled = true,
   enableBulkActions = false,
   extraActions = null,
@@ -101,7 +100,7 @@ const CustomHeader = ({
 
   return (
     <>
-    <AddItemDialog open={opendialog} onClose={handleClosedialog} entityType ={entityType} selectedIds = {selectedIds}></AddItemDialog>
+      <AddItemDialog open={opendialog} onClose={handleClosedialog} entityType={entityType} selectedIds={selectedIds}></AddItemDialog>
       <Box sx={{ height: '50px', display: 'flex', alignItems: 'center' }}>
         <GridToolbarContainer
           sx={{
@@ -166,10 +165,10 @@ const CustomHeader = ({
                       Bulk Archive <ArchiveIcon fontSize="small" style={{ marginLeft: 8 }} />
                     </MenuItem>
                   )}
-                   {isShowTags && (
-                  <MenuItem onClick={handleOpen}>
-                    Tags Cases <LocalOfferIcon fontSize="small" style={{ marginLeft: 8 }} />
-                  </MenuItem>
+                  {isShowTags && (
+                    <MenuItem onClick={handleOpen}>
+                      Tags Cases <LocalOfferIcon fontSize="small" style={{ marginLeft: 8 }} />
+                    </MenuItem>
                   )}
                 </Menu>
               </div>

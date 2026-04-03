@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
@@ -5,12 +6,10 @@ import {
   MenuItem,
   IconButton,
   Card,
-  CardHeader,
   CardContent,
   Tabs,
   Tab,
   Box,
-  Switch,
   Paper,
   TextField,
   InputAdornment,
@@ -40,34 +39,31 @@ const contactMethodInitial = {
   // donerTag: 0,
   Whatsapp: 0,
   Email: 0,
+
   SMS: 0,
   Letter: 0
 };
 
-const AddCaseForm = ({ onCancel }) => {
+const AddCaseForm = () => {
   const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
-  const [countryList, setCountryList] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [, setCountryList] = useState([]);
+  const [, setSelectedFile] = useState(null);
 
   const [contactMethodStates, setContactMethodStates] = useState(contactMethodInitial);
   const [isLoading, setIsloading] = useState(false);
+
   const fileInputRef = React.useRef(null);
   const [campaigns, setCampaigns] = useState([]);
   const [contactpurpose, setContactpurpose] = useState([]);
   const [reason, setReason] = useState([]);
-  const [contactmethod, setContactmethod] = useState([]);
-  const [benificiary, setBenificiary] = useState([]);
-  const [Campaignstag, setCampaignstag] = useState([]);
-  const [engagement, setengagement] = useState([]);
-  const [eventsAttended, seteventsAttended] = useState([]);
-  const [fundingInterests, setfundingInterests] = useState([]);
-  const [fundraisingActivities, setfundraisingActivities] = useState([]);
+  const [, setContactmethod] = useState([]);
   const [allCategory, setAllCategory] = useState([]);
 
   const location = useLocation();
 
   const subRole = location?.state?.subRole;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const editdata = location?.state || {};
   const initialPurposeStates = contactpurpose?.reduce((acc, curr) => {
     acc[curr._id] = 0;
@@ -77,13 +73,13 @@ const AddCaseForm = ({ onCancel }) => {
   const [purposeStates, setPurposeStates] = useState(initialPurposeStates || {});
 
   const {
-    register,
     handleSubmit,
+
     control,
     setValue,
     watch,
     reset,
-    trigger,
+
     formState: { errors }
   } = useForm({
     mode: 'all',
@@ -252,13 +248,6 @@ const AddCaseForm = ({ onCancel }) => {
       }}
     />
   );
-  const handleChange = (e) => {
-    setCaseData({ ...caseData, [e.target.name]: e.target.value });
-  };
-
-  const handleFileClick = () => {
-    fileInputRef.current.click();
-  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -340,6 +329,7 @@ const AddCaseForm = ({ onCancel }) => {
       }
 
       setIsloading(false);
+
       navigate('/donor');
     } catch (error) {
       toast.error('Error in Submitting form');
@@ -347,10 +337,7 @@ const AddCaseForm = ({ onCancel }) => {
     }
   };
 
-  const onlyNumbers = /^[0-9]*$/;
   const onlyLetters = /^[A-Za-z\s]*$/;
-  const onlyLettersAndNumbers = /^[A-Za-z0-9\s]*$/;
-  const ukPostcode = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
 
   const handleTabChange = (newIndex) => {
     setTabIndex(newIndex);
@@ -411,6 +398,7 @@ const AddCaseForm = ({ onCancel }) => {
       setValue('contactPurposeStates', restoredStates);
       setValue('contactPurpose', selected);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editdata, contactpurpose]);
   return (
     <Grid>
@@ -432,7 +420,6 @@ const AddCaseForm = ({ onCancel }) => {
               ? 'Add Donor Group'
               : 'Add Donor'}
           </Typography>
-
           <Box
             sx={{
               display: 'flex',
@@ -462,19 +449,20 @@ const AddCaseForm = ({ onCancel }) => {
             >
               <Tab
                 label="Details"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 0 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
                   fontSize: '14px',
                   minWidth: 120,
                   fontWeight: 'bold',
+
                   textTransform: 'none'
                 })}
               />
               <Tab
                 label="Contact Preferences"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 1 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,

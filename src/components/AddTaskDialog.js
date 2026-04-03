@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from 'react';
 import { Box, Grid, Stack, Switch, Typography, Button, Dialog, DialogTitle, DialogContent, TextField, Autocomplete } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { postApi, getApi, updateApi } from 'common/apiClient';
-import toast from 'react-hot-toast';
+import { postApi, getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-const AddTaskDialog = ({ open, handleClose, onClose, fetchTimeLineData,userId }) => {
+
+const AddTaskDialog = ({ open, handleClose, fetchTimeLineData }) => {
   const [adminList, setAdminList] = useState([]);
   const [isLoading, setIsloading] = useState(false);
   const initialTaskState = {
@@ -48,18 +48,10 @@ const AddTaskDialog = ({ open, handleClose, onClose, fetchTimeLineData,userId })
   const handleSubmit = async () => {
     setIsloading(true);
     try {
-      const payload = {
+      await postApi(urls.dashboard.createTask, {
         ...task,
         assignedTo: task.assignedTo
-      };
-
-      const response = await postApi(urls.dashboard.createTask, payload);
-      if (response.success == true) {
-        const body = {
-          taskId: response?.data?._id
-        };
-        const taskResponse = await postApi(urls.timeline.taskCreate.replace(':id', userId), body);
-      }
+      });
       setTask(initialTaskState);
       handleClose();
       fetchTimeLineData();

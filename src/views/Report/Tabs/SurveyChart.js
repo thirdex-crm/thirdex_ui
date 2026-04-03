@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';

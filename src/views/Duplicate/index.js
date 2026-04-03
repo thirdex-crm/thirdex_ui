@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Grid, Stack, Box, Typography, InputBase, IconButton, Checkbox } from '@mui/material';
+import { Grid, Stack, Box, Typography, InputBase, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
-import CallMergeIcon from '@mui/icons-material/CallMerge';
 import { Visibility } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
@@ -11,12 +10,8 @@ import { urls } from 'common/urls';
 
 const Duplicate = () => {
   const navigate = useNavigate();
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [user, setUser] = useState('');
+  const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true);
-  const handleCheckboxChange = (id) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,8 +19,9 @@ const Duplicate = () => {
         setLoading(true);
         const response = await getApi(urls.duplicate.getallDuplicateUsers);
         const formatted = [];
+        const groups = Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : [];
 
-        response?.data?.forEach((group, groupIndex) => {
+        groups.forEach((group, groupIndex) => {
           const names = [];
           const emails = [];
           const phones = [];
@@ -49,7 +45,8 @@ const Duplicate = () => {
             phones,
             dobs,
             groupIndex,
-            added
+            added,
+            matchType: group.matchType || 'Email'
           });
         });
         setUser(formatted);
@@ -154,6 +151,12 @@ const Duplicate = () => {
       )
     },
     {
+      field: 'matchType',
+      headerName: 'Matched On',
+      flex: 0.8,
+      renderCell: (params) => <Typography sx={{ fontSize: '12px', color: '#0077b6', fontWeight: 500 }}>{params.value}</Typography>
+    },
+    {
       field: 'view',
       headerName: 'View',
       flex: 0.5,
@@ -168,7 +171,8 @@ const Duplicate = () => {
                 emails: params.row.emails,
                 phones: params.row.phones,
                 dobs: params.row.dobs,
-                added: params.row.added
+                added: params.row.added,
+                matchType: params.row.matchType
               }
             })
           }
@@ -273,7 +277,6 @@ const Duplicate = () => {
                 columns={columns}
                 loading={loading}
                 getRowId={(row) => row.id}
-                pagination={false}
                 getRowHeight={() => 'auto'}
                 hideFooterPagination
                 hideFooter

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -6,12 +7,10 @@ import {
   IconButton,
   MenuItem,
   Card,
-  CardHeader,
   CardContent,
   Tabs,
   Tab,
   Box,
-  Switch,
   Paper,
   TextField,
   InputAdornment,
@@ -19,7 +18,6 @@ import {
   Button,
   FormControlLabel,
   Autocomplete,
-  FormHelperText,
   Chip
 } from '@mui/material';
 import { CircularProgress } from '@mui/material';
@@ -31,18 +29,19 @@ import CloseIcon from '@mui/icons-material/Close';
 import Link from '@mui/material/Link';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+
 import AntSwitch from 'components/AntSwitch.js';
 import dayjs from 'dayjs';
 import { postApi, updateApiPatch, getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import config from '../../config';
 
-const AddCaseForm = ({ onCancel }) => {
+const AddCaseForm = () => {
   const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [countryList, setCountryList] = useState([]);
   const [isLoading, setIsloading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [contactpurpose, setContactpurpose] = useState([]);
   const [reason, setReason] = useState([]);
   const [contactmethod, setContactmethod] = useState([]);
@@ -54,16 +53,14 @@ const AddCaseForm = ({ onCancel }) => {
   const [fundraisingActivities, setfundraisingActivities] = useState([]);
 
   const location = useLocation();
+
   const userdata = location?.state;
   const editdata = userdata || null;
 
   const {
-    register,
     handleSubmit,
     control,
     setValue,
-    watch,
-    reset,
     trigger,
     formState: { errors }
   } = useForm({
@@ -143,19 +140,16 @@ const AddCaseForm = ({ onCancel }) => {
 
         if (editdata.contactPreferences.contactMethods) {
           setValue('telephone', editdata.contactPreferences.contactMethods.telephone ?? true);
+
           setValue('emailConsent', editdata.contactPreferences.contactMethods.email ?? true);
+
           setValue('sms', editdata.contactPreferences.contactMethods.sms ?? true);
+
           setValue('whatsapp', editdata.contactPreferences.contactMethods.whatsapp ?? true);
         }
       }
     }
   }, [editdata, setValue]);
-
-  const restrictAccessValue = watch('restrictAccess');
-  const telephoneValue = watch('telephone');
-  const emailConsentValue = watch('emailConsent');
-  const smsValue = watch('sms');
-  const whatsappValue = watch('whatsapp');
 
   const ethnicityOptions = [
     'Arabic or North African',
@@ -184,6 +178,7 @@ const AddCaseForm = ({ onCancel }) => {
         const countries = data.map((country) => ({
           code: country.cca2,
           name: country.name.common,
+
           flag: country.flags.png
         }));
         setCountryList(countries);
@@ -193,22 +188,19 @@ const AddCaseForm = ({ onCancel }) => {
   const districts = [
     { label: 'Adur and Worthing Borough', value: 'adur_worthing_borough' },
     { label: 'Adur District', value: 'adur_district' },
+
     { label: 'Amber Valley Borough', value: 'amber_valley_borough' },
     { label: 'Arun District', value: 'arun_district' },
     { label: 'Ashford Borough', value: 'ashford_borough' },
     { label: 'Babergh District', value: 'babergh_district' },
+
     { label: 'Ashfield District', value: 'ashfield_district' },
     { label: 'Basildon Borough', value: 'basildon_borough' }
   ];
 
   const fileInputRef = useRef(null);
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-  };
+  const handleFileChange = () => {};
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -290,7 +282,6 @@ const AddCaseForm = ({ onCancel }) => {
     />
   );
 
-  const handleToggle = () => setRestrictAccess(!restrictAccess);
   const onSubmit = async (formData) => {
     const isValid = await trigger();
 
@@ -393,6 +384,7 @@ const AddCaseForm = ({ onCancel }) => {
         await updateApiPatch(`${urls.serviceuser.editUser}/${editdata._id}`, fd, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+
         toast.success('User updated successfully!');
       } else {
         await postApi(urls.serviceuser.create, fd, {
@@ -405,65 +397,15 @@ const AddCaseForm = ({ onCancel }) => {
       navigate('/users');
     } catch (error) {
       console.error('Error creating user:', error);
+
       setIsloading(false);
     }
-  };
-
-  const handleReset = () => {
-    reset();
   };
 
   const onlyNumbers = /^[0-9]*$/;
   const onlyLetters = /^[A-Za-z\s]*$/;
   const onlyLetterNumberSpace = /^[a-zA-Z0-9 ]+$/;
   const onlyLettersAndNumbers = /^[A-Za-z0-9\s]*$/;
-
-  const tabFieldMap = {
-    0: [
-      'personalInfo.firstName',
-      'personalInfo.lastName',
-      'personalInfo.dateOfBirth',
-      'personalInfo.title',
-      'personalInfo.gender',
-      'personalInfo.ethnicity',
-      'personalInfo.nickName',
-      'homePhone',
-      'phone',
-      'email',
-      'addressLine1',
-      'town',
-      'district',
-      'postcode',
-      'country',
-      'firstLanguage',
-      'otherId',
-
-      'Beneficiary',
-      'Campaigns',
-      'riskNotes',
-      'engagement',
-      'eventsAttended',
-      'fundingInterests',
-      'fundraisingActivities',
-      'restrictAccess'
-    ],
-    1: [
-      'firstName',
-      'lastName',
-      'phone',
-      'title',
-      'gender',
-      'preferred',
-      'emergencyhomePhone',
-      'emergencyphone',
-      'emergencyemail',
-      'emergencyaddress',
-      'emergencycountry',
-      'emergencytown',
-      'emergencypinCode'
-    ],
-    2: ['preferredContact', 'reason', 'contactPurpose', 'confirmDate', 'telephone', 'emailConsent', 'sms', 'letter', 'whatsapp']
-  };
 
   const handleTabChange = (newIndex) => {
     setTabIndex(newIndex);
@@ -473,7 +415,9 @@ const AddCaseForm = ({ onCancel }) => {
     <Grid>
       <Card sx={{ position: 'relative', backgroundColor: '#eef2f6' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">{editdata ? 'Edit User' : 'Add New User'}</Typography>
+          <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">
+            {editdata ? 'Edit User' : 'Add New User'}
+          </Typography>
 
           <Box
             sx={{
@@ -498,13 +442,14 @@ const AddCaseForm = ({ onCancel }) => {
               onChange={(e, newValue) => handleTabChange(newValue)}
               sx={{
                 display: 'flex',
+
                 gap: 2,
                 borderBottom: '1px solid #4792d3'
               }}
             >
               <Tab
                 label="Details"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 0 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -516,7 +461,7 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Emergency Contact"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 1 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -528,7 +473,7 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Contact Preferences"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 2 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -807,24 +752,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         fullWidth
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1132,24 +1079,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1829,24 +1778,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {

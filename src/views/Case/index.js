@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, InputBase, IconButton, Tooltip, Chip } from '@mui/material';
-import { DataGrid, GridToolbarExport, GridToolbarContainer } from '@mui/x-data-grid';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Stack, Grid, Box, Card, InputBase, IconButton, Tooltip } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import TableStyle from '../../ui-component/TableStyle';
-import CheckIcon from '@mui/icons-material/Check';
-import LoopIcon from '@mui/icons-material/Loop';
-import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterPanel from 'components/FilterPanel';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +17,7 @@ const Case = () => {
   const [rows, setRows] = useState([]);
   const [serviceTypeFilter, setServiceTypeFilterOptions] = useState([]);
   const [ownerFilters, setOwnerFilters] = useState([]);
-  const [showFilter, setShowFilter] = useState(true);
+  const showFilter = true;
   const [selectedIds, setSelectedIds] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -37,11 +34,9 @@ const Case = () => {
   const [loading, setLoading] = useState(true);
   const [totalRows, setTotalRows] = useState(0);
 
-  const toggleSearch = () => setShowSearch((prev) => !prev);
-
   const statusFilter = [
     { value: 'open', label: 'Open' },
-    { value: 'close', label: 'Close' },
+    { value: 'closed', label: 'Closed' },
     { value: 'pending', label: 'Pending' }
   ];
 
@@ -97,7 +92,7 @@ const Case = () => {
       valueGetter: (params) => {
         const status = params.row.status;
         const dateClosed = params.row.dateClosed;
-        if (status === 'close' && dateClosed) {
+        if ((status === 'closed' || status === 'close') && dateClosed) {
           return dateClosed;
         }
         return '-';
@@ -105,7 +100,7 @@ const Case = () => {
     }
   ];
 
-  const handleFilter = async () => {
+  const handleFilter = useCallback(async () => {
     try {
       const queryParams = new URLSearchParams();
 
@@ -144,7 +139,7 @@ const Case = () => {
         return date.toLocaleDateString('en-GB');
       };
 
-      const formattedUsers = filteredCases.map((user, index) => {
+      const formattedUsers = filteredCases.map((user) => {
         const firstName = user?.serviceUserId?.personalInfo?.firstName || '';
         const lastName = user?.serviceUserId?.personalInfo?.lastName || '';
 
@@ -166,7 +161,7 @@ const Case = () => {
     } catch (error) {
       console.error('Failed to fetch filtered cases:', error);
     }
-  };
+  }, [caseOwner, dateOpenedFilter, endDate, searchQuery, serviceType, startDate, status]);
 
   const handleReset = () => {
     setServiceType('');
@@ -184,9 +179,9 @@ const Case = () => {
     if (serviceType || status || caseOwner || dateOpenedFilter || startDate || endDate || searchQuery || isFiltered) {
       handleFilter();
     }
-  }, [serviceType, status, caseOwner, dateOpenedFilter, searchQuery, startDate, endDate]);
+  }, [caseOwner, dateOpenedFilter, endDate, handleFilter, isFiltered, searchQuery, serviceType, startDate, status]);
 
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -199,7 +194,7 @@ const Case = () => {
         return date.toLocaleDateString('en-GB');
       };
 
-      const formattedUsers = allCases?.map((user, index) => {
+      const formattedUsers = allCases?.map((user) => {
         const firstName = user?.serviceUserId?.personalInfo?.firstName || '';
         const lastName = user?.serviceUserId?.personalInfo?.lastName || '';
         const caseOwnerFirstName = user?.caseOwner?.name || '';
@@ -255,11 +250,11 @@ const Case = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [paginationModel.page, paginationModel.pageSize]);
 
   useEffect(() => {
     fetchInitialData();
-  }, [paginationModel]);
+  }, [fetchInitialData]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { useState, useEffect } from 'react';
-import { Stack, Button, Grid, Typography, Box, Card, TextField, IconButton, Tooltip, InputBase, Chip } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { Stack, Grid, Typography, Box, Card, IconButton, Tooltip, InputBase, Chip } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import TableStyle from '../../ui-component/TableStyle';
 import SearchIcon from '@mui/icons-material/Search';
@@ -20,7 +20,7 @@ const statusFilter = [
 
 const ServiceManagement = () => {
   const navigate = useNavigate();
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [serviceType, setServiceType] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -191,12 +191,14 @@ const ServiceManagement = () => {
 
   useEffect(() => {
     fetchServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
 
   useEffect(() => {
     if (serviceType || status || searchQuery || isFiltered) {
       handleFilter();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceType, status, searchQuery]);
 
   const handleSearchChange = (event) => {

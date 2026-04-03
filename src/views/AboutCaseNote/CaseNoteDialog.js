@@ -12,9 +12,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  IconButton
+  Paper
 } from '@mui/material';
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
@@ -23,9 +23,16 @@ import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import CasePopover from 'components/CasePopover';
 
 const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
+  const formatHoursLabel = (value) => {
+    const numericValue = Number(value || 0);
+    const wholeHours = Math.floor(numericValue);
+    const minutes = Math.round((numericValue - wholeHours) * 60);
+
+    return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} mins`;
+  };
+
   const [caseNoteData, setCaseNoteData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [loading, setLoading] = useState(true);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -42,22 +49,18 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
   };
   const openDialog = Boolean(anchorEl);
   useEffect(() => {
+    if (!caseData?.id) return;
+
     const fetchCaseNotes = async () => {
       try {
         const res = await getApi(urls.casenote.getById.replace(':id', caseData?.id));
         setCaseNoteData(res?.data?.caseNoteData || {});
       } catch (error) {
         console.error('Failed to fetch case note details', error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchCaseNotes();
   }, [caseData?.id]);
-
-  const opened = moment(caseNoteData?.caseId?.caseOpened);
-  const closed = moment(caseNoteData?.caseId?.caseClosed);
-  const durationInHours = closed.diff(opened, 'hours', true);
 
   return (
     <>
@@ -120,7 +123,7 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
                               fontWeight: 500
                             }}
                           >
-                            {durationInHours.toFixed(2)} hr
+                            {formatHoursLabel(caseNoteData?.time)}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -214,6 +217,15 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
       <CasePopover open={openDialog} anchorEl={anchorEl} onClose={handleClose} data={caseData} closeNote={handleCloseTow} />
     </>
   );
+};
+
+AboutCaseNote.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  caseData: PropTypes.shape({
+    id: PropTypes.string
+  }),
+  setSelectedCaseNote: PropTypes.func.isRequired
 };
 
 export default AboutCaseNote;

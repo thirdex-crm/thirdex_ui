@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, IconButton, Tooltip, InputBase } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Stack, Grid, Typography, Box, Card, IconButton, Tooltip, InputBase } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
+
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
@@ -38,14 +37,13 @@ const tags = [
 ];
 
 const Lead = () => {
-  const navigate = useNavigate();
   const [formType, setFormType] = useState('');
-  const [donorType, setDonorType] = useState('');
-  const [amountFilter, setAmountFilter] = useState('');
-  const [durationFilter, setDurationFilter] = useState('');
-  const [tagFilter, setTagFilter] = useState('');
-  const [recruitmentFilter, setrecruitmentFilter] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const [, setDonorType] = useState('');
+  const [, setAmountFilter] = useState('');
+  const [, setDurationFilter] = useState('');
+  const [, setTagFilter] = useState('');
+  const [, setrecruitmentFilter] = useState('');
+  const [showFilter] = useState(true);
 
   const rows = [
     {
@@ -94,7 +92,7 @@ const Lead = () => {
             lineHeight: '36px'
           }}
         >
-          Mailing List 
+          Mailing List
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <GridToolbarExport />
@@ -124,7 +122,7 @@ const Lead = () => {
 
           <Tooltip title="Info" arrow>
             <IconButton>
-              <InfoIcon sx={{ color: '#49494c' }}  />
+              <InfoIcon sx={{ color: '#49494c' }} />
             </IconButton>
           </Tooltip>
         </Stack>
@@ -136,9 +134,11 @@ const Lead = () => {
     <Card sx={{ backgroundColor: '#eef2f6' }}>
       <Grid>
         <Stack direction="row" alignItems="center" justifyContent="space-between" m={1}>
-          <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">Mailing List </Typography>
+          <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">
+            Mailing List{' '}
+          </Typography>
           <Box
-          sx={{
+            sx={{
               display: 'flex',
               alignItems: 'center',
               backgroundColor: '#f8f9fa',

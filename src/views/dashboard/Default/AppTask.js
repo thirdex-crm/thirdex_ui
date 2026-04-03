@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
-  Card,
   Box,
   Stack,
   Divider,
@@ -33,13 +32,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useLocation } from 'react-router-dom';
 
-AppTasks.propTypes = {
-  title: PropTypes.string,
-  subheader: PropTypes.string,
-  list: PropTypes.array
-};
-
-export default function AppTasks({ title, subheader, list = [], ...other }) {
+export default function AppTasks() {
   const { control } = useForm({
     defaultValues: {
       taskCompleted: ['2']
@@ -52,12 +45,9 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
   const [search, setSearch] = useState('');
   const [range, setRange] = useState('This Year');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
   const location = useLocation();
-  const [editMode, setEditMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteTask, setDeleteTask] = useState(null);
 
@@ -106,14 +96,13 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
       fetchTasks();
       setOpenAddForm(false);
       setTask(initialTaskState);
-      setEditMode(false);
       setSelectedTaskId(null);
     } catch (error) {
       console.error('Error saving task:', error);
     }
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const queryParams = {
         name: search,
@@ -150,16 +139,19 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
     } catch (err) {
       console.error('Error fetching task:', err);
     }
-  };
+  }, [page, range, search]);
 
   useEffect(() => {
     fetchTasks();
-  }, [search, range, page]);
+  }, [fetchTasks]);
+
+  const taskAdded = location.state?.taskAdded;
+
   useEffect(() => {
-    if (location.state?.taskAdded) {
+    if (taskAdded) {
       fetchTasks();
     }
-  }, [location.state]);
+  }, [fetchTasks, taskAdded]);
 
   const handleDelete = (taskId) => {
     setDeleteTask(taskId);
@@ -183,8 +175,6 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
         ? taskToEdit.assignedTo._id
         : adminList.find((admin) => admin.name.trim().toLowerCase() === taskToEdit.assignedTo.trim().toLowerCase())?._id;
 
-    const matchedAdmin = adminList.find((admin) => admin._id === assignedToId);
-
     setTask({
       details: taskToEdit?.label || '',
       assignedTo: assignedToId || '',
@@ -193,9 +183,7 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
       notification: taskToEdit?.notification || false
     });
 
-    setSelectedAdmin(matchedAdmin || null);
     setSelectedTaskId(taskId);
-    setEditMode(true);
     setOpenAddForm(true);
   };
   const handleClose = () => {
@@ -372,9 +360,7 @@ export default function AppTasks({ title, subheader, list = [], ...other }) {
                     dueDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : ''
                   }));
                 }}
-                renderInput={(params) => (
-                  <TextField {...params} fullWidth size="small" onPointerDown={(e) => e.stopPropagation()} />
-                )}
+                renderInput={(params) => <TextField {...params} fullWidth size="small" onPointerDown={(e) => e.stopPropagation()} />}
               />
             </LocalizationProvider>
 
@@ -491,7 +477,9 @@ TaskItem.propTypes = {
   onDelete: PropTypes.func,
   task: PropTypes.shape({
     id: PropTypes.string,
-    label: PropTypes.string
+    label: PropTypes.string,
+    assignedTo: PropTypes.string,
+    dueDate: PropTypes.string
   })
 };
 const formatDate = (dateString) => {

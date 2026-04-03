@@ -19,13 +19,13 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && pr
     'margin',
     open
       ? {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen
-      }
+          easing: theme.transitions.easing.easeOut,
+          duration: theme.transitions.duration.enteringScreen
+        }
       : {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen
+        }
   ),
   [theme.breakpoints.up('md')]: {
     marginLeft: miniSidebar ? 0 : open ? 0 : -(drawerWidth - 20),

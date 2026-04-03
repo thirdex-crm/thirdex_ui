@@ -1,20 +1,6 @@
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
-import {
-  Grid,
-  TextField,
-  Box,
-  Paper,
-  Button,
-  MenuItem,
-  InputAdornment,
-  FormControlLabel,
-  Card,
-  Typography,
-  Autocomplete,
-  Chip,
-  IconButton
-} from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Grid, TextField, Box, Paper, Button, InputAdornment, Card, Typography, Autocomplete, Chip, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import CloseIcon from '@mui/icons-material/Close';
@@ -23,33 +9,25 @@ import Link from '@mui/material/Link';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { postApi, getApi, updateApi } from 'common/apiClient';
+
 import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
-import AntSwitch from 'components/AntSwitch';
 import { useLocation } from 'react-router-dom';
 import { validateFile } from 'utils/filevalidator';
 
 const AddCaseForm = () => {
   const navigate = useNavigate();
+
   const location = useLocation();
   const serviceToEdit = location.state?.serviceId;
   const [restrictAccess, setRestrictAccess] = useState(true);
   const [isLoading, setIsloading] = useState(false);
-  const [servicetype, setServiceType] = useState([]);
   const [serviceTypeOptions, setServiceTypeOptions] = useState([]);
   const [serviceData, setServiceData] = useState([]);
-  const [benificiary, setBenificiary] = useState([]);
-  const [Campaigns, setCampaigns] = useState([]);
-  const [existingImageUrl, setExistingImageUrl] = useState('');
-  const [engagement, setengagement] = useState([]);
-  const [eventsAttended, seteventsAttended] = useState([]);
-  const [fundingInterests, setfundingInterests] = useState([]);
-  const [fundraisingActivities, setfundraisingActivities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [allCategory, setAllCategory] = useState([]);
 
   const textOnlyRegex = /^[A-Za-z\s]+$/;
-  const numberOnlyRegex = /^[0-9]+$/;
 
   const allowOnlyText = (e) => {
     const regex = /^[A-Za-z\s]$/;
@@ -58,17 +36,7 @@ const AddCaseForm = () => {
     }
   };
 
-  const allowOnlyNumber = (e) => {
-    const regex = /^[0-9]$/;
-    if (!regex.test(e.key) && e.key !== 'Backspace') {
-      e.preventDefault();
-    }
-  };
-
   const onlyLettersAndNumbers = /^[A-Za-z0-9\s]*$/;
-  const onlyLetters = /^[A-Za-z\s]*$/;
-
-  const handleToggle = () => setRestrictAccess(!restrictAccess);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -261,8 +229,9 @@ const AddCaseForm = () => {
     }
   };
 
-  const selectList = serviceTypeOptions?.map((item, index) => ({
+  const selectList = serviceTypeOptions?.map((item) => ({
     id: item?._id,
+
     title: item?.name
   }));
 
@@ -337,7 +306,11 @@ const AddCaseForm = () => {
                         fullWidth
                         label="Service Code"
                         size="small"
-                        onKeyDown={onlyLettersAndNumbers}
+                        onKeyDown={(e) => {
+                          if (!onlyLettersAndNumbers.test(e.key) && e.key !== 'Backspace') {
+                            e.preventDefault();
+                          }
+                        }}
                         error={!!errors.code}
                         helperText={errors.code?.message}
                       />

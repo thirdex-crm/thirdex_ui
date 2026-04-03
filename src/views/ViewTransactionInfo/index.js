@@ -1,5 +1,5 @@
 import { Card, Grid, IconButton, Stack, Typography, Divider } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getApi } from 'common/apiClient';
@@ -12,7 +12,7 @@ const ViewTransaction = () => {
   const [transactionData, setTransactionData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchTransaction = async () => {
+  const fetchTransaction = useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
@@ -24,13 +24,11 @@ const ViewTransaction = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
-    if (id) {
-      fetchTransaction();
-    }
-  }, [id]);
+    fetchTransaction();
+  }, [fetchTransaction]);
 
   return (
     <>

@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import { Card, Grid, useMediaQuery, Skeleton } from '@mui/material';
-import { Box, Container } from '@mui/system';
+import { Skeleton } from '@mui/material';
+import { Box } from '@mui/system';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 

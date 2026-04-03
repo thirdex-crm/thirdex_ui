@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 // components/OptionsPopoverForCase.jsx
 
 import { Popover, List, ListItem, ListItemIcon, ListItemText, Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { IconTrash, IconPencil } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 
 const options = [
   { label: 'Edit', icon: <EditIcon /> },

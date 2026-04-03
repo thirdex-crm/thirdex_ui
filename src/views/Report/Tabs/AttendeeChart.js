@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
@@ -123,7 +124,6 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
 
         setMalePercent(maleP);
         setFemalePercent(femaleP);
-
       } catch (error) {
         console.error('Error fetching cases:', error);
       } finally {
@@ -132,6 +132,7 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
 
   const staticEthnicityConfig = [

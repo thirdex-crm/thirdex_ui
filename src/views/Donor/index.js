@@ -23,7 +23,7 @@ const donorTypes = [
 const Donor = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [status, setStatus] = useState('');
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -126,7 +126,7 @@ const Donor = () => {
       const allDonor = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
 
-      const formattedUsers = allDonor?.map((donor, index) => ({
+      const formattedUsers = allDonor?.map((donor) => ({
         ...donor,
         serialNumber: `#${donor?.uniqueId}`
       }));
@@ -143,6 +143,7 @@ const Donor = () => {
 
   useEffect(() => {
     handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeArchives]);
 
   const handleReset = () => {
@@ -163,12 +164,13 @@ const Donor = () => {
   };
 
   useEffect(() => {
-    if (status || dateOpenedFilter || name || campaign || searchQuery || startDate || endDate||donorType) {
+    if (status || dateOpenedFilter || name || campaign || searchQuery || startDate || endDate || donorType) {
       handleFilter();
     } else {
       fetchDonor();
     }
-  }, [status, dateOpenedFilter, name, campaign, searchQuery, paginationModel, isFiltered, startDate, endDate,donorType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, dateOpenedFilter, name, campaign, searchQuery, paginationModel, isFiltered, startDate, endDate, donorType]);
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -225,7 +227,7 @@ const Donor = () => {
 
       setNameFilterOptions(nameOptions);
 
-      const formattedUsers = allDonor?.map((donor, index) => ({
+      const formattedUsers = allDonor?.map((donor) => ({
         ...donor,
         serialNumber: `#${donor?.uniqueId}`
       }));

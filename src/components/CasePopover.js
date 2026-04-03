@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import {
   Popover,
@@ -28,7 +29,7 @@ import toast from 'react-hot-toast';
 import { postApi, updateApiPatch } from 'common/apiClient';
 import CaseNoteDialog from 'components/AddCaseNote';
 
-const CasePopover = ({ open, anchorEl, onClose, data,closeNote }) => {
+const CasePopover = ({ open, anchorEl, onClose, data, closeNote }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [confirmArchiveOpen, setConfirmArchiveOpen] = useState(false);
   const [archiveReason, setArchiveReason] = useState('');

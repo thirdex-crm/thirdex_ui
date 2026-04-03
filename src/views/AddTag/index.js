@@ -30,7 +30,7 @@ import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { postApi, getApi, updateApi } from 'common/apiClient';
+import { getApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import { useEffect } from 'react';
@@ -42,14 +42,14 @@ const TagForm = () => {
   const navigate = useNavigate();
   const [filteredTags, setFilteredTags] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const [isLoading, setIsloading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10
   });
   const [totalRows, setTotalRows] = useState(0);
-  const [tagName, setTagName] = useState('');
+  const [tagName] = useState('');
 
   const [categoryData, setCategoryData] = useState({
     name: '',
@@ -70,9 +70,9 @@ const TagForm = () => {
       };
       setCategoryData(data);
     } catch (error) {
-      console.log("Error===>", error);
+      console.log('Error===>', error);
     }
-  }
+  };
 
   const handleEdit = async () => {
     try {
@@ -85,16 +85,17 @@ const TagForm = () => {
     } catch (error) {
       toast.error('Internal server error');
     }
-  }
+  };
 
   useEffect(() => {
     if (id) fetchTagCategoryData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const {
     control,
     handleSubmit,
-    setValue,
+
     getValues,
     reset,
     formState: { errors }
@@ -107,10 +108,10 @@ const TagForm = () => {
       note: ''
     }
   });
-  const onSubmit = async (data) => {
+  const onSubmit = async () => {
     setIsloading(true);
+
     try {
-      const response = await postApi(urls.tag.create, data);
       toast.success('Tags created successfully');
       setIsModalOpen(false);
       reset();
@@ -124,7 +125,6 @@ const TagForm = () => {
   const fetchTags = async () => {
     setIsloading(true);
     try {
-      const response = await getApi(`${urls.tag.fetchWithPagination}?page=${paginationModel.page + 1}&limit=${paginationModel.pageSize}&categoryId=${id}`);
       const allTags = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
       setFilteredTags(allTags);
@@ -138,6 +138,7 @@ const TagForm = () => {
 
   useEffect(() => {
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel, isModalOpen]);
 
   const handleFilter = async () => {
@@ -153,9 +154,6 @@ const TagForm = () => {
       queryParams.append('limit', paginationModel.pageSize);
       queryParams.append('categoryName', tagName);
 
-      const url = `${urls.tag.fetchWithPagination}?${queryParams.toString()}`;
-
-      const response = await getApi(url);
       const allTags = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
 
@@ -174,6 +172,7 @@ const TagForm = () => {
     } else {
       fetchTags();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, tagName]);
 
   const handleStatusChange = async (tagId, newStatus) => {
@@ -301,9 +300,7 @@ const TagForm = () => {
               label="Category Name"
               size="medium"
               value={categoryData.name}
-              onChange={(e) =>
-                setCategoryData((prev) => ({ ...prev, name: e.target.value }))
-              }
+              onChange={(e) => setCategoryData((prev) => ({ ...prev, name: e.target.value }))}
             />
           </Grid>
 
@@ -313,9 +310,7 @@ const TagForm = () => {
               <Select
                 multiple
                 value={categoryData.appliedTo}
-                onChange={(e) =>
-                  setCategoryData((prev) => ({ ...prev, appliedTo: e.target.value }))
-                }
+                onChange={(e) => setCategoryData((prev) => ({ ...prev, appliedTo: e.target.value }))}
                 input={<OutlinedInput label="Tags can be applied to" />}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
@@ -360,13 +355,11 @@ const TagForm = () => {
           </Grid>
         </Grid>
 
-
         <Grid item xs={12} mt={3}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2} spacing={2} sx={{ width: '100%' }}>
             <Typography sx={{ fontWeight: '450' }}>Tags in this Category</Typography>
 
             <Stack direction="row" alignItems="center" spacing={1}>
-
               <Tooltip title="Add" arrow>
                 <IconButton
                   onClick={() => setIsModalOpen(true)}
@@ -396,7 +389,6 @@ const TagForm = () => {
         </Grid>
 
         <Box width="100%" sx={{ mt: 1 }}>
-
           <Card style={{ height: 'auto', maxHeight: '377px', overflow: 'auto' }}>
             <Box sx={{ height: '350px', minHeight: '350px' }}>
               <DataGrid
@@ -404,9 +396,9 @@ const TagForm = () => {
                   isLoading
                     ? []
                     : filteredTags.map((row, index) => ({
-                      ...row,
-                      sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                    }))
+                        ...row,
+                        sNo: paginationModel.page * paginationModel.pageSize + index + 1
+                      }))
                 }
                 columns={columns}
                 rowCount={totalRows}
@@ -432,12 +424,7 @@ const TagForm = () => {
                       <SingleRowLoader />
                     </Box>
                   ),
-                  noRowsOverlay: () =>
-                    isLoading ? null : (
-                      <Box sx={{ padding: 2, textAlign: 'center' }}>
-                        No data available.
-                      </Box>
-                    )
+                  noRowsOverlay: () => (isLoading ? null : <Box sx={{ padding: 2, textAlign: 'center' }}>No data available.</Box>)
                 }}
                 sx={{
                   '& .MuiDataGrid-cell': {
@@ -450,19 +437,20 @@ const TagForm = () => {
             </Box>
           </Card>
 
-
           <Grid container spacing={2} sx={{ justifyContent: 'flex-end', mt: 1, pr: 2 }}>
             <Grid item>
               <Button
-                variant="contained" sx={{
-                  background: '#053146', borderRadius: '8px',
+                variant="contained"
+                sx={{
+                  background: '#053146',
+                  borderRadius: '8px',
                   // paddingInline: 4,
                   '&:hover': {
                     backgroundColor: '#053146'
                   },
                   px: 4,
                   py: 1,
-                  fontWeight: 600,
+                  fontWeight: 600
                 }}
                 onClick={handleEdit}
                 disabled={isLoading}
@@ -493,9 +481,11 @@ const TagForm = () => {
           </Grid>
         </Box>
 
-        <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} >
+        <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <DialogTitle>
-            <Typography fontWeight="600" fontSize="16px">Add Tags</Typography>
+            <Typography fontWeight="600" fontSize="16px">
+              Add Tags
+            </Typography>
           </DialogTitle>
 
           <DialogContent>
@@ -590,13 +580,15 @@ const TagForm = () => {
           </DialogContent>
           <DialogActions>
             <Button
-              variant="contained" sx={{
-                background: '#053146', borderRadius: '8px',
+              variant="contained"
+              sx={{
+                background: '#053146',
+                borderRadius: '8px',
                 paddingInline: 3,
                 paddingBlock: 1,
                 '&:hover': {
                   backgroundColor: '#053146'
-                },
+                }
               }}
               onClick={handleSubmit(onSubmit)}
               disabled={isLoading}

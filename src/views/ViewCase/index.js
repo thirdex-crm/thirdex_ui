@@ -1,29 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Grid, Typography, InputBase, Stack, Button, IconButton, Chip, TextField } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Card, CardContent, Grid, Typography, InputBase, Stack, Button, IconButton, Chip, Tooltip } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import FilterPanel from 'components/FilterPanel';
 import SearchIcon from '@mui/icons-material/Search';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Add, Visibility, VisibilityOff } from '@mui/icons-material';
-import CheckIcon from '@mui/icons-material/Check';
-import LoopIcon from '@mui/icons-material/Loop';
 import { useNavigate } from 'react-router-dom';
 import CaseNoteDialog from 'components/AddCaseNote';
 import UserProfileDialog from './userProfile.js';
 import { useLocation } from 'react-router-dom';
 import { getApi } from 'common/apiClient.js';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { urls } from 'common/urls';
 import dayjs from 'dayjs';
 import { imageUrl } from 'common/urls';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader.js';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton.js';
-import { decodedToken } from 'utils/adminData.js';
-import StatusChip from 'views/AboutCase/StatusChip.js';
 import AboutCaseNote from 'views/AboutCaseNote/CaseNoteDialog.js';
 import DescriptionIcon from '@mui/icons-material/Description';
+
+const parseCaseNoteHours = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return 0;
+  }
+
+  const normalizedValue = String(value).trim();
+
+  if (/^\d+(\.\d+)?$/.test(normalizedValue)) {
+    return Number(normalizedValue);
+  }
+
+  if (/^\d{1,2}:\d{2}$/.test(normalizedValue)) {
+    const [hours, minutes] = normalizedValue.split(':').map(Number);
+    return hours + minutes / 60;
+  }
+
+  return 0;
+};
+
+const formatHoursLabel = (value) => {
+  const numericValue = typeof value === 'number' ? value : parseCaseNoteHours(value);
+  const wholeHours = Math.floor(numericValue);
+  const minutes = Math.round((numericValue - wholeHours) * 60);
+
+  return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} mins`;
+};
 
 const CaseDetailsPage = () => {
   const navigate = useNavigate();
@@ -32,7 +53,7 @@ const CaseDetailsPage = () => {
   const [open, setOpen] = useState(false);
   const [openNote, setOpenNote] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
+  const showFilter = true;
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [caseData, setCaseData] = useState(null);
@@ -44,13 +65,12 @@ const CaseDetailsPage = () => {
     page: 0,
     pageSize: 5
   });
-  const [isFiltered, setIsFiltered] = useState(false);
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [createdByOptions, setCreatedByOptions] = useState([]);
-  const [AdminData, setAdminData] = useState([]);
   const [selectedCaseNote, setSelectedCaseNote] = useState(null);
   const location = useLocation();
   const { id } = location.state || {};
+  const hasActiveFilters = Boolean(dateOpenedFilter || searchQuery || createdByFilter);
 
   const CustomHeader = () => {
     return (
@@ -96,6 +116,25 @@ const CaseDetailsPage = () => {
   const dobRaw = serviceuserDetails?.personalInfo?.dateOfBirth;
   const dobFormatted = dobRaw ? dayjs(dobRaw).format('DD/MM/YYYY') : '';
   const age = dobRaw ? dayjs().diff(dayjs(dobRaw), 'year') : '';
+  const resolveAttachmentUrl = (filePath) => {
+    if (!filePath) return '';
+
+    const normalizedPath = filePath.replace(/\\/g, '/');
+
+    if (normalizedPath.startsWith('https://') || normalizedPath.startsWith('http://')) {
+      return normalizedPath;
+    }
+
+    const uploadsSegment = '/uploads/';
+    const uploadsIndex = normalizedPath.lastIndexOf(uploadsSegment);
+    const relativePath = uploadsIndex >= 0 ? normalizedPath.slice(uploadsIndex + 1) : normalizedPath.replace(/^\/+/, '');
+
+    return `${imageUrl.replace(/\/$/, '')}/${relativePath}`;
+  };
+
+  const attachmentPath = caseData?.file || '';
+  const attachmentUrl = resolveAttachmentUrl(attachmentPath);
+  const attachmentName = attachmentPath ? attachmentPath.replace(/\\/g, '/').split('/').pop() : '';
   const UserDetails = {
     name: serviceuserDetails?.personalInfo?.firstName || '',
     lastname: serviceuserDetails?.personalInfo?.lastName || '',
@@ -113,8 +152,11 @@ const CaseDetailsPage = () => {
     referredDate: '02/02/2020',
     image: 'https://via.placeholder.com/64'
   };
-  const handleSave = (data) => {
+  const handleSave = () => {
     setOpenDialog(false);
+    if (id) {
+      fetchCaseDetails();
+    }
   };
 
   const dateAddedFilters = [
@@ -146,14 +188,24 @@ const CaseDetailsPage = () => {
     {
       field: 'hours',
       headerName: 'Hours',
-      flex: 0.5,
+      flex: 0.8,
+      minWidth: 150,
       renderCell: (params) => (
         <Chip
           label={params.value || '-'}
           sx={{
             color: '#0798bd',
             backgroundColor: '#e5f8fe',
-            fontWeight: 500
+            fontWeight: 500,
+            width: 'fit-content',
+            maxWidth: 'none',
+            '& .MuiChip-label': {
+              display: 'block',
+              overflow: 'visible',
+              textOverflow: 'clip',
+              whiteSpace: 'nowrap',
+              px: 1
+            }
           }}
         />
       )
@@ -170,14 +222,16 @@ const CaseDetailsPage = () => {
     setDateOpenedFilter('');
     setSearchQuery('');
     setCreatedByFilter('');
-    setIsFiltered(false);
-    fetchCaseNotes();
   };
-  const handleFilter = async () => {
+  const handleFilter = useCallback(async () => {
+    if (!id) return;
+
     try {
       const queryParams = new URLSearchParams();
 
       queryParams.append('caseId', id);
+      queryParams.append('page', paginationModel.page + 1);
+      queryParams.append('limit', paginationModel.pageSize);
       if (dateOpenedFilter && dateOpenedFilter !== '') {
         const formattedDate = new Date(dateOpenedFilter).toISOString().split('T')[0];
         queryParams.append('date', formattedDate);
@@ -209,44 +263,47 @@ const CaseDetailsPage = () => {
           subject: note.subject || '-',
           createdBy: createdByAdmin || '-',
           configurationName: configName,
+          hours: formatHoursLabel(note?.time),
           sNo: paginationModel.page * paginationModel.pageSize + index + 1
         };
       });
 
       setRows(formattedData);
       setTotalRows(pagination?.total);
-      setIsFiltered(true);
     } catch (error) {
       console.error('Failed to fetch filtered cases:', error);
     }
-  };
+  }, [createdByFilter, dateOpenedFilter, id, paginationModel.page, paginationModel.pageSize, searchQuery]);
 
   useEffect(() => {
-    if (dateOpenedFilter || searchQuery || createdByFilter || isFiltered) {
+    if (hasActiveFilters) {
       handleFilter();
     }
-  }, [dateOpenedFilter, searchQuery, createdByFilter]);
+  }, [handleFilter, hasActiveFilters]);
+
+  const fetchCaseDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getApi(urls.case.getById.replace(':id', id));
+      const Data = response?.data?.caseData;
+      setCaseData(Data);
+      setServiceDetails(Data?.serviceDetails);
+      setServiceuserDetails(Data?.userServiceDetails);
+    } catch (error) {
+      console.error('Error fetching case data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await getApi(urls.case.getById.replace(':id', id));
-        const Data = response?.data?.caseData;
-        setCaseData(Data);
-        setServiceDetails(Data?.serviceDetails);
-        setServiceuserDetails(Data?.userServiceDetails);
-      } catch (error) {
-        console.error('Error fetching case data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
+    fetchCaseDetails();
+  }, [fetchCaseDetails, id]);
 
-  const fetchCaseNotes = async () => {
+  const fetchCaseNotes = useCallback(async () => {
+    if (!id || hasActiveFilters) return;
+
     try {
       setLoading2(true);
       const response = await getApi(
@@ -269,7 +326,7 @@ const CaseDetailsPage = () => {
           subject: note.subject || '-',
           createdBy: note?.createdBy?.userName || '-',
           configurationName: configName,
-          time: note?.time,
+          hours: formatHoursLabel(note?.time),
           sNo: paginationModel.page * paginationModel.pageSize + index + 1
         };
       });
@@ -281,15 +338,21 @@ const CaseDetailsPage = () => {
     } finally {
       setLoading2(false);
     }
-  };
+  }, [hasActiveFilters, id, paginationModel.page, paginationModel.pageSize]);
 
   useEffect(() => {
     fetchCaseNotes();
-  }, [paginationModel]);
+  }, [fetchCaseNotes]);
 
-  useEffect(() => {
-    handleFilter();
-  }, [searchQuery]);
+  const handlePaginationModelChange = useCallback((nextPaginationModel) => {
+    setPaginationModel((currentPaginationModel) => {
+      if (currentPaginationModel.page === nextPaginationModel.page && currentPaginationModel.pageSize === nextPaginationModel.pageSize) {
+        return currentPaginationModel;
+      }
+
+      return nextPaginationModel;
+    });
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -337,7 +400,7 @@ const CaseDetailsPage = () => {
                   <IconButton onClick={() => navigate(-1)}>
                     <KeyboardBackspaceIcon sx={{ fontSize: 20, color: 'black' }} />
                   </IconButton>
-                  {(caseData?.uniqueId || 'Case')} - {serviceuserDetails?.personalInfo?.firstName || '-'}{' '}
+                  {caseData?.uniqueId || 'Case'} - {serviceuserDetails?.personalInfo?.firstName || '-'}{' '}
                   {serviceuserDetails?.personalInfo?.lastName || ''}
                 </Typography>
               </Stack>
@@ -611,8 +674,18 @@ const CaseDetailsPage = () => {
                   <Grid item xs={12} sm={6} md={3}>
                     <Typography fontWeight={500}>Attachments</Typography>
 
-                    {caseData?.file ? (
-                      <DescriptionIcon sx={{ fontSize: 26, color: '#555' }} />
+                    {attachmentUrl ? (
+                      <Tooltip title={attachmentName || 'View attachment'}>
+                        <IconButton
+                          component="a"
+                          href={attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{ p: 0, color: '#555' }}
+                        >
+                          <DescriptionIcon sx={{ fontSize: 26 }} />
+                        </IconButton>
+                      </Tooltip>
                     ) : (
                       <Typography color="text.secondary">0 Files</Typography>
                     )}
@@ -620,16 +693,7 @@ const CaseDetailsPage = () => {
 
                   <Grid item xs={12} sm={6} md={3}>
                     <Typography fontWeight={500}>Total Hours</Typography>
-                    <Typography color="text.secondary">
-                      {(() => {
-                        if (!caseData?.caseOpened || !caseData?.caseClosed) return '0 hrs';
-                        const startDate = new Date(caseData.caseOpened);
-                        const endDate = new Date(caseData.caseClosed);
-                        const diffTime = Math.abs(endDate - startDate);
-                        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-                        return `${diffHours} hrs`;
-                      })()}
-                    </Typography>
+                    <Typography color="text.secondary">{formatHoursLabel(caseData?.totalCaseNoteHours)}</Typography>
                   </Grid>
                 </Grid>
               </Box>
@@ -667,7 +731,7 @@ const CaseDetailsPage = () => {
                 pagination
                 paginationMode="server"
                 paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
                 pageSizeOptions={[5, 10, 25, 50]}
                 rowHeight={70}
                 getRowId={(row) => row.id}
@@ -721,7 +785,7 @@ const CaseDetailsPage = () => {
       />
       <AboutCaseNote
         open={openNote}
-        onClose={() => setOpenNote(false) }
+        onClose={() => setOpenNote(false)}
         caseData={selectedCaseNote}
         setSelectedCaseNote={setSelectedCaseNote}
       />

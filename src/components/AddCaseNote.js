@@ -1,23 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, TextField, InputAdornment, FormControlLabel, Button, Grid, Modal, MenuItem, Link } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Box, Typography, TextField, FormControlLabel, Button, Grid, Modal, MenuItem } from '@mui/material';
 import AntSwitch from 'components/AntSwitch';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { getApi, postApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import { decodedToken } from 'utils/adminData';
 
-const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add Case Note', initialData = null, caseid }) => {
+const HOURS_OPTIONS = Array.from({ length: 96 }, (_, index) => ((index + 1) * 0.25).toFixed(2));
+
+const formatHoursOption = (value) => {
+  const numericValue = Number(value);
+  const wholeHours = Math.floor(numericValue);
+  const minutes = Math.round((numericValue - wholeHours) * 60);
+
+  return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} min`;
+};
+
+const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add Case Note', caseid }) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     date: dayjs(),
-    time: '',
+    hours: '',
     notes: '',
     contactPurpose: '',
     subject: '',
@@ -53,19 +63,19 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
       setFormData((prev) => ({
         ...prev,
         date: caseNoteData.date ? dayjs(caseNoteData.date) : dayjs(),
-        time: caseNoteData.time || '',
+        hours: caseNoteData.time || '',
         notes: caseNoteData.notes || caseNoteData.note || '',
         subject: caseNoteData.subject || '',
         contactPurpose: caseNoteData.configurationId?._id || '',
-        toggle: caseNoteData.isActive ?? false,
-        caseId: caseNoteData.caseId?._id || caseNoteData.caseId || caseid?._id || caseid || '',
+        toggle: caseNoteData.access ?? false,
+        caseId: caseNoteData.caseId?._id || caseNoteData.caseId || caseid || '',
         file: null // don't prefill file
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
         date: dayjs(),
-        time: '',
+        hours: '',
         notes: '',
         subject: '',
         contactPurpose: '',
@@ -89,19 +99,10 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
     fetchContactTypes();
   }, []);
 
-  const handleUploadClick = () => fileInputRef.current?.click();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, file }));
-    }
   };
 
   const handleToggle = (e) => {
@@ -110,7 +111,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
 
   const handleSubmit = async () => {
     const newErrors = {};
-    if (!formData.time) newErrors.time = 'Time is required';
+    if (!formData.hours) newErrors.hours = 'Hours are required';
     if (!formData.notes?.trim()) newErrors.notes = 'Case Notes are required';
     if (!formData.subject?.trim()) newErrors.subject = 'Subject is required';
     if (!formData.contactPurpose) newErrors.contactPurpose = 'Contact Type is required';
@@ -124,10 +125,10 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
       const form = new FormData();
 
       form.append('date', formData.date?.toISOString?.() || '');
-      form.append('time', formData.time);
+      form.append('time', formData.hours);
       form.append('note', formData.notes);
       form.append('subject', formData.subject);
-      form.append('isActive', formData.toggle);
+      form.append('access', formData.toggle);
       form.append('caseId', formData.caseId);
       form.append('configurationId', formData.contactPurpose);
       form.append('createdBy', userId);
@@ -154,7 +155,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
 
       setFormData({
         date: dayjs(),
-        time: '',
+        hours: '',
         notes: '',
         contactPurpose: '',
         subject: '',
@@ -172,10 +173,9 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
     }
   };
 
-  const existingFileName = caseNoteData?.file ? caseNoteData.file.split('\\').pop() : '';
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="case-note-dialog">
-      <Box sx={{  bgcolor: 'background.paper', p: 3, mx: 'auto', mt: '10%', borderRadius: 2, boxShadow: 24, width:"60%"}}>
+      <Box sx={{ bgcolor: 'background.paper', p: 3, mx: 'auto', mt: '10%', borderRadius: 2, boxShadow: 24, width: '60%' }}>
         <Typography variant="h5" gutterBottom>
           {title}
         </Typography>
@@ -192,19 +192,23 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
-              label="Select Time"
-              type="time"
+              select
+              label="Hours Spent"
               variant="outlined"
               size="small"
               fullWidth
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ step: 300 }}
-              value={formData.time}
-              name="time"
+              value={formData.hours}
+              name="hours"
               onChange={handleChange}
-              error={Boolean(errors.time)}
-              helperText={errors.time}
-            />
+              error={Boolean(errors.hours)}
+              helperText={errors.hours}
+            >
+              {HOURS_OPTIONS.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {formatHoursOption(option)}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
@@ -226,33 +230,6 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
             </TextField>
           </Grid>
         </Grid>
-
-        {/* <Box mb={2} display="flex" justifyContent="space-between">
-          <TextField
-            placeholder="Attachments"
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={formData.file?.name || existingFileName || ''}
-            InputProps={{
-              readOnly: true,
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AttachFileIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Link component="button" onClick={handleUploadClick} underline="hover">
-                    Upload a file
-                  </Link>
-                </InputAdornment>
-              )
-            }}
-          />
-          <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-        </Box> */}
-
 
         <TextField
           fullWidth
@@ -302,6 +279,15 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
       </Box>
     </Modal>
   );
+};
+
+CaseNoteDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  fetchdata: PropTypes.func,
+  handleClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  caseid: PropTypes.string
 };
 
 export default CaseNoteDialog;

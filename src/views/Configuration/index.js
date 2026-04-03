@@ -51,17 +51,16 @@ const TabbedDataGrid = () => {
   const [editId, setEditId] = useState(null);
   const [status, setStatus] = useState('');
   const [tabData, setTabData] = useState({});
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [inputError, setInputError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 1,
     pageSize: 100
   });
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
 
   const [expandedPanels, setExpandedPanels] = useState(() => {
     const initialExpanded = {};
@@ -85,6 +84,8 @@ const TabbedDataGrid = () => {
     setToggleValue(item.status);
     setEditMode(true);
     setEditId(item.id);
+
+    // eslint-disable-next-line no-unused-vars
     const sectionName = Object.entries(tabData).find(([_, items]) => items.some((configItem) => configItem.id === item.id))?.[0];
     setModalSection(sectionName);
     setOpenModal(true);
@@ -93,12 +94,18 @@ const TabbedDataGrid = () => {
     setSelectedId(id);
     setConfirmOpen(true);
   };
+
   const handleConfirmDelete = async () => {
-    await updateApi(urls.configuration.delete.replace(':configId', selectedId));
-    await fetchConfigurations();
-    toast.success('Item deleted successfully!');
-    setConfirmOpen(false);
-    setSelectedId(null);
+    if (!selectedId) return;
+    try {
+      await updateApi(urls.configuration.delete.replace(':configId', selectedId));
+      toast.success('Item deleted successfully!');
+      setConfirmOpen(false);
+      setSelectedId(null);
+      fetchConfigurations();
+    } catch (error) {
+      toast.error('Error deleting configuration');
+    }
   };
 
   const handleOpenModal = (section) => {
@@ -186,6 +193,7 @@ const TabbedDataGrid = () => {
 
   useEffect(() => {
     fetchConfigurations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel.page, paginationModel.pageSize, configurationNameFilter, status, searchQuery]);
 
   const validateInput = (value) => {
@@ -263,7 +271,7 @@ const TabbedDataGrid = () => {
     }
   };
 
-  const headerContent = (section, loading, handleOpenModal, showAddIcon = true) => (
+  const headerContent = (section, loading, handleOpenModal) => (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
       {loading ? (
         <Skeleton variant="text" width="60%" height={28} />
@@ -295,11 +303,10 @@ const TabbedDataGrid = () => {
     items,
     loading,
     handleStatusUpdate,
+
     handleEdit,
-    handleDeleteClick,
-    confirmOpen,
-    setConfirmOpen,
-    handleConfirmDelete
+
+    handleDeleteClick
   ) => (
     <>
       <Box sx={{ px: 2, py: 1, backgroundColor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
@@ -472,6 +479,7 @@ const TabbedDataGrid = () => {
           onReset={() => {
             setConfigurationNameFilter('');
             setStatus('');
+
             setSearchQuery('');
             setPaginationModel((prev) => ({ ...prev, page: 1 }));
             fetchConfigurations();
@@ -479,7 +487,7 @@ const TabbedDataGrid = () => {
         />
         <Grid item xs={9}>
           <Grid container spacing={2}>
-            {Object.entries(tabData).map(([section, items], index) => (
+            {Object.entries(tabData).map(([section, items]) => (
               <Grid item xs={12} sm={12} md={6} key={section}>
                 <Accordion
                   expanded={!!expandedPanels[section]}
@@ -512,16 +520,7 @@ const TabbedDataGrid = () => {
                         overflowY: 'auto'
                       }}
                     >
-                      {cardBodyContent(
-                        items,
-                        loading,
-                        handleStatusUpdate,
-                        handleEdit,
-                        handleDeleteClick,
-                        confirmOpen,
-                        setConfirmOpen,
-                        handleConfirmDelete
-                      )}
+                      {cardBodyContent(items, loading, handleStatusUpdate, handleEdit, handleDeleteClick)}
                     </Card>
                   </AccordionDetails>
                 </Accordion>

@@ -1,11 +1,10 @@
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Box, Tabs, Tab, Grid, Chip } from '@mui/material';
+import { Box, Tabs, Tab, Grid, Tooltip, IconButton } from '@mui/material';
 import Chart from './CaseChart.js';
 import CaseList from './CaseList';
 import FilterPanel from 'components/FilterPanel.js';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import PrintStyles from 'themes/print.js';
 import { urls } from 'common/urls.js';
 import { useEffect } from 'react';
@@ -13,7 +12,8 @@ import { getApi } from 'common/apiClient.js';
 
 const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
-  const [totalOpenedCases, setTotalCaseOpened] = useState([]);
+  const [totalOpenedCases, setTotalCaseOpened] = useState({});
+  const [totalCases, setTotalCases] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -21,7 +21,8 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
 
   const fetchCaseCount = async () => {
     const caseOpened = await getApi(urls.dashboard.getAllCasesWithPagination);
-    setTotalCaseOpened(caseOpened?.data?.meta?.statusCounts);
+    setTotalCaseOpened(caseOpened?.data?.meta?.statusCounts || {});
+    setTotalCases(caseOpened?.data?.meta?.total || 0);
   };
   useEffect(() => {
     fetchCaseCount();
@@ -91,7 +92,7 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                   }}
                 >
                   <span>Total Cases Open</span>
-                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalOpenedCases?.close}</span>
+                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalOpenedCases?.open ?? 0}</span>
                 </Box>
 
                 <Box
@@ -108,7 +109,7 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                   }}
                 >
                   <span>Total Cases Closed</span>
-                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalOpenedCases?.open}</span>
+                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalOpenedCases?.close ?? 0}</span>
                 </Box>
 
                 <Box
@@ -124,22 +125,16 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                     fontWeight: 500
                   }}
                 >
-                  <span>Total Hours of support</span>
-                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>5522:12</span>
+                  <span>Total Cases</span>
+                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalCases}</span>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={() => window.print()} />
-                <SaveAltOutlinedIcon
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = '/api/report/download-csv';
-                    link.download = 'report.csv';
-                    link.click();
-                  }}
-                />
-                <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Tooltip title="Print">
+                  <IconButton size="small" onClick={() => window.print()}>
+                    <PrintOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
 
@@ -175,7 +170,13 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                   minWidth: 0
                 }}
               >
-                <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
+                <Chart
+                  countryOfOriginFilter={countryOfOriginFilter}
+                  selectedName={selectedName}
+                  status={status}
+                  caseId={caseId}
+                  dateOpenedFilter={dateOpenedFilter}
+                />
               </Box>
             </Box>
           </>
@@ -223,6 +224,15 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
       </Box>
     </Grid>
   );
+};
+
+Service.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string,
+  FilterPanelProp: PropTypes.any
 };
 
 export default Service;

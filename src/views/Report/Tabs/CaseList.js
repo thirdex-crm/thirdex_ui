@@ -1,13 +1,12 @@
-import { Grid, Typography } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGridApiContext } from '@mui/x-data-grid';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
-import flag from '../../../assets/images/Flag_of_India.svg';
 import { useState } from 'react';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
@@ -19,7 +18,7 @@ import CheckIcon from '@mui/icons-material/Check';
 const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter }) => {
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 10
+    pageSize: 5
   });
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -52,21 +51,26 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
       renderCell: (params) => {
         const val = params.value;
         const colorMap = {
-          Open:    { bg: '#E6F9F0', color: '#1A7A4A', border: '#A3D9BC' },
-          Closed:  { bg: '#FEE8E8', color: '#C0392B', border: '#F5AEAE' },
+          Open: { bg: '#E6F9F0', color: '#1A7A4A', border: '#A3D9BC' },
+          Closed: { bg: '#FEE8E8', color: '#C0392B', border: '#F5AEAE' },
           Pending: { bg: '#FFF4E0', color: '#B07A00', border: '#F5D68A' }
         };
         const style = colorMap[val] || { bg: '#F0F0F0', color: '#737586', border: '#ccc' };
         return (
-          <Box sx={{
-            display: 'inline-flex', alignItems: 'center', gap: '4px',
-            px: 1, py: 0.3, borderRadius: '12px',
-            backgroundColor: style.bg, border: `1px solid ${style.border}`
-          }}>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              px: 1,
+              py: 0.3,
+              borderRadius: '12px',
+              backgroundColor: style.bg,
+              border: `1px solid ${style.border}`
+            }}
+          >
             <CheckIcon sx={{ fontSize: '11px', color: style.color }} />
-            <Typography sx={{ fontSize: '11px', fontWeight: 600, color: style.color, lineHeight: 1 }}>
-              {val || '-'}
-            </Typography>
+            <Typography sx={{ fontSize: '11px', fontWeight: 600, color: style.color, lineHeight: 1 }}>{val || '-'}</Typography>
           </Box>
         );
       }
@@ -97,14 +101,17 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
   ];
 
   const CustomHeader = () => {
-     const apiRef = useGridApiContext();
+    const apiRef = useGridApiContext();
 
     const handleExportCSV = () => {
       apiRef.current.exportDataAsCsv();
     };
 
     const handlePrint = () => {
-      apiRef.current.exportDataAsPrint();
+      apiRef.current.exportDataAsPrint({
+        pageStyle:
+          '@page { size: landscape; margin: 10mm; } body { -webkit-print-color-adjust: exact; } .MuiDataGrid-footerContainer { display: none !important; } .MuiDataGrid-scrollbar { display: none !important; } .MuiIconButton-root { display: none !important; }'
+      });
     };
     return (
       <Box sx={{ height: '50px', display: 'flex', alignItems: 'center' }}>
@@ -131,12 +138,23 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
             {' '}
             Case Report List
           </Typography>
-             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handlePrint} />
-            <SaveAltOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handleExportCSV} />
-            <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Tooltip title="Print">
+              <IconButton size="small" onClick={handlePrint}>
+                <PrintOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Download CSV">
+              <IconButton size="small" onClick={handleExportCSV}>
+                <SaveAltOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Open in New Tab">
+              <IconButton size="small" onClick={() => window.open(window.location.href, '_blank')}>
+                <OpenInNewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
-        
         </GridToolbarContainer>
       </Box>
     );
@@ -157,8 +175,8 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
-        page: paginationModel.page + 1,
-        limit: paginationModel.pageSize
+        page: 1,
+        limit: 1000
       });
 
       if (countryOfOriginFilter) {
@@ -224,32 +242,25 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchInitialData();
-  }, [countriesWithFlags, paginationModel, countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
+  }, [countriesWithFlags, countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
       <Grid container>
-        <Box sx={{ backgroundColor: '#fff', borderRadius: 2 }} height="100vh" width="100%">
+        <Box sx={{ backgroundColor: '#fff', borderRadius: 2, width: '100%' }}>
           <DataGrid
-            rows={
-              loading
-                ? []
-                : rows.map((row, index) => ({
-                    ...row,
-                    sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                  }))
-            }
+            autoHeight
+            rows={loading ? [] : rows}
             columns={columns}
-            rowCount={totalRows}
             loading={loading}
-            pagination
-            paginationMode="server"
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10, 25, 50]}
-            rowHeight={65}
+            rowCount={totalRows}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            rowHeight={55}
             getRowId={(rows) => rows?.id}
             slots={{
               toolbar: () => <CustomHeader />,
@@ -287,6 +298,14 @@ const CaseList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpe
       </Grid>
     </>
   );
+};
+
+CaseList.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string
 };
 
 export default CaseList;

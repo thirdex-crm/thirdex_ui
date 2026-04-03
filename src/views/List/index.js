@@ -1,35 +1,31 @@
 import React from 'react';
-import { Card, Grid, IconButton, Tooltip, Typography, InputBase, Button, Menu, MenuItem } from '@mui/material';
+import { Card, Grid, IconButton, Tooltip, Typography, InputBase } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState, useEffect } from 'react';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
-import PersonIcon from '@mui/icons-material/Person';
+import { DataGrid } from '@mui/x-data-grid';
+
 import AddIcon from '@mui/icons-material/Add';
-import { IconTrash } from '@tabler/icons';
-import LibraryAddCheckOutlinedIcon from '@mui/icons-material/LibraryAddCheckOutlined';
+
 import InfoIcon from '@mui/icons-material/Info';
+
 import FilterPanel from 'components/FilterPanel';
-import dayjs from 'dayjs';
-import { getApi, updateApi } from 'common/apiClient';
+import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
-import { dateAddedFilters, entityTypeMap, listTypeFilter, ROLES, sessionNames } from 'common/constants';
+
 import CustomHeader from 'components/CustomHeader';
 import ListTypeDialog from './listTypeDialog';
+
 const List = () => {
   const navigate = useNavigate();
-  const [showFilter, setShowFilter] = useState(true);
-  const [listFilters, setListFilters] = useState([]);
-  const [listType, setListType] = useState('Service user');
+  const [showFilter] = useState(true);
+  const [, setListFilters] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [confirmUnarchiveOpen, setConfirmUnarchiveOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [rows, setRows] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -39,6 +35,7 @@ const List = () => {
   const [endDate, setEndDate] = useState('');
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
+
     pageSize: 10
   });
 
@@ -140,12 +137,14 @@ const List = () => {
 
   useEffect(() => {
     handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeArchives]);
 
   useEffect(() => {
     if (searchQuery || isFiltered || startDate || endDate) {
       handleFilter();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, startDate, endDate]);
 
   const handleSearchChange = (event) => {
@@ -161,6 +160,7 @@ const List = () => {
 
   useEffect(() => {
     fetchLists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
   const columns = [
     {
@@ -202,12 +202,12 @@ const List = () => {
           <IconButton
             onClick={() => setOpenDialog(true)}
             sx={{
-               backgroundColor: '#009fc7',
-                textTransform: 'none',
-                whiteSpace: 'nowrap',
-                paddingInline: '15px',
-                paddingBlock: '7px',
-                borderRadius: '10px',
+              backgroundColor: '#009fc7',
+              textTransform: 'none',
+              whiteSpace: 'nowrap',
+              paddingInline: '15px',
+              paddingBlock: '7px',
+              borderRadius: '10px',
               width: '305px',
               height: '35px',
               display: 'flex',
@@ -326,8 +326,8 @@ const List = () => {
                       extraActions={null}
                       isCompletlyDelete={true}
                       refetchData={fetchLists}
-                      //isShowArchive={false} 
-                      isShowTags={true} 
+                      //isShowArchive={false}
+                      isShowTags={true}
                     />
                   ),
                   loadingOverlay: () => (

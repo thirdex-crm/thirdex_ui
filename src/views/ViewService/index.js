@@ -1,19 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Button,
-  Grid,
-  IconButton,
-  MenuItem,
-  Divider,
-  TextField,
-  Stack,
-  Tooltip
-} from '@mui/material';
+import { Box, Card, Typography, Button, Grid, IconButton, Divider, Stack, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import InfoIcon from '@mui/icons-material/Info';
@@ -33,20 +19,19 @@ const ViewService = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const serviceId = location.state?.row?._id || location.state?.row || location.state?.serviceId;
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [countryOfOriginFilter, setCountryOfOriginFilter] = useState('');
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [isFiltered, setIsFiltered] = useState(false);
   const [timeFilter, setTimeFilter] = useState('');
-  const [timeOptions, settimeOptions] = useState('');
+  const [timeOptions] = useState([]);
   const [sessionLeadFilter, setSessionLeadFilter] = useState('');
   const [serviceData, setServiceData] = useState(null);
   const [sessionData, setSessionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(true);
-  const [rows, setRows] = useState([]);
-  const [totalRows, setTotalRows] = useState(0);
+  const [, setTotalRows] = useState(0);
   const [sessionLeads, setSessionLeads] = useState([]);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -148,6 +133,7 @@ const ViewService = () => {
     };
 
     fetchService();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId]);
 
   const fetchSessionlist = async (serviceId) => {
@@ -179,6 +165,7 @@ const ViewService = () => {
     if (serviceId) {
       fetchSessionlist(serviceId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId, paginationModel]);
 
   const handleFilter = async () => {
@@ -230,12 +217,14 @@ const ViewService = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (dateOpenedFilter || locationFilter || paginationModel || isFiltered || sessionLeadFilter || timeFilter) {
       handleFilter();
     } else if (serviceId) {
       fetchSessionlist(serviceId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateOpenedFilter, locationFilter, paginationModel, isFiltered, sessionLeadFilter, timeFilter]);
 
   return (
@@ -363,7 +352,7 @@ const ViewService = () => {
                           top: 5,
                           right: 8,
                           zIndex: 2,
-                          marginTop:2
+                          marginTop: 2
                         }}
                       >
                         <EditOutlinedIcon />

@@ -1,16 +1,12 @@
+import PropTypes from 'prop-types';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGridApiContext } from '@mui/x-data-grid';
-import { Button, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
-import {
-  DataGrid,
-  GridToolbarContainer,
-} from '@mui/x-data-grid';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
-import flag from '../../../assets/images/Flag_of_India.svg';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import { useState } from 'react';
@@ -21,10 +17,10 @@ import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter }) => {
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 10
+    pageSize: 5
   });
   const [loading, setLoading] = useState(true);
-  const [includeArchives, setIncludeArchives] = useState(false);
+  const [includeArchives] = useState(false);
   const [rows, setRows] = useState([]);
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
@@ -131,7 +127,10 @@ const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, date
     };
 
     const handlePrint = () => {
-      apiRef.current.exportDataAsPrint();
+      apiRef.current.exportDataAsPrint({
+        pageStyle:
+          '@page { size: landscape; margin: 10mm; } body { -webkit-print-color-adjust: exact; } .MuiDataGrid-footerContainer { display: none !important; } .MuiDataGrid-scrollbar { display: none !important; } .MuiIconButton-root { display: none !important; }'
+      });
     };
 
     return (
@@ -159,10 +158,22 @@ const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, date
             Service User Report List
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handlePrint} />
-            <SaveAltOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handleExportCSV} />
-            <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Tooltip title="Print">
+              <IconButton size="small" onClick={handlePrint}>
+                <PrintOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Download CSV">
+              <IconButton size="small" onClick={handleExportCSV}>
+                <SaveAltOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Open in New Tab">
+              <IconButton size="small" onClick={() => window.open(window.location.href, '_blank')}>
+                <OpenInNewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
         </GridToolbarContainer>
       </Box>
@@ -186,8 +197,8 @@ const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, date
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
-        page: paginationModel.page + 1,
-        limit: paginationModel.pageSize,
+        page: 1,
+        limit: 1000,
         role: 'service_user'
       });
 
@@ -252,33 +263,26 @@ const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, date
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (countriesWithFlags.length > 0) {
       fetchpeople();
     }
-  }, [countriesWithFlags, paginationModel, countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
+  }, [countriesWithFlags, countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       <Grid container>
-        <Box sx={{ backgroundColor: '#fff', borderRadius: 2 }} height="100vh" width="100%">
+        <Box sx={{ backgroundColor: '#fff', borderRadius: 2, width: '100%' }}>
           <DataGrid
-            rows={
-              loading
-                ? []
-                : rows.map((row, index) => ({
-                    ...row,
-                    sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                  }))
-            }
+            autoHeight
+            rows={loading ? [] : rows}
             columns={columns}
             loading={loading}
-            pagination
-            paginationMode="server"
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10, 25, 50]}
             rowCount={totalRows}
-            rowHeight={65}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            rowHeight={55}
             getRowId={(rows) => rows?.id}
             slots={{
               toolbar: () => <CustomHeader />,
@@ -316,6 +320,14 @@ const ServiceList = ({ countryOfOriginFilter, selectedName, status, caseId, date
       </Grid>
     </>
   );
+};
+
+ServiceList.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string
 };
 
 export default ServiceList;

@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import {
-  Grid,
-  TextField,
-  Box,
-  Paper,
-  Button,
-  InputAdornment,
-  Card,
-  Typography,
-  FormControlLabel,
-  Autocomplete,
-  IconButton
-} from '@mui/material';
+import { Grid, TextField, Box, Paper, Button, InputAdornment, Card, Typography, Autocomplete, IconButton } from '@mui/material';
 import { MenuItem, Select, Chip, FormControl, InputLabel } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -24,7 +12,6 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { getApi, postApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
-import AntSwitch from 'components/AntSwitch';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import { useLocation } from 'react-router-dom';
@@ -35,17 +22,12 @@ const AddCaseForm = () => {
   const location = useLocation();
   const sessionData = location.state?.sessionData;
   const [isLoading, setIsloading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = React.useRef(null);
   const [rows, setRows] = useState([]);
   const [services, setServices] = useState([]);
   const [caseOwner, setCaseOwner] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isEditMode, setIsEditMode] = useState(false);
   const [allCategory, setAllCategory] = useState([]);
 
   const [searchQueryService, setSearchQueryService] = useState('');
-  const [searchQueryCaseOwner, setSearchQueryCaseOwner] = useState('');
 
   const {
     control,
@@ -53,6 +35,7 @@ const AddCaseForm = () => {
     reset,
     watch,
     setValue,
+    clearErrors,
     getValues,
     formState: { errors }
   } = useForm({
@@ -60,6 +43,7 @@ const AddCaseForm = () => {
       serviceUserId: '',
       serviceId: '',
       caseOwner: '',
+      serviceStatus: 'pending',
       caseOpened: dayjs(),
       caseClosed: null,
       tags: [],
@@ -69,17 +53,6 @@ const AddCaseForm = () => {
     mode: 'all'
   });
 
-  const handleFileClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setValue('file', file);
-    }
-  };
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -208,12 +181,12 @@ const AddCaseForm = () => {
       formData.append('serviceId', data.serviceId || '');
       formData.append('caseOwner', data.caseOwner || '');
       formData.append('caseOpened', data.caseOpened || '');
-      formData.append('caseClosed', data.caseClosed || '');
+      formData.append('caseClosed', data.serviceStatus === 'closed' ? data.caseClosed || '' : '');
       (data.beneficiaryTags || []).forEach((tagId) => {
         formData.append('tags[]', tagId.tagId);
       });
       formData.append('description', data.description || '');
-      formData.append('status', sessionData?.serviceStatus || data.serviceStatus);
+      formData.append('status', data.serviceStatus);
       if (data.file) {
         formData.append('file', data.file);
       }
@@ -240,13 +213,7 @@ const AddCaseForm = () => {
 
   useEffect(() => {
     const fetchpeople = async () => {
-      const queryParams = new URLSearchParams();
-      if (searchQuery && searchQuery !== '') {
-        queryParams.append('search', searchQuery);
-      }
-      queryParams.append('role', 'service_user');
-
-      const response = await getApi(`${urls.serviceuser.fetchWithPagination}?${queryParams.toString()}`);
+      const response = await getApi(`${urls.serviceuser.fetchWithPagination}?role=service_user`);
       const allUser = response?.data?.data || [];
       const formattedUsers = allUser.map((user) => ({
         id: user._id,
@@ -255,7 +222,7 @@ const AddCaseForm = () => {
       setRows(formattedUsers);
     };
     fetchpeople();
-  }, [searchQuery]);
+  }, []);
   useEffect(() => {
     const fetchpeople = async () => {
       const response = await getApi(`${urls.login.getAllAdmin}`);
@@ -267,7 +234,7 @@ const AddCaseForm = () => {
       setCaseOwner(formattedUsers);
     };
     fetchpeople();
-  }, [searchQueryCaseOwner]);
+  }, []);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -281,19 +248,14 @@ const AddCaseForm = () => {
     fetchServices();
   }, [searchQueryService]);
 
-  const onlyLetters = /^[A-Za-z\s]*$/;
-  const openedDate = watch('caseOpened');
-  const closedDate = watch('caseClosed');
+  const selectedStatus = watch('serviceStatus');
 
   useEffect(() => {
-    if (closedDate && dayjs(closedDate).isBefore(dayjs(), 'day')) {
-      setValue('serviceStatus', 'closed');
-    } else if (openedDate && dayjs(openedDate).isAfter(dayjs(), 'day')) {
-      setValue('serviceStatus', 'pending');
-    } else {
-      setValue('serviceStatus', 'open');
+    if (selectedStatus !== 'closed') {
+      setValue('caseClosed', null);
+      clearErrors('caseClosed');
     }
-  }, [openedDate, closedDate, setValue]);
+  }, [selectedStatus, setValue, clearErrors]);
 
   return (
     <Card sx={{ position: 'relative', backgroundColor: '#eef2f6' }}>
@@ -441,7 +403,6 @@ const AddCaseForm = () => {
                             {...field}
                             label="Status"
                             value={field.value || 'pending'}
-                            disabled // 🔹 ye line add karo
                             renderValue={(selected) => {
                               if (selected === 'open') return 'Open';
                               if (selected === 'closed') return 'Closed';
@@ -521,39 +482,40 @@ const AddCaseForm = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
-                    <Controller
-                      name="caseClosed"
-                      control={control}
-                      rules={{
-                        required: 'End date is required',
-
-                        validate: (value) =>
-                          !value || !getValues('caseOpened') || value.isAfter(getValues('caseOpened'))
-                            ? true
-                            : 'End date must be after start date'
-                      }}
-                      render={({ field }) => (
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label="Date Case Closed"
-                            value={field.value}
-                            minDate={getValues('caseOpened') || undefined}
-                            onChange={(newValue) => field.onChange(newValue)}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                fullWidth
-                                size="small"
-                                error={!!errors.caseClosed}
-                                helperText={errors.caseClosed?.message}
-                              />
-                            )}
-                          />
-                        </LocalizationProvider>
-                      )}
-                    />
-                  </Grid>
+                  {selectedStatus === 'closed' && (
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name="caseClosed"
+                        control={control}
+                        rules={{
+                          required: 'End date is required',
+                          validate: (value) =>
+                            !value || !getValues('caseOpened') || value.isAfter(getValues('caseOpened'))
+                              ? true
+                              : 'End date must be after start date'
+                        }}
+                        render={({ field }) => (
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              label="Date Case Closed"
+                              value={field.value}
+                              minDate={getValues('caseOpened') || undefined}
+                              onChange={(newValue) => field.onChange(newValue)}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  fullWidth
+                                  size="small"
+                                  error={!!errors.caseClosed}
+                                  helperText={errors.caseClosed?.message}
+                                />
+                              )}
+                            />
+                          </LocalizationProvider>
+                        )}
+                      />
+                    </Grid>
+                  )}
 
                   <Grid item xs={12} sm={12}>
                     <Box mb={2} display="flex" justifyContent="space-between">

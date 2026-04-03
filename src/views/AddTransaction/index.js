@@ -1,16 +1,14 @@
-import { useEffect, useState, useRef } from 'react';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
 import { Grid, TextField, Card, Tabs, Tab, Box, MenuItem, Button, Autocomplete, FormControl } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
 import { postApi, getApi } from 'common/apiClient';
 
 const AddCaseForm = ({ onCancel, fetchTransections }) => {
-  const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [paymentTabComplete, setPaymentTabComplete] = useState(false);
-  const fileInputRef = useRef(null);
 
   const [serviceType, setServiceType] = useState([]);
   const [products, setProducts] = useState([]);
@@ -21,17 +19,16 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
 
   const {
     handleSubmit,
+
     control,
+
     register,
     setValue,
-    getValues,
+
     trigger,
+
     formState: { errors }
   } = useForm({ mode: 'all' });
-
-  const handleTabChange = (newIndex) => {
-    setTabIndex(newIndex);
-  };
 
   useEffect(() => {
     const fetchDonors = async () => {
@@ -91,7 +88,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
   }, []);
 
   const onSubmit = async (data) => {
-    if (tabIndex === 0 && !paymentTabComplete) {
+    if (!paymentTabComplete) {
       const valid = await trigger([
         'assignedTo',
         'campaign',
@@ -105,6 +102,8 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
       if (valid) {
         setPaymentTabComplete(true);
         setTabIndex(1);
+      } else {
+        setTabIndex(0);
       }
       return;
     }
@@ -114,17 +113,17 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
 
     try {
       const payload = {
-        donorId: data.assignedTo || '',
-        campaign: data.campaign || '',
-        amountPaid: data.amountPaid || '',
-        paymentMethod: data.paymentMethod || '',
-        quantity: data.quantity || '',
-        amountDue: data.amountDue || '',
-        processingCost: data.processingCost || '',
-        currency: data.currency || '',
-        receiptNumber: data.receiptNumber || '',
-        transactionId: data.transactionId || '',
-        productId: data.product || null
+        donorId: data.assignedTo || undefined,
+        campaign: data.campaign || undefined,
+        amountPaid: data.amountPaid ? Number(data.amountPaid) : undefined,
+        paymentMethod: data.paymentMethod || undefined,
+        quantity: data.quantity ? Number(data.quantity) : undefined,
+        amountDue: data.amountDue ? Number(data.amountDue) : undefined,
+        processingCost: data.processingCost ? Number(data.processingCost) : 0,
+        currency: data.currency || undefined,
+        receiptNumber: data.receiptNumber || undefined,
+        transactionId: data.transactionId || undefined,
+        productId: data.product || undefined
       };
 
       await postApi(urls.transaction.create, payload, {
@@ -149,7 +148,10 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
         <Card sx={{ padding: 3, borderRadius: 3, boxShadow: 'none', backgroundColor: '#ffffff' }}>
           <Tabs
             value={tabIndex}
-            onChange={(e, newValue) => setTabIndex(newValue)}
+            onChange={(e, newValue) => {
+              if (newValue === 1 && !paymentTabComplete) return;
+              setTabIndex(newValue);
+            }}
             sx={{
               minHeight: 'auto',
               borderBottom: '1px solid #e0e0e0',
@@ -171,7 +173,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
             }}
           >
             <Tab label="Payment" />
-            <Tab label="Allocation" />
+            <Tab label="Allocation" disabled={!paymentTabComplete} />
           </Tabs>
 
           <Box component="form" mt={2} onSubmit={handleSubmit(onSubmit)}>
@@ -391,8 +393,8 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                               message: 'Only numbers allowed'
                             }
                           })}
-                          error={!!errors.contactPurpose}
-                          helperText={errors.contactPurpose?.message}
+                          error={!!errors.quantity}
+                          helperText={errors.quantity?.message}
                         />
                       </Grid>
 
@@ -404,8 +406,8 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                           {...register('amountDue', {
                             required: 'Amount Due is required'
                           })}
-                          error={!!errors.reason}
-                          helperText={errors.reason?.message}
+                          error={!!errors.amountDue}
+                          helperText={errors.amountDue?.message}
                         />
                       </Grid>
                     </Grid>

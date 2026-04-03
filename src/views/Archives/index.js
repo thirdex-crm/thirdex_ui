@@ -3,14 +3,8 @@ import {
   Card,
   Grid,
   IconButton,
-  TextField,
   Tooltip,
   Typography,
-  Popover,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Dialog,
   InputBase,
   DialogTitle,
@@ -21,26 +15,26 @@ import {
 import { Box, Stack } from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState, useEffect } from 'react';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import PersonIcon from '@mui/icons-material/Person';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import InfoIcon from '@mui/icons-material/Info';
 import FilterPanel from 'components/FilterPanel';
-import dayjs from 'dayjs';
 import { getApi, updateApi } from 'common/apiClient';
 import { urls } from 'common/urls';
+
 import ArchiveIcon from '@mui/icons-material/Archive';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
+
 import CustomHeader from 'components/CustomHeader';
 import { dateAddedFilters, entityTypeMap, listTypeFilter, ROLES, sessionNames } from 'common/constants';
 
 const Archives = () => {
   const navigate = useNavigate();
-  const [showFilter, setShowFilter] = useState(true);
-  const [activityType, setActivityTypeFilter] = useState('');
-  const [sessionName, setSessionNameFilter] = useState('');
+  const [showFilter] = useState(true);
+  const [, setSessionNameFilter] = useState('');
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
@@ -48,20 +42,15 @@ const Archives = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [includeServiceuser, setIncludeServiceuser] = useState(false);
   const [confirmUnarchiveOpen, setConfirmUnarchiveOpen] = useState(false);
-  const [includeArchives, setIncludeArchives] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [rows, setRows] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [isFiltered, setIsFiltered] = useState(false);
+  const [, setIsFiltered] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
+
     pageSize: 10
   });
-
-  const activityTypes = [
-    { value: 'outreach', label: 'Outreach' },
-    { value: 'training', label: 'Training' }
-  ];
 
   const fetchListData = async () => {
     setLoading(true);
@@ -247,6 +236,7 @@ const Archives = () => {
     if (listType) {
       fetchListData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listType]);
 
   const handleConfirmUnarchive = async () => {
@@ -327,6 +317,7 @@ const Archives = () => {
 
   useEffect(() => {
     fetchpeople();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel, searchQuery, dateOpenedFilter]);
 
   const handleSearchChange = (event) => {

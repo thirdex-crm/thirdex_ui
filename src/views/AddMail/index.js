@@ -1,21 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  Grid,
-  TextField,
-  Typography,
-  Button,
-  Switch,
-  FormControlLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Box,
-  Paper,
-  FormControl,
-  InputLabel,
-  FormHelperText
-} from '@mui/material';
+import { Card, Grid, TextField, Typography, Button, FormControlLabel, Select, MenuItem, IconButton, Box, Paper } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Delete, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -23,7 +7,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AntSwitch from 'components/AntSwitch.js';
 import { useForm, Controller } from 'react-hook-form';
-import { postApi, getApi } from 'common/apiClient';
+import { getApi } from 'common/apiClient';
 import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
 import { useEffect } from 'react';
@@ -37,15 +21,10 @@ const MailingListForm = () => {
   const [contactPurposeEntry, setContactPurposeEntry] = useState([]);
 
   const location = useLocation();
+
   const userType = location?.state?.subRole;
 
-  const {
-    handleSubmit,
-    control,
-    register,
-    setValue,
-    formState: { errors }
-  } = useForm({
+  const { handleSubmit, control } = useForm({
     mode: 'all',
     defaultValues: {
       userType,
@@ -98,8 +77,6 @@ const MailingListForm = () => {
 
   const fetchtTagData = async () => {
     try {
-      const response = await getApi(urls.tag.getAllTags);
-
       setTagOptions(response?.data?.allTags);
     } catch (error) {
       console.error('Error fetching config:', error);
@@ -144,25 +121,15 @@ const MailingListForm = () => {
 
     if (hasError) {
       setFilters(validatedFilters);
-      const firstErrorIndex = validatedFilters.findIndex(
-        (filter) => filter.errors.field || filter.errors.comparison || filter.errors.value
-      );
 
       setIsloading(false);
       return;
     }
 
     try {
-      const formData = {
-        ...data,
-        name: data.listName || '',
-        tags: data.tags || '',
-        channelSettings: data.channelSettings || '',
-        purposeSettings: data.purposeSettings || '',
-        filters: validatedFilters.map(({ errors, ...rest }) => rest)
-      };
+      void data;
+      void validatedFilters;
 
-      const response = await postApi(urls.mail.create, formData);
       toast.success('Mail added successfully');
       navigate('/mail');
     } catch (error) {

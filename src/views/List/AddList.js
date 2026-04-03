@@ -5,14 +5,11 @@ import {
   TextField,
   Typography,
   Button,
-  Switch,
-  FormControlLabel,
   Select,
   MenuItem,
   IconButton,
   Box,
   Paper,
-  Checkbox,
   FormControl,
   InputLabel,
   FormHelperText
@@ -22,7 +19,6 @@ import { Delete, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import { useNavigate } from 'react-router-dom';
-import AntSwitch from 'components/AntSwitch.js';
 import { useForm, Controller } from 'react-hook-form';
 import { postApi, getApi } from 'common/apiClient';
 import toast from 'react-hot-toast';
@@ -30,7 +26,7 @@ import { urls } from 'common/urls';
 import { useEffect } from 'react';
 import { Autocomplete } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import { caseFieldOptions, channelOptions, ethnicityOptions, fieldOptions, formFieldOptions, mailingListFieldOptions, serviceFieldOptions, transactionFieldOptions } from 'common/constants';
+import { caseFieldOptions, ethnicityOptions, fieldOptions, serviceFieldOptions, transactionFieldOptions } from 'common/constants';
 
 const AddListForm = () => {
   const location = useLocation();
@@ -38,17 +34,12 @@ const AddListForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsloading] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
-  const [contactPurposeEntry, setContactPurposeEntry] = useState([]);
   const [filterFieldOptions, setFilterFieldOptions] = useState([]);
   const setFieldOption = () => {
     if (state?.type == 'service_user' || state?.type == 'donor' || state?.type == 'volunteer') {
       setFilterFieldOptions(fieldOptions);
     } else if (state?.type == 'donations') {
       setFilterFieldOptions(transactionFieldOptions);
-    } else if (state?.type == 'Mailing List') {
-      setFilterFieldOptions(mailingListFieldOptions);
-    } else if (state?.type == 'Forms') {
-      setFilterFieldOptions(formFieldOptions);
     } else if (state?.type == 'case') {
       setFilterFieldOptions(caseFieldOptions);
     } else if (state?.type == 'services') {
@@ -57,17 +48,23 @@ const AddListForm = () => {
       setFilterFieldOptions([]);
     }
   };
-  const {
-    handleSubmit,
-    control,
-    formState: { errors }
-  } = useForm({
+
+  // Map list type to TagCategory appliedTo label
+  const getAppliedTo = () => {
+    const map = {
+      service_user: 'Service Users',
+      volunteer: 'Volunteers',
+      services: 'Services',
+      case: 'Cases',
+      donor: 'Donors'
+    };
+    return map[state?.type] || null;
+  };
+  const { handleSubmit, control } = useForm({
     mode: 'all',
     defaultValues: {
       listName: '',
       tags: [],
-      channelSettings: [],
-      purposeSettings: [],
       includeArchived: false
     }
   });
@@ -101,26 +98,18 @@ const AddListForm = () => {
 
   const fetchtTagData = async () => {
     try {
-      const response = await getApi(urls.tag.getAllTags);
-
-      setTagOptions(response?.data?.allTags);
+      const appliedTo = getAppliedTo();
+      const url = appliedTo ? `${urls.tag.getAllTags}?appliedTo=${encodeURIComponent(appliedTo)}` : urls.tag.getAllTags;
+      const response = await getApi(url);
+      setTagOptions(response?.data?.allTags || []);
     } catch (error) {
-      console.error('Error fetching config:', error);
-    }
-  };
-  const fetchContactPurposes = async () => {
-    try {
-      const res = await getApi(urls.configuration.fetch);
-      const options = res?.data?.allConfiguration?.filter((item) => item.configurationType === 'Contact Purpose');
-      setContactPurposeEntry(options || []);
-    } catch (err) {
-      console.error('Error fetching contact purposes:', err);
+      console.error('Error fetching tags:', error);
     }
   };
   useEffect(() => {
     fetchtTagData();
-    fetchContactPurposes();
     setFieldOption();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = async (data) => {
@@ -156,13 +145,16 @@ const AddListForm = () => {
         ...data,
         name: data.listName || '',
         tags: (data.tags || []).map((tag) => tag._id),
-        channelSettings: data.channelSettings || '',
-        purposeSettings: data.purposeSettings || '',
         listType: state?.type || '',
-        filters: validatedFilters.map(({ errors, ...rest }) => ({
-          ...rest,
-          value: Array.isArray(rest.value) ? rest.value.join(', ') : rest.value
-        }))
+
+        filters: validatedFilters.map((filter) => {
+          const rest = { ...filter };
+          delete rest.errors;
+          return {
+            ...rest,
+            value: Array.isArray(rest.value) ? rest.value.join(', ') : rest.value
+          };
+        })
       };
       const response = await postApi(urls.list.create, formData);
       toast.success('List added successfully');
@@ -270,174 +262,6 @@ const AddListForm = () => {
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
-            <Controller
-              name="channelSettings"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  multiple
-                  disableCloseOnSelect
-                  disablePortal={true}
-                  options={channelOptions}
-                  value={field.value || []}
-                  onChange={(_, newValue) => field.onChange(newValue)}
-                  getOptionLabel={(option) => option}
-                  isOptionEqualToValue={(option, value) => option === value}
-                  renderInput={(params) => (
-                    <TextField {...params} label="List User with any of these channel settings" placeholder="Search" size="small" />
-                  )}
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props} style={{ padding: 0, marginBottom: 8 }}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          width: '100%',
-                          cursor: 'pointer',
-                          gap: 1
-                        }}
-                      >
-                        <Checkbox
-                          checked={selected}
-                          sx={{
-                            color: selected ? '#009fc7' : 'rgba(0,0,0,0.26)',
-                            '&.Mui-checked': {
-                              color: '#009fc7'
-                            }
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            flexGrow: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            backgroundColor: selected ? '#67ae5a' : '#c95a51',
-                            color: '#fff',
-                            borderRadius: '20px',
-                            px: 2,
-                            py: '6px',
-                            fontWeight: 500,
-                            fontSize: 14,
-                            userSelect: 'none'
-                          }}
-                        >
-                          <Typography>{option}</Typography>
-                          <Box
-                            sx={{
-                              ml: 1,
-                              fontWeight: 'bold',
-                              fontSize: 18,
-                              userSelect: 'none',
-                              lineHeight: 1
-                            }}
-                          >
-                            {selected ? '✓' : '×'}
-                          </Box>
-                        </Box>
-                      </Box>
-                    </li>
-                  )}
-                  renderTags={(selected) => selected.join(', ')}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Controller
-              name="purposeSettings"
-              control={control}
-              rules={{ required: 'This field is required' }}
-              render={({ field, fieldState }) => {
-                const selectedValues = contactPurposeEntry.filter((item) => field.value?.includes(item._id));
-
-                return (
-                  <Autocomplete
-                    multiple
-                    disablePortal
-                    disableCloseOnSelect
-                    options={contactPurposeEntry}
-                    getOptionLabel={(option) => option.name}
-                    isOptionEqualToValue={(option, value) => option._id === value._id}
-                    value={selectedValues}
-                    onChange={(_, selectedOptions) => field.onChange(selectedOptions.map((opt) => opt._id))}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="AND any of these purpose settings"
-                        placeholder="Search"
-                        size="small"
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                      />
-                    )}
-                    renderOption={(props, option, { selected }) => (
-                      <li {...props} style={{ padding: 0, marginBottom: 8 }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            width: '100%',
-                            cursor: 'pointer',
-                            gap: 1
-                          }}
-                        >
-                          <Checkbox
-                            checked={selected}
-                            sx={{
-                              color: selected ? '#009fc7' : 'rgba(0,0,0,0.26)',
-                              '&.Mui-checked': {
-                                color: '#009fc7'
-                              }
-                            }}
-                          />
-                          <Box
-                            sx={{
-                              flexGrow: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              backgroundColor: selected ? '#67ae5a' : '#c95a51',
-                              color: '#fff',
-                              borderRadius: '20px',
-                              px: 2,
-                              py: '6px',
-                              fontWeight: 500,
-                              fontSize: 14,
-                              userSelect: 'none'
-                            }}
-                          >
-                            <Typography>{option.name}</Typography>
-                            <Box
-                              sx={{
-                                ml: 1,
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                                userSelect: 'none',
-                                lineHeight: 1
-                              }}
-                            >
-                              {selected ? '✓' : '×'}
-                            </Box>
-                          </Box>
-                        </Box>
-                      </li>
-                    )}
-                    renderTags={(selected) => selected.map((opt) => opt.name).join(', ')}
-                  />
-                );
-              }}
-            />
-          </Grid>
-
-          {/* <Grid item xs={12} sm={6}>
-            <Controller
-              name="purposeSettings"
-              control={control}
-              render={({ field }) => <TextField {...field} fullWidth label="AND any of these purpose settings" size="small" />}
-            />
-          </Grid> */}
           <Grid item xs={12}>
             Include People where :
             <Button variant="contained" onClick={addFilter} sx={{ fontSize: '10px', borderRadius: '20px', background: '#009fc7', ml: 2 }}>
@@ -498,7 +322,7 @@ const AddListForm = () => {
                         multiple
                         options={ethnicityOptions}
                         getOptionLabel={(option) => option}
-                        value={Array.isArray(filter.value) ? filter.value : (filter.value ? filter.value.split(', ').filter(Boolean) : [])}
+                        value={Array.isArray(filter.value) ? filter.value : filter.value ? filter.value.split(', ').filter(Boolean) : []}
                         onChange={(_, selected) => handleFilterChange(filter.id, 'value', selected)}
                         renderInput={(params) => (
                           <TextField

@@ -188,5 +188,3 @@ export const mailingListFieldOptions = [
   { value: 'name', label: 'Name' },
   { value: 'userType', label: 'User Type' }
 ];
-
-

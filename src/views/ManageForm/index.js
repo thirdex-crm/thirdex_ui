@@ -1,45 +1,63 @@
-import { Stack, Grid, TextField, Card, Box, Typography, IconButton, Chip, Tooltip, InputBase } from '@mui/material';
+import {
+  Stack,
+  Grid,
+  Card,
+  Box,
+  Typography,
+  IconButton,
+  Chip,
+  Tooltip,
+  InputBase,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+
 import AddFormModal from './AddForm.js';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+
+import EditFormModal from './EditFormModal.js';
+import { DataGrid } from '@mui/x-data-grid';
 import React, { useState } from 'react';
 import FilterPanel from 'components/FilterPanel';
 import { urls } from 'common/urls.js';
-import { getApi } from 'common/apiClient.js';
+import { getApi, deleteApi } from 'common/apiClient.js';
 import { useEffect } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { useNavigate } from 'react-router-dom';
+
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader.js';
 import CustomHeader from 'components/CustomHeader.js';
-
-const campaignFilter = [
-  { value: 'campaign1', label: 'Campaign 1' },
-  { value: 'campaign2', label: 'Campaign 2' }
-];
+import toast from 'react-hot-toast';
 
 const Lead = () => {
   const [openAdd, setOpenAdd] = useState(false);
-  const [campaign, setCampaignFilter] = useState('');
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editFormData, setEditFormData] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [formToDelete, setFormToDelete] = useState(null);
   const [rows, setRows] = useState([]);
   const [formType, setFormType] = useState('');
   const [formTitle, setFormTitle] = useState('');
   const [formTypes, setFormTypes] = useState([]);
   const [formTitles, setFormTitles] = useState([]);
   const [dateCreated, setDateCreated] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [totalRows, setTotalRows] = useState(0);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
+
     pageSize: 10
   });
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
 
   const handleOpenAdd = () => {
     setOpenAdd(true);
@@ -47,6 +65,48 @@ const Lead = () => {
 
   const handleCloseAdd = () => {
     setOpenAdd(false);
+  };
+
+  const handleEdit = async (row) => {
+    try {
+      const response = await getApi(`${urls.forms.getById}/${row.link}`);
+      if (response?.data) {
+        setEditFormData(response.data);
+        setOpenEdit(true);
+      } else {
+        toast.error('Failed to load form data');
+      }
+    } catch (error) {
+      toast.error('Failed to fetch form data');
+    }
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+    setEditFormData(null);
+  };
+
+  const handleDeleteClick = (row) => {
+    setFormToDelete(row);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteApi(`${urls.forms.delete}/${formToDelete.link}`);
+      toast.success('Form deleted successfully');
+      getAllForms();
+    } catch (error) {
+      toast.error('Failed to delete form');
+    } finally {
+      setDeleteConfirmOpen(false);
+      setFormToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setFormToDelete(null);
   };
 
   const handleNavigate = (id) => {
@@ -92,6 +152,7 @@ const Lead = () => {
   };
   useEffect(() => {
     getAllForms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, formType, paginationModel, formTitle, dateCreated]);
 
   const getFormTypes = async () => {
@@ -144,14 +205,48 @@ const Lead = () => {
     {
       field: 'edit',
       headerName: 'Action',
-      flex: 0.3,
+      flex: 0.7,
       align: 'center',
       headerAlign: 'center',
       sortable: false,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <OpenInNewIcon color="primary" fontSize="small" sx={{ cursor: 'pointer' }} onClick={() => handleNavigate(params.row.link)} />
-          {/* <EditOutlinedIcon sx={{ color: ' #EBEBE4' }} fontSize="small" onClick={() => handleEdit(params.row)} /> */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Tooltip title="Open Form" arrow>
+            <IconButton
+              size="small"
+              onClick={() => handleNavigate(params.row.link)}
+              sx={{
+                color: '#009fc7',
+                '&:hover': { backgroundColor: '#e5f8fe' }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Edit Form" arrow>
+            <IconButton
+              size="small"
+              onClick={() => handleEdit(params.row)}
+              sx={{
+                color: '#5c5cff',
+                '&:hover': { backgroundColor: '#f0f0ff' }
+              }}
+            >
+              <EditOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Form" arrow>
+            <IconButton
+              size="small"
+              onClick={() => handleDeleteClick(params.row)}
+              sx={{
+                color: '#e53935',
+                '&:hover': { backgroundColor: '#fdecea' }
+              }}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       )
     }
@@ -165,6 +260,27 @@ const Lead = () => {
     <>
       <Grid>
         <AddFormModal open={openAdd} onClose={handleCloseAdd} getAllForms={getAllForms} />
+        <EditFormModal open={openEdit} onClose={handleCloseEdit} getAllForms={getAllForms} editFormData={editFormData} />
+        <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>
+          <DialogTitle>Delete Form</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete <strong>{formToDelete?.title}</strong>? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} sx={{ color: '#555' }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              variant="contained"
+              sx={{ backgroundColor: '#e53935', '&:hover': { backgroundColor: '#c62828' } }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Card sx={{ backgroundColor: '#eef2f6' }}>
           <Grid>
             <Stack direction="row" alignItems="center" justifyContent="space-between" m={1} marginBlock={3}>

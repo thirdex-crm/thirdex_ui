@@ -1,63 +1,68 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog } from '@mui/material';
 import FormBuilder from 'formBuilder/FormBuilder';
 import SelectTemplate from 'formBuilder/SelectTemplate';
 import TemplateOne from 'formBuilder/TemplateOne';
 import TemplateTwo from 'formBuilder/TemplateTwo';
 import TemplateThree from 'formBuilder/TemplateThree';
-import { useEffect } from 'react';
-import DefaultFields from 'formBuilder/DefaultFields';
 
-const AddFormModal = ({ open = false, onClose = () => {}, getAllForms }) => {
-  const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem('formData');
-    return savedData ? JSON.parse(savedData) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('formData', JSON.stringify(formData));
-  }, [formData]);
-
-  const [preset, setPreset] = useState(true);
+const EditFormModal = ({ open = false, onClose = () => {}, getAllForms, editFormData }) => {
+  const [formData, setFormData] = useState([]);
+  const [preset, setPreset] = useState(false);
   const [preview, setPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateData, setTemplateData] = useState([]);
-  const [formValues, setFormValues] = useState();
+  const [formValues, setFormValues] = useState({});
+
   useEffect(() => {
-    if (open) {
-      setPreset(true);
+    if (open && editFormData) {
+      setPreset(false);
       setPreview(false);
       setSelectedTemplate(null);
-      setTemplateData([]);
-      setFormValues(undefined);
+      setFormData([]);
+      // Map DB fields to formBuilder-compatible format
+      const fields = (editFormData.fields || []).map((f) => ({
+        type: f.type,
+        label: f.label,
+        name: f.name,
+        required: f.required,
+        values: f.values,
+        validation: f.validation,
+        subtype: f.subtype
+      }));
+      setTemplateData(fields);
+      setFormValues({
+        formType: editFormData.type || '',
+        description: editFormData.description || '',
+        formRecord: editFormData.records || ''
+      });
     }
-  }, [open]);
+  }, [open, editFormData]);
+
+  const handleClose = () => {
+    setPreset(false);
+    setPreview(false);
+    setSelectedTemplate(null);
+    onClose();
+  };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      {preset && (
-        <DefaultFields
-          templateData={templateData}
-          setTemplateData={setTemplateData}
-          setPreset={setPreset}
-          onClose={onClose}
-          setFormValues={setFormValues}
-        />
-      )}
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       {!preview && !preset && (
         <FormBuilder
           setFormData={setFormData}
           formData={formData}
           setPreview={setPreview}
-          onClose={onClose}
+          onClose={handleClose}
           templateData={templateData}
           setTemplateData={setTemplateData}
           setPreset={setPreset}
+          isEdit={true}
         />
       )}
       {preview && !selectedTemplate && (
-        <SelectTemplate setPreview={setPreview} setSelectedTemplate={setSelectedTemplate} onClose={onClose} setPreset={setPreset} />
+        <SelectTemplate setPreview={setPreview} setSelectedTemplate={setSelectedTemplate} onClose={handleClose} setPreset={setPreset} />
       )}
       {selectedTemplate === 1 && (
         <TemplateOne
@@ -67,8 +72,10 @@ const AddFormModal = ({ open = false, onClose = () => {}, getAllForms }) => {
           setSelectedTemplate={setSelectedTemplate}
           setPreview={setPreview}
           setPreset={setPreset}
-          onClose={onClose}
+          onClose={handleClose}
           getAllForms={getAllForms}
+          isEdit={true}
+          formId={editFormData?.publicId}
         />
       )}
       {selectedTemplate === 2 && <TemplateTwo formData={formData} setSelectedTemplate={setSelectedTemplate} setPreview={setPreview} />}
@@ -77,4 +84,4 @@ const AddFormModal = ({ open = false, onClose = () => {}, getAllForms }) => {
   );
 };
 
-export default AddFormModal;
+export default EditFormModal;

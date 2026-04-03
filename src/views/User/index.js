@@ -7,11 +7,8 @@ import {
   Typography,
   Box,
   Card,
-  Chip,
   Tooltip,
   IconButton,
-  Modal,
-  TextField,
   Button,
   InputBase,
   Dialog,
@@ -19,35 +16,32 @@ import {
   DialogTitle,
   DialogContent
 } from '@mui/material';
+
 import TableStyle from '../../ui-component/TableStyle';
-import { Close } from '@mui/icons-material';
 import { IconTrash, IconPencil } from '@tabler/icons';
-import FilterPanel from 'components/FilterPanel';
-import CheckIcon from '@mui/icons-material/Check';
-import LoopIcon from '@mui/icons-material/Loop';
+
 import AddIcon from '@mui/icons-material/Add';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { urls } from 'common/urls';
 import { getApi, updateApiPatch } from 'common/apiClient';
+
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
+
 import toast from 'react-hot-toast';
 import config from '../../config';
 
 const User = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
-  const [status, setStatus] = useState('');
-  const [dateOpenedFilter, setDateOpenedFilter] = useState('');
-  const [nameFilter, setNameFilter] = useState('');
-  const [countryOfOriginFilter, setCountryOfOriginFilter] = useState('');
+  const [status] = useState('');
+  const [dateOpenedFilter] = useState('');
+  const [countryOfOriginFilter] = useState('');
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState([]);
-  const [allData, setAllData] = useState([]);
+  const [, setRows] = useState([]);
+  const [, setAllData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [nameFilterOptions, setNameFilterOptions] = useState([]);
-  const [selectedName, setSelectedName] = useState('');
+  const [, setNameFilterOptions] = useState([]);
+  const [selectedName] = useState('');
   const [users, setusers] = useState('');
   const [totalRows, setTotalRows] = useState(0);
   const [paginationModel, setPaginationModel] = useState({
@@ -61,7 +55,9 @@ const User = () => {
 
   const fetchData = async () => {
     try {
-      const response = await getApi(`${urls.login.getUserswithPagination}?page=${paginationModel.page + 1}&limit=${paginationModel.pageSize}`);
+      const response = await getApi(
+        `${urls.login.getUserswithPagination}?page=${paginationModel.page + 1}&limit=${paginationModel.pageSize}`
+      );
       const filteredAdmins = response?.data?.data?.map((admin) => ({
         ...admin,
         id: admin._id,
@@ -82,6 +78,7 @@ const User = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns = [
@@ -168,17 +165,6 @@ const User = () => {
       </Box>
     );
   };
-  const statusFilter = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
-  ];
-
-  const dateAddedFilters = [
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'Last 7 Days' },
-    { value: 'month', label: 'Last 30 Days' },
-    { value: 'year', label: 'Last 1 Year' }
-  ];
 
   useEffect(() => {
     fetch(config.filter_Country)
@@ -227,6 +213,7 @@ const User = () => {
 
   useEffect(() => {
     fetchUserName();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUser = async () => {
@@ -306,6 +293,7 @@ const User = () => {
 
   useEffect(() => {
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countriesWithFlags, paginationModel, status, dateOpenedFilter, selectedName, searchQuery, countryOfOriginFilter]);
 
   const handleDelete = async (id) => {
@@ -336,15 +324,6 @@ const User = () => {
     }
   };
 
-  const handleReset = () => {
-    setStatus('');
-    setDateOpenedFilter('');
-    setNameFilter('');
-    setSearchQuery('');
-    setCountryOfOriginFilter('');
-    fetchUser();
-  };
-
   return (
     <>
       <Card sx={{ backgroundColor: '#eef2f6' }}>
@@ -354,12 +333,12 @@ const User = () => {
               <IconButton
                 onClick={() => navigate('/add-config-user')}
                 sx={{
-                   backgroundColor: '#009fc7',
-                textTransform: 'none',
-                whiteSpace: 'nowrap',
-                paddingInline: '15px',
-                paddingBlock: '7px',
-                borderRadius: '10px',
+                  backgroundColor: '#009fc7',
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  paddingInline: '15px',
+                  paddingBlock: '7px',
+                  borderRadius: '10px',
                   width: '220px',
                   height: '35px',
                   display: 'flex',

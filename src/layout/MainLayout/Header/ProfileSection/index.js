@@ -8,8 +8,6 @@ import { useTheme } from '@mui/material/styles';
 import {
   Avatar,
   Box,
-  Card,
-  CardContent,
   Chip,
   ClickAwayListener,
   Divider,
@@ -17,9 +15,7 @@ import {
   InputAdornment,
   List,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
-  OutlinedInput,
   Paper,
   Popper,
   Stack,
@@ -33,28 +29,24 @@ import {
   TextField,
   ListItem,
   IconButton,
-  MenuItem,
   Autocomplete
 } from '@mui/material';
-import TranslateIcon from '@mui/icons-material/Translate';
 import PerfectScrollbar from 'react-perfect-scrollbar';
+
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import UpgradePlanCard from './UpgradePlanCard';
+
 import User1 from 'assets/images/femaleicon.png';
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons';
 import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { postApi, getApi, updateApi } from 'common/apiClient';
-import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
 const ProfileSection = () => {
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
   const navigate = useNavigate();
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [openAddForm, setOpenAddForm] = useState(false);

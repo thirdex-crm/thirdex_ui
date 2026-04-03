@@ -1,13 +1,12 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, Tab, Divider, Grid } from '@mui/material';
+import { Box, Tab, Grid } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import Service from './Tabs/Service';
 import Cases from './Tabs/Cases';
 import Session from './Tabs/Session';
 import Survey from './Tabs/Survey';
 import Donor from './Tabs/Donor';
-import Attendee from './Tabs/Attendee'
-import FilterPanel from 'components/FilterPanel';
+import Attendee from './Tabs/Attendee';
 import { urls } from 'common/urls';
 import { getApi } from 'common/apiClient';
 import config from '../../config';
@@ -23,32 +22,38 @@ const caseStatusFilter = [
 ];
 
 const tabFilterConfig = {
-  '1': { // Service User
+  1: {
+    // Service User
     selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter'],
     customDateLabel: 'Date of Birth',
     statuses: statusFilter
   },
-  '2': { // Cases — Open/Closed labels match case status
+  2: {
+    // Cases — Open/Closed labels match case status
     selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter', 'caseIdFilter'],
     customDateLabel: 'Date Opened',
     statuses: caseStatusFilter
   },
-  '3': { // Sessions — no Case ID (sessions have no case reference)
+  3: {
+    // Sessions — no Case ID (sessions have no case reference)
     selectedFilters: ['countryOfOriginFilter', 'dateOpenedFilter', 'nameFilter', 'statusFilter'],
     customDateLabel: 'Session Date',
     statuses: statusFilter
   },
-  '4': { // Key Indicators
+  4: {
+    // Key Indicators
     selectedFilters: ['countryOfOriginFilter', 'nameFilter', 'statusFilter'],
     customDateLabel: 'By Date',
     statuses: statusFilter
   },
-  '5': { // Attendance — status/date not supported by BE
+  5: {
+    // Attendance — status/date not supported by BE
     selectedFilters: ['countryOfOriginFilter', 'nameFilter', 'caseIdFilter'],
     customDateLabel: 'By Date',
     statuses: statusFilter
   },
-  '6': { // Donor — date range filter via startDate/endDate
+  6: {
+    // Donor — date range filter via startDate/endDate
     selectedFilters: ['dateRange', 'nameFilter', 'statusFilter'],
     customDateLabel: 'By Date',
     statuses: statusFilter
@@ -64,12 +69,10 @@ const dateAddedFilters = [
 
 const Report = () => {
   const [value, setValue] = useState('1');
-  const [showFilter, setShowFilter] = useState(true);
   const [status, setStatus] = useState('');
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [name, setNameFilter] = useState('');
   const [countriesWithFlags, setCountriesWithFlags] = useState([]);
   const [configCountries, setConfigCountries] = useState([]);
   const [caseId, setCaseIdFilter] = useState('');
@@ -111,7 +114,7 @@ const Report = () => {
         const countryConfigs = allConfig.filter((item) => item?.configurationType === 'Country' || item?.name);
         setConfigCountries(
           countryConfigs.map((item) => ({
-            value: item._id,   // ObjectId — sent directly to session API
+            value: item._id, // ObjectId — sent directly to session API
             label: item.name
           }))
         );
@@ -145,8 +148,7 @@ const Report = () => {
       setDonorNameOptions(
         donors.map((d) => ({
           value: d._id,
-          label: `${d.personalInfo?.firstName || ''} ${d.personalInfo?.lastName || ''}`.trim() ||
-                 d.companyInformation?.companyName || '-'
+          label: `${d.personalInfo?.firstName || ''} ${d.personalInfo?.lastName || ''}`.trim() || d.companyInformation?.companyName || '-'
         }))
       );
     } catch (error) {
@@ -158,36 +160,36 @@ const Report = () => {
     fetchUserName();
     fetchDonorNames();
   }, []);
-const FilterPanelProp = {
-                    showFilter:true,
-                    statuses: (tabFilterConfig[value] || tabFilterConfig['1']).statuses,
-                    statusFilter: status,
-                    setStatusFilter: setStatus,
-                    dateAddedFilters,
-                    dateOpenedFilter,
-                    setDateOpenedFilter,
-                    startDate,
-                    setStartDate,
-                    endDate,
-                    setEndDate,
-                    // Donor tab uses donor names; Sessions tab uses configCountries
-                    names: value === '6' ? donorNameOptions : nameFilterOptions,
-                    nameFilter: selectedName,
-                    setNameFilter: setSelectedName,
-                    caseIds: uniqueIds,
-                    caseIdFilter: caseId,
-                    setCaseIdFilter,
-                    // Sessions tab uses configCountries (ObjectId values) so country filter works correctly
-                    countriesWithFlags: value === '3' ? configCountries : countriesWithFlags,
-                    countryOfOriginFilter,
-                    setCountryOfOriginFilter,
-                    selectedFilters: (tabFilterConfig[value] || tabFilterConfig['1']).selectedFilters,
-                    customDateLabel: (tabFilterConfig[value] || tabFilterConfig['1']).customDateLabel,
-                  }
+  const FilterPanelProp = {
+    showFilter: true,
+    statuses: (tabFilterConfig[value] || tabFilterConfig['1']).statuses,
+    statusFilter: status,
+    setStatusFilter: setStatus,
+    dateAddedFilters,
+    dateOpenedFilter,
+    setDateOpenedFilter,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    // Donor tab uses donor names; Sessions tab uses configCountries
+    names: value === '6' ? donorNameOptions : nameFilterOptions,
+    nameFilter: selectedName,
+    setNameFilter: setSelectedName,
+    caseIds: uniqueIds,
+    caseIdFilter: caseId,
+    setCaseIdFilter,
+    // Sessions tab uses configCountries (ObjectId values) so country filter works correctly
+    countriesWithFlags: value === '3' ? configCountries : countriesWithFlags,
+    countryOfOriginFilter,
+    setCountryOfOriginFilter,
+    selectedFilters: (tabFilterConfig[value] || tabFilterConfig['1']).selectedFilters,
+    customDateLabel: (tabFilterConfig[value] || tabFilterConfig['1']).customDateLabel
+  };
   return (
     <>
       <Grid container spacing={2}>
-           <Grid item xs={12}>
+        <Grid item xs={12}>
           <TabContext value={value}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', overflowX: 'auto' }}>
               <TabList
@@ -302,176 +304,185 @@ const FilterPanelProp = {
               </TabList>
             </Box>
 
-           {value === '1' && ( <TabPanel
-              value="1"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-            >
-              <Box
+            {value === '1' && (
+              <TabPanel
+                value="1"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Service
-                  countryOfOriginFilter={countryOfOriginFilter}
-                  selectedName={selectedName}
-                  status={status}
-                  caseId={caseId}
-                  dateOpenedFilter={dateOpenedFilter}
-                  FilterPanelProp={FilterPanelProp}
-                />
-              </Box>
-            </TabPanel>
-              )}
-              {value === '2' && (
-            <TabPanel
-              value="2"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-            >
-              <Box
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Service
+                    countryOfOriginFilter={countryOfOriginFilter}
+                    selectedName={selectedName}
+                    status={status}
+                    caseId={caseId}
+                    dateOpenedFilter={dateOpenedFilter}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
+            )}
+            {value === '2' && (
+              <TabPanel
+                value="2"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Cases
-                  countryOfOriginFilter={countryOfOriginFilter}
-                  selectedName={selectedName}
-                  status={status}
-                  caseId={caseId}
-                  dateOpenedFilter={dateOpenedFilter}
-                  FilterPanelProp={FilterPanelProp}
-                />
-              </Box>
-            </TabPanel>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Cases
+                    countryOfOriginFilter={countryOfOriginFilter}
+                    selectedName={selectedName}
+                    status={status}
+                    caseId={caseId}
+                    dateOpenedFilter={dateOpenedFilter}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
             )}
             {value === '3' && (
-            <TabPanel
-              value="3"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-            >
-              <Box
+              <TabPanel
+                value="3"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Session
-                  countryOfOriginFilter={countryOfOriginFilter}
-                  selectedName={selectedName}
-                  status={status}
-                  caseId={caseId}
-                  dateOpenedFilter={dateOpenedFilter}
-                  FilterPanelProp={FilterPanelProp}
-                />
-              </Box>
-            </TabPanel>
-              )}
-              {value === '4' && (
-            <TabPanel
-              value="4"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-            >
-              <Box
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Session
+                    countryOfOriginFilter={countryOfOriginFilter}
+                    selectedName={selectedName}
+                    status={status}
+                    caseId={caseId}
+                    dateOpenedFilter={dateOpenedFilter}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
+            )}
+            {value === '4' && (
+              <TabPanel
+                value="4"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Survey 
-                  countryOfOriginFilter={countryOfOriginFilter}
-                  selectedName={selectedName}
-                  status={status}
-                  caseId={caseId}
-                  dateOpenedFilter={dateOpenedFilter}
-                  FilterPanelProp={FilterPanelProp}/>
-              </Box>
-            </TabPanel>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Survey
+                    countryOfOriginFilter={countryOfOriginFilter}
+                    selectedName={selectedName}
+                    status={status}
+                    caseId={caseId}
+                    dateOpenedFilter={dateOpenedFilter}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
             )}
             {value === '5' && (
               <TabPanel
-              value="5"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-              >
-              <Box
+                value="5"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Attendee
-                  countryOfOriginFilter={countryOfOriginFilter}
-                  selectedName={selectedName}
-                  status={status}
-                  caseId={caseId}
-                  dateOpenedFilter={dateOpenedFilter}
-                 FilterPanelProp={FilterPanelProp}
-                />
-              </Box>
-            </TabPanel>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Attendee
+                    countryOfOriginFilter={countryOfOriginFilter}
+                    selectedName={selectedName}
+                    status={status}
+                    caseId={caseId}
+                    dateOpenedFilter={dateOpenedFilter}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
             )}
             {value === '6' && (
-            <TabPanel
-              value="6"
-              sx={{
-                px: 0,
-                display: 'flex',
-                gap: 2,
-                alignItems: 'flex-start',
-                width: '100%',
-                flexWrap: 'nowrap',
-              }}
-            >
-              <Box
+              <TabPanel
+                value="6"
                 sx={{
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  minWidth: 0,
+                  px: 0,
+                  display: 'flex',
+                  gap: 2,
+                  alignItems: 'flex-start',
+                  width: '100%',
+                  flexWrap: 'nowrap'
                 }}
               >
-                <Donor selectedName={selectedName} status={status} startDate={startDate} endDate={endDate} FilterPanelProp={FilterPanelProp} />
-              </Box>
-            </TabPanel>)}
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    flexShrink: 1,
+                    minWidth: 0
+                  }}
+                >
+                  <Donor
+                    selectedName={selectedName}
+                    status={status}
+                    startDate={startDate}
+                    endDate={endDate}
+                    FilterPanelProp={FilterPanelProp}
+                  />
+                </Box>
+              </TabPanel>
+            )}
           </TabContext>
         </Grid>
       </Grid>

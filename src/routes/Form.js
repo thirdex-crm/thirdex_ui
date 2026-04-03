@@ -1,8 +1,8 @@
-import GetFormById from "formBuilder/GetFormById";
+import GetFormById from 'formBuilder/GetFormById';
 
 const Form = {
-    path: '/surveyform/:formid',
-    element: <GetFormById />
+  path: '/surveyform/:formid',
+  element: <GetFormById />
 };
 
 export default Form;

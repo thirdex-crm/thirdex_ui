@@ -1,19 +1,8 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Typography,
-  Paper,
-  Chip,
-  Button,
-  IconButton,
-  Divider,
-  Stack,
-  Tooltip
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import TagIcon from '@mui/icons-material/LocalOffer';
+import { Box, Grid, Typography, Paper, Chip, Button, IconButton, Divider, Stack, Tooltip } from '@mui/material';
+
 import CloseIcon from '@mui/icons-material/Close';
+
 import InfoIcon from '@mui/icons-material/Info';
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
@@ -22,13 +11,14 @@ import { urls } from 'common/urls';
 import { getApi, updateApi } from 'common/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import HomeRepairServiceOutlinedIcon from '@mui/icons-material/HomeRepairServiceOutlined';
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
-import { imageUrl } from 'common/urls';
+
 import Diversity2OutlinedIcon from '@mui/icons-material/Diversity2Outlined';
+
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import { DataGrid } from '@mui/x-data-grid';
+
 import PersonIcon from '@mui/icons-material/Person';
+
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import toast from 'react-hot-toast';
 import AddAttendeeDialog from 'components/AddAttendeeDialog';
@@ -41,7 +31,7 @@ const ServiceDetails = () => {
   const [openDialog, setOpen] = useState(false);
 
   // const { serviceid } = location.state || {};
-  const [serviceTypeName, setServiceTypeName] = useState('');
+  const [, setServiceTypeName] = useState('');
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -194,6 +184,7 @@ const ServiceDetails = () => {
     if (sessionId) {
       fetchpeopleAttendee();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel, sessionId]);
   const columns = [
     {
@@ -438,7 +429,7 @@ const ServiceDetails = () => {
                   <Chip
                     label={sessionData[0].file}
                     size="small"
-                    onDelete={() => { }}
+                    onDelete={() => {}}
                     deleteIcon={
                       <CancelIcon
                         sx={{
@@ -498,7 +489,7 @@ const ServiceDetails = () => {
                             key={i}
                             label={tag}
                             size="small"
-                            onDelete={() => { }}
+                            onDelete={() => {}}
                             deleteIcon={
                               <CancelIcon
                                 sx={{

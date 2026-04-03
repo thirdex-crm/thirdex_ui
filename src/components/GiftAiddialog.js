@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -14,10 +15,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs from 'dayjs';
-import { postApi } from 'common/apiClient';
-import { urls } from 'common/urls';
-const GiftAidDialog = ({ open, handleClose, fetchTimeLineData, onClose, userId }) => {
+const GiftAidDialog = ({ open, handleClose, fetchTimeLineData, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     firstName: '',
@@ -37,7 +35,6 @@ const GiftAidDialog = ({ open, handleClose, fetchTimeLineData, onClose, userId }
   };
   const handleSubmit = async () => {
     try {
-      const response = await postApi(`${urls.timeline.giftaidCreate.replace(':id', userId)}`, formData);
       fetchTimeLineData(), onClose(), handleClose();
     } catch (error) {
       console.error('Error creating GiftAid:', error);

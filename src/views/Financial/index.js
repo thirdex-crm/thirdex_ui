@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Stack, Button, Grid, Typography, Box, Card, TextField, InputBase, IconButton, Tooltip } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { Stack, Grid, Typography, Box, Card, InputBase, IconButton, Tooltip } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import TableStyle from '../../ui-component/TableStyle';
 import SearchIcon from '@mui/icons-material/Search';
@@ -21,15 +21,14 @@ const dateAddedFilters = [
 ];
 
 const Financial = () => {
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
-  const [name, setNameFilter] = useState('');
-  const [nameFilters, setNameFilters] = useState([]);
+  const [, setNameFilter] = useState('');
+  const [, setNameFilters] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [campaign, setCampaignFilter] = useState('');
-  const [user, setUser] = useState([]);
+  const [, setCampaignFilter] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
   const [campaignName, setCampaignName] = useState('');
   const navigate = useNavigate();
@@ -126,7 +125,7 @@ const Financial = () => {
 
       if (assignedTo) queryParams.append('donorId', assignedTo);
       if (campaignName) queryParams.append('campaign', campaignName);
-       if (startDate) {
+      if (startDate) {
         queryParams.append('startDate', new Date(startDate).toISOString());
       }
       if (endDate) {
@@ -192,7 +191,8 @@ const Financial = () => {
     if (assignedTo || dateOpenedFilter || isFiltered || searchQuery || startDate || endDate || campaignName) {
       handleFilter();
     }
-  }, [assignedTo, dateOpenedFilter, startDate, endDate,searchQuery, campaignName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignedTo, dateOpenedFilter, startDate, endDate, searchQuery, campaignName]);
 
   const fetchData = async () => {
     try {
@@ -246,6 +246,7 @@ const Financial = () => {
   };
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -294,7 +295,7 @@ const Financial = () => {
             <IconButton
               onClick={handleOpen}
               sx={{
-                 backgroundColor: '#009fc7',
+                backgroundColor: '#009fc7',
                 textTransform: 'none',
                 whiteSpace: 'nowrap',
                 paddingInline: '15px',
@@ -391,7 +392,7 @@ const Financial = () => {
             campaigns={campaignTypeOptions}
             campaignFilter={campaignName}
             setCampaignFilter={(value) => setCampaignName(value)}
-            selectedFilters={['dateRange',"campaignFilter",]}
+            selectedFilters={['dateRange', 'campaignFilter']}
             onReset={handleReset}
             customDateLabel="By Date"
           />
@@ -414,9 +415,9 @@ const Financial = () => {
                     rowHeight={65}
                     loading={loading}
                     getRowId={(row) => row.id}
-                     onRowClick={(params) => {
-                        navigate('/view-transaction', { state: { id : params?.row?.id } });
-                      }}
+                    onRowClick={(params) => {
+                      navigate('/view-transaction', { state: { id: params?.row?.id } });
+                    }}
                     pagination
                     paginationMode="server"
                     paginationModel={paginationModel}

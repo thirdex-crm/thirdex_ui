@@ -1,33 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Avatar,
-  Tooltip,
-  Grid,
-  Stack,
-  IconButton,
-  Tabs,
-  Tab,
-  Divider,
-  Paper,
-  Chip
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, Stack, IconButton, Tabs, Tab, Chip } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import Timeline from '@mui/lab/Timeline';
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
-import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
-import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import { useNavigate } from 'react-router-dom';
 import FilterPanel from 'components/FilterPanel';
 import CaseNoteDialog from 'components/AddCaseNote';
@@ -48,9 +24,9 @@ import { colors } from 'common/constants';
 const UserProfileCard = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
-  const [showFilter, setShowFilter] = useState(true);
-  const [activityType, setActivityType] = useState('');
-  const [sessionName, setSessionName] = useState('');
+  const [showFilter] = useState(true);
+  const [activityType, setActivityType] = useState(''); // eslint-disable-line no-unused-vars
+  const [sessionName, setSessionName] = useState(''); // eslint-disable-line no-unused-vars
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [caseNoteOpen, setCaseNoteOpen] = useState(false);
@@ -115,6 +91,7 @@ const UserProfileCard = () => {
     if (id) {
       fetchTimeLineData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const createdAt = userData?.createdAt;
@@ -158,13 +135,6 @@ const UserProfileCard = () => {
     { value: 'session2', label: 'Session 2' }
   ];
 
-  const dateAddedFilters = [
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'Last 7 Days' },
-    { value: 'month', label: 'Last 30 Days' },
-    { value: 'year', label: 'Last 1 Year' }
-  ];
-
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };
@@ -186,7 +156,7 @@ const UserProfileCard = () => {
     tags
   }));
 
-  const handleSave = (data) => {
+  const handleSave = () => {
     setCaseNoteOpen(false);
   };
 
@@ -194,8 +164,7 @@ const UserProfileCard = () => {
 
   if (imagePath.startsWith('/thirdexDev/thirdxBE/') || imagePath.startsWith('/thiredx/thirdxBE/')) {
     imagePath = imagePath.replace('/thirdexDev/thirdxBE/', '');
-      imagePath = imagePath.replace('/thiredx/thirdxBE/', '/');
-
+    imagePath = imagePath.replace('/thiredx/thirdxBE/', '/');
   }
 
   const fullImageUrl = imagePath
@@ -325,16 +294,16 @@ const UserProfileCard = () => {
               <Tab
                 label="People"
                 value={0}
-                sx={(theme) => ({
+                sx={{
                   marginRight: 2
-                })}
+                }}
               />
               <Tab
                 label="Timeline"
                 value={1}
-                sx={(theme) => ({
+                sx={{
                   marginRight: 2
-                })}
+                }}
               />
             </Tabs>
 
@@ -467,7 +436,7 @@ const UserProfileCard = () => {
                           overflowY: 'auto'
                         }}
                       >
-                        {userData?.role === 'volunteer' || (
+                        {userData?.role !== 'volunteer' && (
                           <>
                             <Typography
                               sx={{
@@ -933,7 +902,7 @@ const UserProfileCard = () => {
                   setDateOpenedFilter={(value) => setDateOpenedFilter(value)}
                   includeArchives={includeArchives}
                   setIncludeArchives={setIncludeArchives}
-                  selectedFilters={['activityTypeFilter', 'dateOpenedFilter',  'includeArchives']}
+                  selectedFilters={['activityTypeFilter', 'dateOpenedFilter', 'includeArchives']}
                   customDateLabel="By Date"
                 />
 

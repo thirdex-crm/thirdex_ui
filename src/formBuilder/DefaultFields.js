@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Switch,
-  Typography
-} from '@mui/material';
+/* eslint-disable react/prop-types */
+import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField, Switch, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
@@ -18,8 +7,7 @@ import { urls } from 'common/urls';
 import { getApi } from 'common/apiClient';
 import { useEffect } from 'react';
 
-const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setFormValues }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+const DefaultFields = ({ setTemplateData, setPreset, onClose, setFormValues }) => {
   // const templates = [
   //     {
   //         id: 1,
@@ -976,7 +964,14 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
             { label: '5', value: '5', selected: false }
           ]
         },
-        { type: 'textarea', required: false, label: "I'd also like to add...", className: 'form-control', name: 'textarea-comments', subtype: 'textarea' }
+        {
+          type: 'textarea',
+          required: false,
+          label: "I'd also like to add...",
+          className: 'form-control',
+          name: 'textarea-comments',
+          subtype: 'textarea'
+        }
       ]
     },
     {
@@ -986,7 +981,14 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
         { type: 'header', subtype: 'h1', label: 'Self Refferal Form' },
         { type: 'text', required: true, label: 'First Name', className: 'form-control', name: 'text-self-first-name', subtype: 'text' },
         { type: 'text', required: true, label: 'Last Name', className: 'form-control', name: 'text-self-last-name', subtype: 'text' },
-        { type: 'textarea', required: false, label: 'Please tell us your reason for referral', className: 'form-control', name: 'textarea-referral-reason', subtype: 'textarea' }
+        {
+          type: 'textarea',
+          required: false,
+          label: 'Please tell us your reason for referral',
+          className: 'form-control',
+          name: 'textarea-referral-reason',
+          subtype: 'textarea'
+        }
       ]
     },
     {
@@ -994,7 +996,14 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
       name: 'Volunteer Sign-up Form',
       data: [
         { type: 'header', subtype: 'h1', label: 'Volunteer Sign-up Form' },
-        { type: 'text', required: true, label: 'First Name', className: 'form-control', name: 'text-volunteer-first-name', subtype: 'text' },
+        {
+          type: 'text',
+          required: true,
+          label: 'First Name',
+          className: 'form-control',
+          name: 'text-volunteer-first-name',
+          subtype: 'text'
+        },
         { type: 'text', required: true, label: 'Last Name', className: 'form-control', name: 'text-volunteer-last-name', subtype: 'text' },
         { type: 'text', required: true, label: 'Email', className: 'form-control', name: 'text-volunteer-email', subtype: 'text' }
       ]
@@ -1006,7 +1015,14 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
         { type: 'header', subtype: 'h1', label: 'Workshop Registration Form' },
         { type: 'text', required: true, label: 'First Name', className: 'form-control', name: 'text-workshop-first-name', subtype: 'text' },
         { type: 'text', required: true, label: 'Last Name', className: 'form-control', name: 'text-workshop-last-name', subtype: 'text' },
-        { type: 'select', required: true, label: 'Please choose which session you will be attending', className: 'form-control', name: 'select-workshop-session', values: [] }
+        {
+          type: 'select',
+          required: true,
+          label: 'Please choose which session you will be attending',
+          className: 'form-control',
+          name: 'select-workshop-session',
+          values: []
+        }
       ]
     }
   ];
@@ -1016,8 +1032,8 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
     { id: 'volunteer', value: 'Volunteer' },
     { id: 'donar_individual', value: 'Donor Individual' },
     { id: 'donar_company', value: 'Donor Company' },
-    { id: 'donor_group', value: 'Donor Group' },
-  ]
+    { id: 'donor_group', value: 'Donor Group' }
+  ];
 
   const validationSchema = yup.object({
     starterForm: yup.string().required('Please choose a starter form or create a new form.'),
@@ -1123,22 +1139,21 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
 
     setStep(2);
   };
-  const [formTypes, setFormTypes] = useState([])
+  const [formTypes, setFormTypes] = useState([]);
 
   const fetchData = async () => {
     try {
       const queryParams = new URLSearchParams();
       queryParams.append('configurationType', 'Form Types');
       const response = await getApi(`${urls.configuration.fetchWithPagination}?${queryParams.toString()}`);
-      setFormTypes(response?.data?.data)
-
+      setFormTypes(response?.data?.data);
     } catch (error) {
       console.error('Error fetching config:', error);
     }
   };
   useEffect(() => {
     fetchData();
-  }, [])
+  }, []);
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3 } }}>
@@ -1227,7 +1242,9 @@ const DefaultFields = ({ templateData, setTemplateData, setPreset, onClose, setF
                 error={formik.touched.formDisplayTitle && Boolean(formik.errors.formDisplayTitle)}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
-              <FormHelperText sx={{ color: '#d32f2f' }}>{formik?.touched?.formDisplayTitle && formik?.errors?.formDisplayTitle}</FormHelperText>
+              <FormHelperText sx={{ color: '#d32f2f' }}>
+                {formik?.touched?.formDisplayTitle && formik?.errors?.formDisplayTitle}
+              </FormHelperText>
             </FormControl>
           </Grid>
 

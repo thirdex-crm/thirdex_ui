@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import { Box, Tabs, Tab, Grid } from '@mui/material';
 import DonorList from './DonorList';
@@ -59,8 +60,7 @@ const Service = ({ selectedName, status, startDate, endDate, FilterPanelProp }) 
                 minWidth: 0
               }}
             >
-            <DonorList selectedName={selectedName} status={status} startDate={startDate} endDate={endDate} />
-             
+              <DonorList selectedName={selectedName} status={status} startDate={startDate} endDate={endDate} />
             </Box>
           </Box>
         )}

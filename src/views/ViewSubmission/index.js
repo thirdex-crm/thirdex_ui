@@ -1,15 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, Avatar, Tooltip, Grid, Stack, IconButton, Tabs, Tab, Divider, Popover, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Grid,
+  Stack,
+  IconButton,
+  Tabs,
+  Tab,
+  Popover,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import UserBg from 'assets/images/form.png';
-import OptionsPopover from 'components/AddFilter';
 import { getApi, postApi, updateApiPatch } from 'common/apiClient';
 import { urls } from 'common/urls';
-import { imageUrl } from 'common/urls';
+
 import '../ViewServiceUser/index.css';
-import EditIcon from '@mui/icons-material/Edit';
-import ArchiveIcon from '@mui/icons-material/Archive';
+
 import MergeTypeIcon from '@mui/icons-material/MergeType';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { toast } from 'react-hot-toast';
@@ -18,88 +34,90 @@ const ViewSubmission = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [userData, setUserData] = useState(null);
-  const [formData, setFormData] = useState({
+  const [formData] = useState({
     personalInfo: {
-      "title": "Mr",
-      "firstName": "John",
-      "middleName": "H",
-      "lastName": "Doe",
-      "nickName": "Johnny",
-      "gender": "Male",
-      "ethnicity": "Asian",
-      "dateOfBirth": "1990-01-01T00:00:00.000Z"
+      title: 'Mr',
+      firstName: 'John',
+      middleName: 'H',
+      lastName: 'Doe',
+      nickName: 'Johnny',
+      gender: 'Male',
+      ethnicity: 'Asian',
+      dateOfBirth: '1990-01-01T00:00:00.000Z'
     },
     contactInfo: {
-      "homePhone": "0123456789",
-      "phone": "0987654321",
-      "email": "john.doe@example.com",
-      "addressLine1": "123 Main Street",
-      "addressLine2": "Apt 4B",
-      "town": "Townsville",
-      "district": "Central",
-      "postcode": "AB12CD",
-      "country": "Countryland",
-      "firstLanguage": "English",
-      "otherId": "ID123456789"
+      homePhone: '0123456789',
+      phone: '0987654321',
+      email: 'john.doe@example.com',
+      addressLine1: '123 Main Street',
+      addressLine2: 'Apt 4B',
+      town: 'Townsville',
+      district: 'Central',
+      postcode: 'AB12CD',
+      country: 'Countryland',
+      firstLanguage: 'English',
+      otherId: 'ID123456789'
     },
     otherInfo: {
-      "file": "file.pdf",
-      "description": "Test user",
-      "benificiary": "68358ac07c75f31fd02bf143",
-      "campaigns": "68358ac07c75f31fd02bf143",
-      "engagement": "68358ac07c75f31fd02bf143",
-      "eventAttanded": "68358ac07c75f31fd02bf143",
-      "fundingInterest": "68358ac07c75f31fd02bf143",
-      "fundraisingActivities": "68358ac07c75f31fd02bf143",
-      "restrictAccess": false
+      file: 'file.pdf',
+      description: 'Test user',
+      benificiary: '68358ac07c75f31fd02bf143',
+      campaigns: '68358ac07c75f31fd02bf143',
+      engagement: '68358ac07c75f31fd02bf143',
+      eventAttanded: '68358ac07c75f31fd02bf143',
+      fundingInterest: '68358ac07c75f31fd02bf143',
+      fundraisingActivities: '68358ac07c75f31fd02bf143',
+      restrictAccess: false
     },
     emergencyContact: {
-      "title": "Mrs",
-      "gender": "Female",
-      "firstName": "Jane",
-      "lastName": "Doe",
-      "relationshipToUser": "Wife",
-      "homePhone": "0123498765",
-      "phone": "0987612345",
-      "email": "jane.doe@example.com",
-      "addressLine1": "123 Main Street",
-      "addressLine2": "Apt 4B",
-      "country": "Countryland",
-      "town": "Townsville",
-      "postcode": "AB12CD"
+      title: 'Mrs',
+      gender: 'Female',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      relationshipToUser: 'Wife',
+      homePhone: '0123498765',
+      phone: '0987612345',
+      email: 'jane.doe@example.com',
+      addressLine1: '123 Main Street',
+      addressLine2: 'Apt 4B',
+      country: 'Countryland',
+      town: 'Townsville',
+      postcode: 'AB12CD'
     },
     contactPreferences: {
-      'preferredMethod': '68355dfe2d4f3ed5720dd1a9',
-      "contactPurposes": '68355dfe2d4f3ed5720dd1a9',
-      "dateOfConfirmation": "2024-01-01T00:00:00.000Z",
-      "reason": '68355dfe2d4f3ed5720dd1a9',
-      "contactMethods": {
-        "telephone": true,
-        "email": true,
-        "sms": false,
-        "letter": false
+      preferredMethod: '68355dfe2d4f3ed5720dd1a9',
+      contactPurposes: '68355dfe2d4f3ed5720dd1a9',
+      dateOfConfirmation: '2024-01-01T00:00:00.000Z',
+      reason: '68355dfe2d4f3ed5720dd1a9',
+      contactMethods: {
+        telephone: true,
+        email: true,
+        sms: false,
+        letter: false
       }
     },
     isActive: true,
-    role: "volunteer",
+    role: 'volunteer',
+
     isDeleted: false,
-    createdAt: "2025-05-06T12:32:09.474Z",
-    updatedAt: "2025-05-06T12:32:09.474Z",
+
+    createdAt: '2025-05-06T12:32:09.474Z',
+    updatedAt: '2025-05-06T12:32:09.474Z',
     __v: 0
   });
-  const [loading, setLoading] = useState(true);
-  const uniqueid = location?.state?.serialNumber || 1;
-  const { id } = useParams()
-  const [formTitle, setFormTitle] = useState('-')
-  const [formStatus, setFormStatus] = useState('PENDING')
+  const [, setLoading] = useState(true);
+
+  const { id } = useParams();
+  const [formTitle, setFormTitle] = useState('-');
+  const [formStatus, setFormStatus] = useState('PENDING');
 
   const fetchUserById = async () => {
     try {
-      const fromUrl = `${urls?.responses?.response}/${id}`
+      const fromUrl = `${urls?.responses?.response}/${id}`;
       const response = await getApi(fromUrl);
       const user = response?.data?.data;
-      setFormTitle(response?.data?.formId?.title)
-      setFormStatus(response?.data?.status)
+      setFormTitle(response?.data?.formId?.title);
+      setFormStatus(response?.data?.status);
       if (user) {
         setUserData(user);
       }
@@ -113,6 +131,7 @@ const ViewSubmission = () => {
     if (id) {
       fetchUserById();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleChange = (event, newValue) => {
@@ -202,13 +221,13 @@ const ViewSubmission = () => {
 
   const handleOptionClick = async (label) => {
     if (label == 'Accept') {
-      const url = urls?.serviceuser?.create
+      const url = urls?.serviceuser?.create;
       await postApi(url, fd, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const urlUpdate = `${urls?.responses?.submit}/${id}`
-      await updateApiPatch(urlUpdate, { status: 'APPROVED' })
-      toast.success('Added in Volunteer')
+      const urlUpdate = `${urls?.responses?.submit}/${id}`;
+      await updateApiPatch(urlUpdate, { status: 'APPROVED' });
+      toast.success('Added in Volunteer');
       handleClose();
     } else {
       handleClose();
@@ -266,22 +285,16 @@ const ViewSubmission = () => {
                 overflow: 'hidden',
                 boxShadow: 3
               }}
-            >
-            </Card>
+            ></Card>
           </Box>
         </Grid>
-        {formTitle == 'Volunteer Sign Up Form' &&
+        {formTitle == 'Volunteer Sign Up Form' && (
           <Box sx={{ mt: '-40px', mb: '20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              onClick={handleClick}
-              sx={{ mr: '20px' }}
-              disabled={formStatus === 'APPROVED'}
-            >
-              {formStatus == 'APPROVED' ? "APPROVED" : "MANAGE"}
+            <Button variant="contained" onClick={handleClick} sx={{ mr: '20px' }} disabled={formStatus === 'APPROVED'}>
+              {formStatus == 'APPROVED' ? 'APPROVED' : 'MANAGE'}
             </Button>
           </Box>
-        }
+        )}
         <Grid item xs={12}>
           <Box sx={{ width: '100%' }}>
             <Tabs
@@ -290,6 +303,7 @@ const ViewSubmission = () => {
               sx={{
                 px: 2,
                 display: 'flex',
+
                 gap: 2,
                 borderBottom: '1px solid #4792d3'
               }}
@@ -297,14 +311,14 @@ const ViewSubmission = () => {
               <Tab
                 label="User"
                 value={0}
-                sx={(theme) => ({
+                sx={() => ({
                   marginRight: 2
                 })}
               />
               <Tab
                 label="Additional Fields"
                 value={1}
-                sx={(theme) => ({
+                sx={() => ({
                   marginRight: 2
                 })}
               />
@@ -317,7 +331,9 @@ const ViewSubmission = () => {
                     <CardContent>
                       <Typography variant="h5" fontWeight="600" gutterBottom>
                         Form Title
-                        <Typography component="span" className="text">: {formTitle}</Typography>
+                        <Typography component="span" className="text">
+                          : {formTitle}
+                        </Typography>
                       </Typography>
                       <Typography variant="h5" fontWeight="600" gutterBottom>
                         ABOUT
@@ -327,24 +343,33 @@ const ViewSubmission = () => {
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Full Name:</span>
-                              <Typography component="span" className="text">{`${userData?.['First Name']} ${userData?.['Last Name']}` ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {`${userData?.['First Name']} ${userData?.['Last Name']}` ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>{' '}
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
-                              <span>User ID:</span> <Typography component="span" className="text">{userData?.userId ?? '-'}</Typography>
+                              <span>User ID:</span>{' '}
+                              <Typography component="span" className="text">
+                                {userData?.userId ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Ethnicity:</span>{' '}
-                              <Typography component="span" className="text">{userData?.Ethicity ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.Ethicity ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Language:</span>{' '}
-                              <Typography component="span" className="text">{userData?.Language ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.Language ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
@@ -358,7 +383,9 @@ const ViewSubmission = () => {
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Address:</span>{' '}
-                              <Typography component="span" className="text">{userData?.Address ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.Address ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                         </Grid>
@@ -367,7 +394,9 @@ const ViewSubmission = () => {
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Gender:</span>{' '}
-                              <Typography component="span" className="text">{userData?.Gender ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.Gender ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
@@ -390,7 +419,10 @@ const ViewSubmission = () => {
 
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
-                              <span>Alternative Id:</span> <Typography component="span" fontSize="12px">{userData?.AlternativeId ?? '-'}</Typography>
+                              <span>Alternative Id:</span>{' '}
+                              <Typography component="span" fontSize="12px">
+                                {userData?.AlternativeId ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
@@ -470,25 +502,33 @@ const ViewSubmission = () => {
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Full Name:</span>{' '}
-                              <Typography component="span" className="text">{userData?.s ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.s ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Gender:</span>{' '}
-                              <Typography component="span" className="text">{userData?.s ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.s ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Relationship to Service User:</span>{' '}
-                              <Typography component="span" className="text">{userData?.s ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.s ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Address:</span>{' '}
-                              <Typography component="span" className="text">{userData?.s ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.s ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                         </Grid>
@@ -513,7 +553,9 @@ const ViewSubmission = () => {
                           <Box display="flex" alignItems="center" mb={1}>
                             <Typography variant="body1" className="heading">
                               <span>Email:</span>{' '}
-                              <Typography component="span" className="text">{userData?.s ?? '-'}</Typography>
+                              <Typography component="span" className="text">
+                                {userData?.s ?? '-'}
+                              </Typography>
                             </Typography>
                           </Box>
                         </Grid>
@@ -602,119 +644,184 @@ const ViewSubmission = () => {
                     Additional Fields
                   </Typography>
                   <Grid container spacing={2}>
-                    {formTitle == 'Volunteer Sign Up Form' &&
+                    {formTitle == 'Volunteer Sign Up Form' && (
                       <>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Do you have a disability or condition that you would like us to be aware of, so we can better support you ?</Typography>
-                            <Typography>{userData?.['Do you have a disability or condition that you would like us to be aware of, so we can better support you ?'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Do you have a disability or condition that you would like us to be aware of, so we can better support you ?
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'Do you have a disability or condition that you would like us to be aware of, so we can better support you ?'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Interest and skills</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Interest and skills
+                            </Typography>
                             <Typography>{userData?.['Interest and skills'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Please add any comments or questions you might have</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Please add any comments or questions you might have
+                            </Typography>
                             <Typography>{userData?.['Please add any comments or questions you might have'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Do you any past experience in volunteer work ?</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Do you any past experience in volunteer work ?
+                            </Typography>
                             <Typography>{userData?.['Do you any past experience in volunteer work ?'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">When are you available?</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              When are you available?
+                            </Typography>
                             <Typography>{userData?.['When are you available?'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
-                      </>}
-                    {formTitle == 'Community Referral' &&
+                      </>
+                    )}
+                    {formTitle == 'Community Referral' && (
                       <>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Safeguarding/Risk Factors</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Safeguarding/Risk Factors
+                            </Typography>
                             <Typography>{userData?.['Safeguarding/Risk Factors'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Do you have a disability or condition that you would like us to be aware of, so we can better support you ?</Typography>
-                            <Typography>{userData?.['Do you have a disability or condition that you would like us to be aware of, so we can better support you ?'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Do you have a disability or condition that you would like us to be aware of, so we can better support you ?
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'Do you have a disability or condition that you would like us to be aware of, so we can better support you ?'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Please choose which session you will be attending</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Please choose which session you will be attending
+                            </Typography>
                             <Typography>{userData?.['Please choose which session you will be attending'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Dietary restrictions</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Dietary restrictions
+                            </Typography>
                             <Typography>{userData?.['Dietary restrictions'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
-                      </>}
-                    {formTitle == 'Satisfaction Survey' &&
+                      </>
+                    )}
+                    {formTitle == 'Satisfaction Survey' && (
                       <>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">I think your organisation have helped me to achieve my goals: (1 -Strongly Disagree, 5 -Strongly Disagree)</Typography>
-                            <Typography>{userData?.['I think your organisation have helped me to achieve my goals: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              I think your organisation have helped me to achieve my goals: (1 -Strongly Disagree, 5 -Strongly Disagree)
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'I think your organisation have helped me to achieve my goals: (1 -Strongly Disagree, 5 -Strongly Disagree)'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">The staff/Mentor at your organisation have treated me fairly and with respect: (1 -Strongly Disagree, 5 -Strongly Disagree)</Typography>
-                            <Typography>{userData?.['The staff/Mentor at your organisation have treated me fairly and with respect: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              The staff/Mentor at your organisation have treated me fairly and with respect: (1 -Strongly Disagree, 5
+                              -Strongly Disagree)
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'The staff/Mentor at your organisation have treated me fairly and with respect: (1 -Strongly Disagree, 5 -Strongly Disagree)'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">I am now more able to deal with issues and problems in my life than I was before: (1 -Strongly Disagree, 5 -Strongly Disagree)</Typography>
-                            <Typography>{userData?.['I am now more able to deal with issues and problems in my life than I was before: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              I am now more able to deal with issues and problems in my life than I was before: (1 -Strongly Disagree, 5
+                              -Strongly Disagree)
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'I am now more able to deal with issues and problems in my life than I was before: (1 -Strongly Disagree, 5 -Strongly Disagree)'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">I now feel more positive about my future: (1 -Strongly Disagree, 5 -Strongly Disagree)</Typography>
-                            <Typography>{userData?.['I now feel more positive about my future: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              I now feel more positive about my future: (1 -Strongly Disagree, 5 -Strongly Disagree)
+                            </Typography>
+                            <Typography>
+                              {userData?.['I now feel more positive about my future: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">I am satisfied with the service I received from your organisation: (1 -Strongly Disagree, 5 -Strongly Disagree)</Typography>
-                            <Typography>{userData?.['I am satisfied with the service I received from your organisation: (1 -Strongly Disagree, 5 -Strongly Disagree)'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              I am satisfied with the service I received from your organisation: (1 -Strongly Disagree, 5 -Strongly
+                              Disagree)
+                            </Typography>
+                            <Typography>
+                              {userData?.[
+                                'I am satisfied with the service I received from your organisation: (1 -Strongly Disagree, 5 -Strongly Disagree)'
+                              ] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">In what way/s could the service/s provided to me by your organisation be improved?</Typography>
-                            <Typography>{userData?.['In what way/s could the service/s provided to me by your organisation be improved?'] ?? '-'}</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              In what way/s could the service/s provided to me by your organisation be improved?
+                            </Typography>
+                            <Typography>
+                              {userData?.['In what way/s could the service/s provided to me by your organisation be improved?'] ?? '-'}
+                            </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection='column'>
-                            <Typography variant="body1" className="heading">Id also like to add</Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1} flexDirection="column">
+                            <Typography variant="body1" className="heading">
+                              Id also like to add
+                            </Typography>
                             <Typography>{userData?.['Id also like to add'] ?? '-'}</Typography>
                           </Box>
                         </Grid>
                       </>
-                    }
+                    )}
                   </Grid>
                 </CardContent>
               </Card>
             )}
           </Box>
         </Grid>
-      </Card >
+      </Card>
     </>
   );
 };

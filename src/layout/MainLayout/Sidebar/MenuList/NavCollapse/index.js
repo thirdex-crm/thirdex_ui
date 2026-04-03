@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import NavItem from '../NavItem';
@@ -10,8 +9,7 @@ import { IconChevronDown, IconChevronUp } from '@tabler/icons';
 
 const NavCollapse = ({ menu, level }) => {
   const theme = useTheme();
-  const customization = useSelector((state) => state.customization);
-  const navigate = useNavigate();
+
   const { pathname } = useLocation();
 
   const [open, setOpen] = useState(false);
@@ -62,6 +60,7 @@ const NavCollapse = ({ menu, level }) => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, menu.children]);
 
   const menus = menu.children?.map((item) => {

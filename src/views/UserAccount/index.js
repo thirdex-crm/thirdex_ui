@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Box,
   Grid,
-  Avatar,
   Card,
   CardContent,
   Typography,
@@ -20,7 +19,6 @@ import {
   TableCell,
   TableContainer,
   TableRow,
-  Switch,
   Paper,
   IconButton,
   Skeleton
@@ -28,22 +26,23 @@ import {
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
+
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import OpacityOutlinedIcon from '@mui/icons-material/OpacityOutlined';
 
 import AntSwitch from 'components/AntSwitch.js';
-import EmailIcon from '@mui/icons-material/Email';
+
 import PhoneIcon from '@mui/icons-material/Phone';
+
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PersonIcon from '@mui/icons-material/Person';
-import BadgeIcon from '@mui/icons-material/Badge';
-import PublicIcon from '@mui/icons-material/Public';
+
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+
 import TranslateIcon from '@mui/icons-material/Translate';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import WorkIcon from '@mui/icons-material/Work';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import EditProfileModal from './editProfile.js';
+
 import ProfileLogo from 'assets/images/profile.png';
 import Background from 'assets/images/background.jpg';
 import { urls } from 'common/urls.js';
@@ -120,16 +119,6 @@ const EmployeeDetails = () => {
     }
   });
 
-  const empData = {
-    email: 'john.doe@example.com',
-    phone: '+1 234 567 890',
-    location: 'New York, USA',
-    fullName: 'John Doe',
-    userId: '1765',
-    ethnicity: 'Mixed-White and Black carebien',
-    country: 'USA',
-    language: 'English'
-  };
   const getUserInfo = async () => {
     setLoading(true);
     const url = urls?.login?.getUserProfile;
@@ -162,8 +151,9 @@ const EmployeeDetails = () => {
             <Tab
               label="Profile"
               value={0}
-              sx={(theme) => ({
+              sx={() => ({
                 backgroundColor: tabValue === 0 ? '#e3f2fd' : 'transparent',
+
                 transition: 'background-color 0.3s ease',
                 marginRight: 2
               })}
@@ -171,7 +161,7 @@ const EmployeeDetails = () => {
             <Tab
               label="Change Password"
               value={1}
-              sx={(theme) => ({
+              sx={() => ({
                 backgroundColor: tabValue === 1 ? '#e3f2fd' : 'transparent',
                 transition: 'background-color 0.3s ease',
                 marginRight: 2
@@ -180,7 +170,7 @@ const EmployeeDetails = () => {
             <Tab
               label="Settings"
               value={2}
-              sx={(theme) => ({
+              sx={() => ({
                 backgroundColor: tabValue === 2 ? '#e3f2fd' : 'transparent',
                 transition: 'background-color 0.3s ease',
                 marginRight: 2

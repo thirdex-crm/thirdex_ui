@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect, useState } from 'react';
 import { Grid, Box, Typography } from '@mui/material';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';

@@ -1,11 +1,12 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { Grid, Paper, Box, Typography, Chip } from '@mui/material';
+import { Paper, Box, Typography, Chip } from '@mui/material';
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import { useEffect, useState } from 'react';
 
-const CaseTagCard = ({ sessionData, caseId }) => {
+const CaseTagCard = ({ sessionData }) => {
   const [loading, setLoading] = useState(true);
   const [groupedTagsArray, setGroupedTagsArray] = useState([]);
 

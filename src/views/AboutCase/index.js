@@ -15,8 +15,7 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Stack,
-  Tooltip
+  Stack
 } from '@mui/material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -24,17 +23,19 @@ import { getApi, postApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import toast from 'react-hot-toast';
 import AboutCaseCard from './AboutCaseCard';
+
 import CaseTagCard from './CaseTagCard';
+
 import OptionsPopoverForCase from 'components/OptionsPopoverForCase';
-import { IconTrash, IconPencil } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 
 const AboutCase = () => {
   const navigate = useNavigate();
+
   const location = useLocation();
-  const [serviceTypeName, setServiceTypeName] = useState('');
   const [sessionData, setSessionData] = useState(null);
   const [groupedTags, setGroupedTags] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmArchiveOpen, setConfirmArchiveOpen] = useState(false);

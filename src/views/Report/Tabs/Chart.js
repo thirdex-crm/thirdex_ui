@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Box } from '@mui/system';
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography } from '@mui/material';
@@ -77,7 +78,13 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
             else if (age >= 60) ageGroupCount['Seniors']++;
           }
         });
-        setAgeBarData([ageGroupCount['Adults'], ageGroupCount['Infants'], ageGroupCount['Seniors'], ageGroupCount['Kids'], ageGroupCount['Young Adults']]);
+        setAgeBarData([
+          ageGroupCount['Adults'],
+          ageGroupCount['Infants'],
+          ageGroupCount['Seniors'],
+          ageGroupCount['Kids'],
+          ageGroupCount['Young Adults']
+        ]);
       } catch (error) {
         console.error('Error fetching service user chart data:', error);
       } finally {
@@ -85,6 +92,7 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
 
   return (

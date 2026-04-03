@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, Grid, Button, Box, IconButton, Stack } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, DialogTitle, Grid, Button, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import GiftAidDialog from './GiftAiddialog';
@@ -13,7 +14,7 @@ import { urls } from 'common/urls';
 import { toast } from 'react-toastify';
 import AddTaskDialog from './AddTaskDialog';
 
-const AddItemDialog = ({ open, onClose, onSelect,fetchTimeLineData, userId, role }) => {
+const AddItemDialog = ({ open, onClose, fetchTimeLineData, userId, role }) => {
   const navigate = useNavigate();
   const [selectedForm, setSelectedForm] = useState(null);
 
@@ -207,7 +208,14 @@ const AddItemDialog = ({ open, onClose, onSelect,fetchTimeLineData, userId, role
         </Grid>
       </Box>
       {selectedForm === 'giftAidDeclarations' && (
-        <GiftAidDialog open={true} onClose={onClose} fetchTimeLineData={fetchTimeLineData} handleClose={() => setSelectedForm(null)} userId={userId} dateLabel={'Gift Aid Declarations'} />
+        <GiftAidDialog
+          open={true}
+          onClose={onClose}
+          fetchTimeLineData={fetchTimeLineData}
+          handleClose={() => setSelectedForm(null)}
+          userId={userId}
+          dateLabel={'Gift Aid Declarations'}
+        />
       )}
       {selectedForm === 'registerAttendance' && <Attendee open={true} handleClose={() => setSelectedForm(null)} userId={userId} />}
       {selectedForm === 'emailInbound' && (

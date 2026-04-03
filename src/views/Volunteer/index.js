@@ -1,16 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, IconButton, Tooltip, InputBase, Menu, MenuItem, Button } from '@mui/material';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Stack, Grid, Typography, Box, Card, IconButton, Tooltip, InputBase } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
 import FilterPanel from 'components/FilterPanel';
 import { getApi } from 'common/apiClient';
-import LibraryAddCheckOutlinedIcon from '@mui/icons-material/LibraryAddCheckOutlined';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import { IconTrash } from '@tabler/icons';
 import { urls } from 'common/urls';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import CustomHeader from 'components/CustomHeader';
@@ -26,13 +23,6 @@ const districts = [
   { label: 'Basildon Borough', value: 'basildon_borough' }
 ];
 
-const dateAddedFilters = [
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'Last 7 Days' },
-  { value: 'month', label: 'Last 30 Days' },
-  { value: 'year', label: 'Last 1 Year' }
-];
-
 const genders = [
   { value: 'Male', label: 'Male' },
   { value: 'Female', label: 'Female' },
@@ -44,10 +34,8 @@ const Volunteer = () => {
   const navigate = useNavigate();
   const [districtFilter, setDistrictFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const showFilter = true;
   const [selectedIds, setSelectedIds] = useState([]);
-
-  const [isFiltered, setIsFiltered] = useState(false);
   const [dateOpenedFilter, setDateOpenedFilter] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,6 +46,7 @@ const Volunteer = () => {
     page: 0,
     pageSize: 10
   });
+  const hasActiveFilters = Boolean(districtFilter || genderFilter || dateOpenedFilter || searchQuery);
 
   const district = useMemo(() => {
     return districts.map((type) => ({
@@ -102,7 +91,7 @@ const Volunteer = () => {
     }
   ];
 
-  const handleFilter = async () => {
+  const handleFilter = useCallback(async () => {
     try {
       const queryParams = new URLSearchParams();
 
@@ -128,7 +117,7 @@ const Volunteer = () => {
 
       const allUser = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
-      const formattedUsers = allUser?.map((user, index) => ({
+      const formattedUsers = allUser?.map((user) => ({
         id: user._id,
         serialNumber: `#${user?.uniqueId}`,
         firstName: user.personalInfo?.firstName || '',
@@ -141,21 +130,16 @@ const Volunteer = () => {
 
       setRows(formattedUsers);
       setTotalRows(pagination?.total);
-      setIsFiltered(true);
     } catch (error) {
       console.error('Failed to fetch filtered services:', error);
     }
-  };
+  }, [dateOpenedFilter, districtFilter, genderFilter, includeArchives, paginationModel.page, paginationModel.pageSize, searchQuery]);
 
   useEffect(() => {
-    if (districtFilter || genderFilter || dateOpenedFilter || searchQuery || isFiltered) {
+    if (hasActiveFilters) {
       handleFilter();
     }
-  }, [districtFilter, genderFilter, dateOpenedFilter, searchQuery, paginationModel.page, paginationModel.pageSize]);
-
-  useEffect(() => {
-    handleFilter();
-  }, [includeArchives]);
+  }, [handleFilter, hasActiveFilters]);
 
   const handleReset = () => {
     setDistrictFilter('');
@@ -163,15 +147,17 @@ const Volunteer = () => {
     setDateOpenedFilter(null);
     setSearchQuery('');
     setIncludeArchives(false);
-    setIsFiltered(false);
-    handleFilter();
+    setPaginationModel((currentPaginationModel) => ({
+      ...currentPaginationModel,
+      page: 0
+    }));
   };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  const fetchpeople = async () => {
+  const fetchpeople = useCallback(async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -187,7 +173,7 @@ const Volunteer = () => {
       const response = await getApi(`${urls.serviceuser.fetchWithPagination}?${queryParams.toString()}`);
       const allUser = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
-      const formattedUsers = allUser?.map((user, index) => ({
+      const formattedUsers = allUser?.map((user) => ({
         id: user._id,
         serialNumber: `#${user?.uniqueId}`,
         firstName: user.personalInfo?.firstName || '',
@@ -205,11 +191,23 @@ const Volunteer = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [includeArchives, paginationModel.page, paginationModel.pageSize]);
 
   useEffect(() => {
-    fetchpeople();
-  }, [paginationModel]);
+    if (!hasActiveFilters) {
+      fetchpeople();
+    }
+  }, [fetchpeople, hasActiveFilters]);
+
+  const handlePaginationModelChange = useCallback((nextPaginationModel) => {
+    setPaginationModel((currentPaginationModel) => {
+      if (currentPaginationModel.page === nextPaginationModel.page && currentPaginationModel.pageSize === nextPaginationModel.pageSize) {
+        return currentPaginationModel;
+      }
+
+      return nextPaginationModel;
+    });
+  }, []);
 
   return (
     <Card sx={{ backgroundColor: '#eef2f6' }}>
@@ -332,7 +330,7 @@ const Volunteer = () => {
                 pagination
                 paginationMode="server"
                 paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
                 onRowSelectionModelChange={(newSelection) => {
                   setSelectedIds(newSelection);
                 }}
@@ -349,7 +347,7 @@ const Volunteer = () => {
                       enableBulkActions={false}
                       exportEnabled={true}
                       extraActions={null}
-                      refetchData={fetchpeople}
+                      refetchData={hasActiveFilters ? handleFilter : fetchpeople}
                     />
                   ),
                   loadingOverlay: () => (
