@@ -1,42 +1,24 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Avatar,
-  Tooltip,
-  Grid,
-  Stack,
-  IconButton,
-  Tabs,
-  Tab,
-  Divider,
-  Chip
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, Stack, IconButton, Tabs, Tab, Chip } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
+
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import Timeline from '@mui/lab/Timeline';
-import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineSeparator from '@mui/lab/TimelineSeparator';
-import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
-import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import { useNavigate, useLocation } from 'react-router-dom';
+
 import FilterPanel from 'components/FilterPanel';
+
 import CancelIcon from '@mui/icons-material/Cancel';
+
 import CaseNoteDialog from 'components/AddCaseNote';
+
 import AddItemDialog from 'components/AddItem';
 import UserBg from 'assets/images/form.png';
 import ServiceUser from 'assets/images/UserProfile.png';
-import OptionsPopover from 'components/AddFilter';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import OptionsPopoverDonor from 'components/PopoverDoner';
-import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined';
 import { imageUrl } from 'common/urls';
+
 import SectionSkeleton from 'ui-component/Loader/SectionSkeleton';
 import { colors, SUBROLES } from 'common/constants';
 import TimelineActivity from 'components/TimelineActivity';
@@ -47,11 +29,12 @@ const UserProfileCard = () => {
   const location = useLocation();
   const id = location.state?._id || location.state?.id;
   const sub_role = location.state?.subRole;
+
   const isArchive = location.state?.isArchive;
   const [tabValue, setTabValue] = useState(0);
-  const [showFilter, setShowFilter] = useState(true);
-  const [activityType, setActivityType] = useState('');
-  const [sessionName, setSessionName] = useState('');
+  const [showFilter] = useState(true);
+  const [, setActivityType] = useState('');
+  const [, setSessionName] = useState('');
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [caseNoteOpen, setCaseNoteOpen] = useState(false);
@@ -127,9 +110,10 @@ const UserProfileCard = () => {
     : '';
   const isActive = userData?.isActive;
   const uniqueId = userData?.uniqueId || '-';
+
   const personalInfo = userData?.personalInfo || {};
   const contactInfo = userData?.contactInfo || {};
-  const emergencyContact = userData?.emergencyContact || {};
+
   const contactPreferences = userData?.contactPreferences || {};
   const otherInfo = userData?.otherInfo || {};
   const companyInformation = userData?.companyInformation || {};
@@ -137,8 +121,7 @@ const UserProfileCard = () => {
 
   if (imagePath.startsWith('/thirdexDev/thirdxBE/') || imagePath.startsWith('/thiredx/thirdxBE/')) {
     imagePath = imagePath.replace('/thirdexDev/thirdxBE/', '');
-      imagePath = imagePath.replace('/thiredx/thirdxBE/', '');
-
+    imagePath = imagePath.replace('/thiredx/thirdxBE/', '');
   }
 
   const fullImageUrl = imagePath ? (imagePath.startsWith('https://') ? imagePath : `${imageUrl}${imagePath}`) : '';
@@ -168,21 +151,15 @@ const UserProfileCard = () => {
 
   const sessionNames = [
     { value: 'session1', label: 'Session 1' },
-    { value: 'session2', label: 'Session 2' }
-  ];
 
-  const dateAddedFilters = [
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'Last 7 Days' },
-    { value: 'month', label: 'Last 30 Days' },
-    { value: 'year', label: 'Last 1 Year' }
+    { value: 'session2', label: 'Session 2' }
   ];
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const handleSave = (data) => {
+  const handleSave = () => {
     setCaseNoteOpen(false);
   };
 
@@ -361,20 +338,21 @@ const UserProfileCard = () => {
                 px: 2,
                 display: 'flex',
                 gap: 2,
+
                 borderBottom: '1px solid #4792d3'
               }}
             >
               <Tab
                 label="Profile"
                 value={0}
-                sx={(theme) => ({
+                sx={() => ({
                   marginRight: 2
                 })}
               />
               <Tab
                 label="Timeline"
                 value={1}
-                sx={(theme) => ({
+                sx={() => ({
                   marginRight: 2
                 })}
               />

@@ -1,6 +1,5 @@
-import { Stack, Grid, TextField, Card, Box, Typography, IconButton, Chip, Tooltip, InputBase, Button } from '@mui/material';
+import { Stack, Grid, Card, Box, Typography, IconButton, Chip, InputBase } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import React, { useState } from 'react';
 import FilterPanel from 'components/FilterPanel';
@@ -8,8 +7,6 @@ import { urls } from 'common/urls';
 import { useEffect } from 'react';
 import { getApi, updateApiPatch } from 'common/apiClient';
 import moment from 'moment';
-import ReadMoreIcon from '@mui/icons-material/ReadMore';
-import { useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
 import SubmissionDialog from './SubmissionDialog';
 import toast from 'react-hot-toast';
@@ -55,10 +52,11 @@ const Lead = () => {
   const [formTypes, setFormTypes] = useState([]);
   const [formTitles, setFormTitles] = useState([]);
   const [dateCreated, setDateCreated] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalRows, setTotalRows] = useState(0);
+  const [statusFilter, setStatusFilter] = useState('');
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10
@@ -91,20 +89,14 @@ const Lead = () => {
     getAllResponse();
     toast.success('Submission Rejected');
     setDialogOpen(false);
-    setConfirmOpen(false)
-  };
-
-  const navigate = useNavigate();
-  const handleNavigate = (id) => {
-    navigate(`${id}`);
+    setConfirmOpen(false);
   };
 
   const getAllResponse = async () => {
     setLoading(true);
     const queryParams = new URLSearchParams({
       page: paginationModel.page + 1,
-      limit: paginationModel.pageSize,
-      status: 'PENDING'
+      limit: paginationModel.pageSize
     });
     if (searchQuery) {
       queryParams.append('search', searchQuery);
@@ -117,6 +109,9 @@ const Lead = () => {
     }
     if (dateCreated) {
       queryParams.append('createdAt', dateCreated);
+    }
+    if (statusFilter) {
+      queryParams.append('status', statusFilter);
     }
     const fromUrl = `${urls?.responses?.submit}?${queryParams.toString()}`;
     const response = await getApi(fromUrl);
@@ -135,12 +130,13 @@ const Lead = () => {
       return data;
     });
     setTotalRows(pagination?.total);
-    setRows(formattedData);
+    setRows(formattedData || []);
     setLoading(false);
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     getAllResponse();
-  }, [searchQuery, formType, paginationModel, formTitle, dateCreated]);
+  }, [searchQuery, formType, paginationModel, formTitle, dateCreated, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getFormTypes = async () => {
     const url = `${urls?.responses?.submit}?limit=10000`;
@@ -188,6 +184,21 @@ const Lead = () => {
       )
     },
     {
+      field: 'status',
+      headerName: 'Status',
+      flex: 0.8,
+      renderCell: (params) => {
+        const val = params.value || 'PENDING';
+        const colorMap = {
+          APPROVED: { color: '#41c048', bg: '#eefbe5' },
+          REJECTED: { color: '#e53935', bg: '#fdecea' },
+          PENDING: { color: '#f57c00', bg: '#fff3e0' }
+        };
+        const colors = colorMap[val] || colorMap.PENDING;
+        return <Chip label={val} sx={{ color: colors.color, backgroundColor: colors.bg, fontWeight: 500 }} />;
+      }
+    },
+    {
       field: 'edit',
       headerName: 'Edit',
       flex: 0.3,
@@ -202,7 +213,7 @@ const Lead = () => {
             onClick={(e) => {
               e.stopPropagation();
               setSelectedRowId(params.row.id);
-              setConfirmOpen(true)
+              setConfirmOpen(true);
             }}
             size={18}
             style={{ color: 'red', cursor: 'pointer', verticalAlign: 'middle' }}
@@ -293,7 +304,14 @@ const Lead = () => {
               setFormTitle={setFormTitle}
               dateCreated={dateCreated}
               setDateCreated={setDateCreated}
-              selectedFilters={['formType', 'formDisplayTitle', 'dateSubmitted']}
+              statuses={[
+                { value: 'PENDING', label: 'Pending' },
+                { value: 'APPROVED', label: 'Approved' },
+                { value: 'REJECTED', label: 'Rejected' }
+              ]}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              selectedFilters={['formType', 'formDisplayTitle', 'dateSubmitted', 'statusFilter']}
             />
 
             <Grid item xs={9}>
@@ -303,9 +321,9 @@ const Lead = () => {
                     loading
                       ? []
                       : rows.map((row, index) => ({
-                        ...row,
-                        sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                      }))
+                          ...row,
+                          sNo: paginationModel.page * paginationModel.pageSize + index + 1
+                        }))
                   }
                   columns={columns}
                   loading={loading}

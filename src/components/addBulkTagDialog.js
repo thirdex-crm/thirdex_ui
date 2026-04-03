@@ -1,22 +1,12 @@
-
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  Grid,
-  Box,
-  IconButton,
-  Autocomplete,
-  TextField,
-  Button,
-  Stack
-} from '@mui/material';
+import { Dialog, DialogTitle, Grid, Box, IconButton, Autocomplete, TextField, Button, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { getApi, postApi } from 'common/apiClient'; 
+import { getApi, postApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import toast from 'react-hot-toast';
 
-const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => {
+const AddItemDialog = ({ open, onClose, selectedIds = [] }) => {
   const [entityIds, setEntityIds] = useState([]);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
@@ -26,20 +16,20 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
   useEffect(() => {
     if (open) {
       getApi(urls.tagCategory.fetchWithPagination)
-        .then(res => {
+        .then((res) => {
           setCategories(res?.data?.data || []);
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     }
   }, [open]);
 
   useEffect(() => {
     if (selectedCategory) {
       getApi(`${urls.tag.fetchWithPagination}?categoryId=${selectedCategory._id}`)
-        .then(res => {
+        .then((res) => {
           setTags(res.data.data || []);
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     } else {
       setTags([]);
       setSelectedTag(null);
@@ -52,7 +42,7 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
       for (const id of selectedIds) {
         const res = await getApi(`${urls.list.fetchListData}/${id}`);
         const entities = res?.data?.data || [];
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           if (entity?._id) {
             allIds.add(entity._id);
           }
@@ -70,12 +60,13 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
     } else {
       setEntityIds([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, selectedIds]);
 
   const handleSave = async () => {
     if (!selectedTag || entityIds.length === 0) {
-      console.log(selectedTag._id, entityIds, );
-      
+      console.log(selectedTag._id, entityIds);
+
       toast.error('Please select a tag and ensure there are entities to assign.');
       return;
     }
@@ -83,12 +74,12 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
     try {
       await postApi(urls.list.assignTagToEntities, {
         tagId: selectedTag?._id,
-        entityIds: entityIds,
+        entityIds: entityIds
       });
-      console.log(selectedTag._id, entityIds, );
-      
+      console.log(selectedTag._id, entityIds);
+
       // Close after successful save
-      toast.success("tag updated successfully");
+      toast.success('tag updated successfully');
       onClose();
     } catch (err) {
       console.error('Failed to save tag:', err);
@@ -112,9 +103,7 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
       }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between" px={2} pt={2}>
-        <DialogTitle sx={{ fontSize: '16px', fontWeight: '600', p: 0 }}>
-          Add Tags
-        </DialogTitle>
+        <DialogTitle sx={{ fontSize: '16px', fontWeight: '600', p: 0 }}>Add Tags</DialogTitle>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -127,9 +116,7 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
               getOptionLabel={(option) => option?.name || ''}
               value={selectedCategory}
               onChange={(e, value) => setSelectedCategory(value)}
-              renderInput={(params) => (
-                <TextField {...params} label="Tags Category" size="small" />
-              )}
+              renderInput={(params) => <TextField {...params} label="Tags Category" size="small" />}
             />
           </Grid>
 
@@ -140,9 +127,7 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
               value={selectedTag}
               onChange={(e, value) => setSelectedTag(value)}
               disabled={!selectedCategory}
-              renderInput={(params) => (
-                <TextField {...params} label="Tags" size="small" />
-              )}
+              renderInput={(params) => <TextField {...params} label="Tags" size="small" />}
             />
           </Grid>
 
@@ -152,16 +137,22 @@ const AddItemDialog = ({ open, onClose, entityType = '', selectedIds = [] }) => 
               <Button variant="outlined" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button variant="contained"  sx={{
-                  background: '#053146', borderRadius: '8px',
+              <Button
+                variant="contained"
+                sx={{
+                  background: '#053146',
+                  borderRadius: '8px',
                   // paddingInline: 4,
                   '&:hover': {
                     backgroundColor: '#053146'
                   },
                   px: 4,
                   py: 1,
-                  fontWeight: 600,
-                }}onClick={handleSave} disabled={!selectedTag}>
+                  fontWeight: 600
+                }}
+                onClick={handleSave}
+                disabled={!selectedTag}
+              >
                 Save
               </Button>
             </Stack>

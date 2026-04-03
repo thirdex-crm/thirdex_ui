@@ -46,15 +46,15 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
             sx={{
               mt: 1,
               mb: 4,
-              backgroundColor: '#053146', 
-              color: 'white', 
-              border: '1px solid white', 
+              backgroundColor: '#053146',
+              color: 'white',
+              border: '1px solid white',
               '&:hover': {
-                backgroundColor: '#021d2a', 
-                border: '1px solid white' 
+                backgroundColor: '#021d2a',
+                border: '1px solid white'
               },
               '& .MuiSvgIcon-root': {
-                color: 'white' 
+                color: 'white'
               }
             }}
           >

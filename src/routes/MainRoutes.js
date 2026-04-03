@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoutes from './PrivateRoute';
-import { element } from 'prop-types';
+
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 const PeopleManagement = Loadable(lazy(() => import('views/People')));
 const Volunteer = Loadable(lazy(() => import('views/Volunteer')));

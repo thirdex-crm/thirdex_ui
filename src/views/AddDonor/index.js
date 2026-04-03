@@ -10,7 +10,6 @@ import {
   Tabs,
   Tab,
   Box,
-  Switch,
   Paper,
   TextField,
   InputAdornment,
@@ -50,13 +49,13 @@ const AddDonorForm = () => {
   const [countryList, setCountryList] = useState([]);
   const [contactMethodStates, setContactMethodStates] = useState(contactMethodInitial);
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [, setSelectedFile] = useState(null);
   const [isLoading, setIsloading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
   const [contactpurpose, setContactpurpose] = useState([]);
   const [reason, setReason] = useState([]);
-  const [contactmethod, setContactmethod] = useState([]);
+  const [, setContactmethod] = useState([]);
   const initialPurposeStates = contactpurpose?.reduce((acc, curr) => {
     acc[curr._id] = 0;
     return acc;
@@ -71,13 +70,14 @@ const AddDonorForm = () => {
   const fileInputRef = React.useRef(null);
 
   const {
-    register,
     handleSubmit,
+
     control,
     setValue,
+
     watch,
     reset,
-    trigger,
+
     formState: { errors }
   } = useForm({
     mode: 'all',
@@ -140,20 +140,12 @@ const AddDonorForm = () => {
         const countries = data.map((country) => ({
           code: country.cca2,
           name: country.name.common,
+
           flag: country.flags.png
         }));
         setCountryList(countries);
       });
   }, []);
-
-  const handleChange = (e) => {
-    setCaseData({ ...caseData, [e.target.name]: e.target.value });
-  };
-
-  const handleFileClick = (e) => {
-    e.preventDefault();
-    fileInputRef.current?.click();
-  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -412,6 +404,7 @@ const AddDonorForm = () => {
       setValue('contactPurposeStates', restoredStates);
       setValue('contactPurpose', selected);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editdata, contactpurpose]);
 
   return (
@@ -449,24 +442,26 @@ const AddDonorForm = () => {
               sx={{
                 display: 'flex',
                 gap: 2,
+
                 borderBottom: '1px solid #4792d3'
               }}
             >
               <Tab
                 label="Personal Details"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 0 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
                   fontSize: '14px',
                   minWidth: 120,
+
                   fontWeight: 'bold',
                   textTransform: 'none'
                 })}
               />
               <Tab
                 label="Contact Preferences"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 1 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -1043,24 +1038,26 @@ const AddDonorForm = () => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {

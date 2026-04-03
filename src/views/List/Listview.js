@@ -1,16 +1,17 @@
 import React from 'react';
-import { Card, Grid, IconButton, Tooltip, Typography, InputBase, Button, Menu, MenuItem, Dialog, DialogContent, DialogTitle, Switch, FormControlLabel, Divider } from '@mui/material';
+import { Card, Grid, IconButton, Tooltip, Typography, Button, Dialog, DialogContent, DialogTitle, Switch, Divider } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import { useState, useEffect } from 'react';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import { getApi, updateApi } from 'common/apiClient';
+import { getApi } from 'common/apiClient';
+import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
-import { entityTypeMap, ROLES, sessionNames } from 'common/constants';
+import { entityTypeMap } from 'common/constants';
 import CustomHeader from 'components/CustomHeader';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 const ListView = () => {
@@ -31,6 +32,80 @@ const ListView = () => {
     pageSize: 10
   });
 
+  const handlePrepareDownload = async () => {
+    try {
+      const response = await getApi(`${urls.list.fetchListData}/${id}?page=1&limit=100000`);
+      const allData = response?.data?.data || [];
+      const lType = listType?.toLowerCase();
+
+      let headers = [];
+      let csvRows = [];
+
+      if (['service_user', 'donor', 'volunteer'].includes(lType)) {
+        headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Address'];
+
+        let records = allData;
+        if (combineAddress) {
+          const seen = {};
+          records = allData.filter((u) => {
+            const addr = u?.personalInfo?.address || '';
+            if (seen[addr]) return false;
+            seen[addr] = true;
+            return true;
+          });
+        }
+
+        csvRows = records.map((u) => [
+          u?.personalInfo?.firstName || '',
+          u?.personalInfo?.lastName || '',
+          u?.personalInfo?.email || '',
+          u?.personalInfo?.phone || '',
+          u?.personalInfo?.address || ''
+        ]);
+      } else if (lType === 'donations') {
+        headers = ['Transaction ID', 'Amount Paid', 'Payment Method', 'Date'];
+        csvRows = allData.map((d) => [
+          d?.transactionId || '',
+          d?.amountPaid || '',
+          d?.paymentMethod || '',
+          d?.createdAt ? new Date(d.createdAt).toLocaleDateString() : ''
+        ]);
+      } else if (lType === 'case') {
+        headers = ['Case ID', 'Title', 'Status', 'Date'];
+        csvRows = allData.map((c) => [
+          c?.uniqueId || c?._id || '',
+          c?.title || '',
+          c?.status || '',
+          c?.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''
+        ]);
+      } else if (lType === 'services') {
+        headers = ['Name', 'Type', 'Date'];
+        csvRows = allData.map((s) => [s?.name || '', s?.serviceType || '', s?.createdAt ? new Date(s.createdAt).toLocaleDateString() : '']);
+      } else {
+        headers = ['ID', 'Name'];
+        csvRows = allData.map((item) => [item?._id || '', item?.name || item?.title || item?.transactionId || '']);
+      }
+
+      const escape = (val) => `"${String(val).replace(/"/g, '""')}"`;
+      const csvContent = [headers.map(escape).join(','), ...csvRows.map((row) => row.map(escape).join(','))].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${listData?.name || 'list'}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setDownloadOpen(false);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Failed to prepare download');
+    }
+  };
+
   const fetchLists = async () => {
     try {
       setLoading(true);
@@ -50,9 +125,11 @@ const ListView = () => {
       const formattedUsers = users.map((user, index) => ({
         id: user?._id,
         serialNumber: `#C-${(index + 1).toString().padStart(3, '0')}`,
-        name: user?.personalInfo ? (`${user.personalInfo.firstName} ${user.personalInfo.lastName}`): user?.uniqueId || user?.name||user?.transactionId||user?.title
+        name: user?.personalInfo
+          ? `${user.personalInfo.firstName} ${user.personalInfo.lastName}`
+          : user?.uniqueId || user?.name || user?.transactionId || user?.title
       }));
-     
+
       setListData(response?.data?.listData);
 
       setRows(formattedUsers);
@@ -66,7 +143,21 @@ const ListView = () => {
 
   useEffect(() => {
     fetchLists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleInfoClick = (rowId) => {
+    const type = listType?.toLowerCase();
+    if (type === 'service_user' || type === 'volunteer') {
+      navigate('/view-people', { state: { id: rowId } });
+    } else if (type === 'services') {
+      navigate('/view-service', { state: { serviceId: rowId } });
+    } else if (type === 'case') {
+      navigate('/view-case', { state: { id: rowId } });
+    } else if (type === 'donor') {
+      navigate('/view-donor', { state: { id: rowId } });
+    }
+  };
 
   const columns = [
     {
@@ -85,7 +176,7 @@ const ListView = () => {
           </Stack>
 
           <Tooltip title="Info" arrow>
-            <IconButton>
+            <IconButton onClick={() => handleInfoClick(params.row.id)}>
               <InfoIcon sx={{ color: '#49494c' }} />
             </IconButton>
           </Tooltip>
@@ -132,13 +223,18 @@ const ListView = () => {
                 <Typography variant="body2">Create separate files for each communication channel</Typography>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconButton size="small" onClick={() => setSeparateFiles(false)} sx={{ p: 0 }}>
-                    <Typography fontSize="14px" color="error">✕</Typography>
+                    <Typography fontSize="14px" color="error">
+                      ✕
+                    </Typography>
                   </IconButton>
                   <Switch
                     checked={separateFiles}
                     onChange={(e) => setSeparateFiles(e.target.checked)}
                     size="small"
-                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' }
+                    }}
                   />
                   <Typography variant="body2" color="text.secondary">
                     {separateFiles ? 'Yes' : 'No'}
@@ -150,13 +246,18 @@ const ListView = () => {
                 <Typography variant="body2">Combine people at the same address into one row in the download file</Typography>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconButton size="small" onClick={() => setCombineAddress(false)} sx={{ p: 0 }}>
-                    <Typography fontSize="14px" color="error">✕</Typography>
+                    <Typography fontSize="14px" color="error">
+                      ✕
+                    </Typography>
                   </IconButton>
                   <Switch
                     checked={combineAddress}
                     onChange={(e) => setCombineAddress(e.target.checked)}
                     size="small"
-                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' }
+                    }}
                   />
                   <Typography variant="body2" color="text.secondary">
                     {combineAddress ? 'Yes' : 'No'}
@@ -173,13 +274,18 @@ const ListView = () => {
                 <Typography variant="body2">Add Activities to Timeline</Typography>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconButton size="small" onClick={() => setAddToTimeline(false)} sx={{ p: 0 }}>
-                    <Typography fontSize="14px" color="error">✕</Typography>
+                    <Typography fontSize="14px" color="error">
+                      ✕
+                    </Typography>
                   </IconButton>
                   <Switch
                     checked={addToTimeline}
                     onChange={(e) => setAddToTimeline(e.target.checked)}
                     size="small"
-                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' } }}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#009fc7' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#009fc7' }
+                    }}
                   />
                   <Typography variant="body2" color="text.secondary">
                     {addToTimeline ? 'Yes' : 'No'}
@@ -191,14 +297,25 @@ const ListView = () => {
                 <Button
                   variant="contained"
                   onClick={() => setDownloadOpen(false)}
-                  sx={{ backgroundColor: '#f5a623', '&:hover': { backgroundColor: '#d4911a' }, color: '#fff', borderRadius: '20px', textTransform: 'none' }}
+                  sx={{
+                    backgroundColor: '#f5a623',
+                    '&:hover': { backgroundColor: '#d4911a' },
+                    color: '#fff',
+                    borderRadius: '20px',
+                    textTransform: 'none'
+                  }}
                 >
                   Close
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={() => setDownloadOpen(false)}
-                  sx={{ backgroundColor: '#009fc7', '&:hover': { backgroundColor: '#007da3' }, borderRadius: '20px', textTransform: 'none' }}
+                  onClick={handlePrepareDownload}
+                  sx={{
+                    backgroundColor: '#009fc7',
+                    '&:hover': { backgroundColor: '#007da3' },
+                    borderRadius: '20px',
+                    textTransform: 'none'
+                  }}
                 >
                   Prepare Download
                 </Button>

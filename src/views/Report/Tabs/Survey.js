@@ -1,12 +1,10 @@
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Box, Tabs, Tab, Grid } from '@mui/material';
-import { Button, TextField, Typography } from '@mui/material';
+import { Box, Tabs, Tab, Grid, Tooltip, IconButton, Typography } from '@mui/material';
 import Chart from './SurveyChart';
 import CaseList from './SurveyList';
 import FilterPanel from 'components/FilterPanel';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import PrintStyles from 'themes/print.js';
 const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
@@ -68,18 +66,12 @@ const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpene
                   Key Indicators Of Concern
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={() => window.print()} />
-                <SaveAltOutlinedIcon
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = '/api/report/download-csv';
-                    link.download = 'report.csv';
-                    link.click();
-                  }}
-                />
-                <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Tooltip title="Print">
+                  <IconButton size="small" onClick={() => window.print()}>
+                    <PrintOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
             <Box
@@ -104,16 +96,22 @@ const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpene
               >
                 <FilterPanel {...FilterPanelProp} />
               </Box>
-               <PrintStyles targetId="print-chart" />
+              <PrintStyles targetId="print-chart" />
               <Box
-               id="print-chart"
+                id="print-chart"
                 sx={{
                   flexGrow: 2,
                   flexShrink: 1,
                   minWidth: 0
                 }}
               >
-                <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
+                <Chart
+                  countryOfOriginFilter={countryOfOriginFilter}
+                  selectedName={selectedName}
+                  status={status}
+                  caseId={caseId}
+                  dateOpenedFilter={dateOpenedFilter}
+                />
               </Box>
             </Box>
           </>
@@ -148,17 +146,22 @@ const Survey = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpene
                 minWidth: 0
               }}
             >
-              <CaseList
-                countryOfOriginFilter={countryOfOriginFilter}
-                selectedName={selectedName}
-                status={status}
-              />
+              <CaseList countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} />
             </Box>
           </Box>
         )}
       </Box>
     </Grid>
   );
+};
+
+Survey.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string,
+  FilterPanelProp: PropTypes.any
 };
 
 export default Survey;

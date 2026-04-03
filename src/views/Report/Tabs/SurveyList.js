@@ -1,6 +1,7 @@
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
@@ -11,34 +12,49 @@ import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 const KeyIndicatorsList = ({ countryOfOriginFilter, selectedName, status }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [riskFactors, setRiskFactors] = useState([]);
+  const [, setRiskFactors] = useState([]);
 
   const columns = [
     { field: 'label', headerName: 'Key Indicator of Concern', flex: 1 },
     { field: 'count', headerName: 'Count of People', width: 160 }
   ];
 
-  const CustomToolbar = () =>{
- const apiRef = useGridApiContext();
+  const CustomToolbar = () => {
+    const apiRef = useGridApiContext();
 
     const handleExportCSV = () => {
       apiRef.current.exportDataAsCsv();
     };
 
     const handlePrint = () => {
-      apiRef.current.exportDataAsPrint();
+      apiRef.current.exportDataAsPrint({
+        pageStyle:
+          '@page { size: landscape; margin: 10mm; } body { -webkit-print-color-adjust: exact; } .MuiDataGrid-footerContainer { display: none !important; } .MuiDataGrid-scrollbar { display: none !important; } .MuiIconButton-root { display: none !important; }'
+      });
     };
-   return(
+    return (
       <GridToolbarContainer sx={{ justifyContent: 'space-between', p: 1 }}>
-      <Typography sx={{ fontWeight: 600, fontSize: '16px' }}>Key Indicators List</Typography>
-       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handlePrint} />
-            <SaveAltOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handleExportCSV} />
-            <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
-          </Box>
-    </GridToolbarContainer>
-  );
-} 
+        <Typography sx={{ fontWeight: 600, fontSize: '16px' }}>Key Indicators List</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Tooltip title="Print">
+            <IconButton size="small" onClick={handlePrint}>
+              <PrintOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download CSV">
+            <IconButton size="small" onClick={handleExportCSV}>
+              <SaveAltOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Open in New Tab">
+            <IconButton size="small" onClick={() => window.open(window.location.href, '_blank')}>
+              <OpenInNewIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </GridToolbarContainer>
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,6 +134,12 @@ const KeyIndicatorsList = ({ countryOfOriginFilter, selectedName, status }) => {
       />
     </Box>
   );
+};
+
+KeyIndicatorsList.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string
 };
 
 export default KeyIndicatorsList;

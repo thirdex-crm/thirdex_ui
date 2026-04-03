@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Card, Grid, IconButton, TextField, Tooltip, Typography, InputBase } from '@mui/material';
+import { Button, Card, Grid, IconButton, Tooltip, Typography, InputBase } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
@@ -21,10 +21,10 @@ const sessionNames = [
 ];
 
 const BulkDelete = () => {
-  const [showFilter, setShowFilter] = useState(true);
-  const [activityType, setActivityTypeFilter] = useState('');
+  const [showFilter] = useState(true);
+  const [, setActivityTypeFilter] = useState('');
   const [includeArchives, setIncludeArchives] = useState(false);
-  const [sessionName, setSessionNameFilter] = useState('');
+  const [, setSessionNameFilter] = useState('');
   const [dateAddedFilter, setDateAddedFilter] = useState(dayjs());
 
   const CustomHeader = () => (
@@ -100,7 +100,9 @@ const BulkDelete = () => {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" m={1}>
-        <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">Bulk Delete</Typography>
+        <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">
+          Bulk Delete
+        </Typography>
 
         <Stack direction="row" spacing={2} alignItems="center">
           <Button

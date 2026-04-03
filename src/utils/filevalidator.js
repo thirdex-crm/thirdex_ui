@@ -1,4 +1,3 @@
-
 // export const validateFile = (file) => {
 //   const allowedTypes = [
 //     'application/pdf',
@@ -22,16 +21,16 @@
 export const validateFile = (file) => {
   const allowedTypes = [
     'application/pdf',
-    'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'image/jpeg',
-    'image/png', 
+    'image/png'
   ];
 
   const maxSizeInBytes = 25 * 1024 * 1024;
 
-  if (!file) return true; 
+  if (!file) return true;
 
   if (!allowedTypes.includes(file.type)) {
     return 'Only JPG, JPEG, PNG, PDF, CSV, DOC, DOCX, and XLSX files are allowed.';

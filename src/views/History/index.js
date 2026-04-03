@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { Stack, Typography, Box, Card, TextField, Chip, Tabs, Tab, Container, Grid, IconButton, InputBase } from '@mui/material';
+import { Stack, Typography, Box, Card, Chip, Tabs, Tab, Grid, IconButton, InputBase } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterPanel from 'components/FilterPanel';
@@ -8,11 +9,6 @@ import { getApi } from 'common/apiClient';
 import { useEffect } from 'react';
 import moment from 'moment';
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
-
-const statusFilter = [
-  { value: 'APPROVED', label: 'Approved' },
-  { value: 'REJECTED', label: 'Rejected' }
-];
 
 const dateAddedFilters = [
   { value: 'today', label: 'Today' },
@@ -62,8 +58,7 @@ const columns = [
 
 export default function TabbedDataGrid() {
   const [tabValue, setTabValue] = useState(0);
-  const [showFilter, setShowFilter] = useState(true);
-  const [status, setStatus] = useState('');
+  const [showFilter] = useState(true);
   const [dateOpenedFilter, setDateOpenedFilter] = useState('');
   const [namesFilter, setNamesFilter] = useState([]);
   const [nameFilter, setNameFilter] = useState('');
@@ -78,25 +73,25 @@ export default function TabbedDataGrid() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  const filteredRows = allRows.filter((row) => (tabValue === 0 ? row.status === 'APPROVED' : row.status === 'REJECTED'));
+  // Derive the status from the active tab — always server-side filtered
+  const tabStatus = tabValue === 0 ? 'APPROVED' : 'REJECTED';
 
   const getAllResponse = async () => {
+    setLoading(true);
     const queryParams = new URLSearchParams({
       page: paginationModel.page + 1,
-      limit: paginationModel.pageSize
+      limit: paginationModel.pageSize,
+      status: tabStatus
     });
     if (searchQuery) {
       queryParams.append('search', searchQuery);
     }
     if (nameFilter) {
-      queryParams.append('search', nameFilter);
+      queryParams.append('title', nameFilter);
     }
     if (dateOpenedFilter) {
       const formattedDate = new Date(dateOpenedFilter).toISOString().split('T')[0];
-      queryParams.append('date', formattedDate);
-    }
-    if (status) {
-      queryParams.append('status', status);
+      queryParams.append('createdAt', formattedDate);
     }
     if (startDate) {
       queryParams.append('startDate', moment(startDate).format('YYYY-MM-DD'));
@@ -107,38 +102,44 @@ export default function TabbedDataGrid() {
     const fromUrl = `${urls?.responses?.submit}?${queryParams.toString()}`;
     const response = await getApi(fromUrl);
     const pagination = response?.data?.meta || { total: 0 };
-    
-    const formattedData = response?.data?.data
-      ?.map((item, index) => {
-        const submissionDate = moment(item?.submittedAt).format('L');
-        let data = {
-          id: index + 1,
-          title: item?.formId?.title,
-          status: item?.status,
-          date: submissionDate,
-          age: item?.data?.Age || '-'
-        };
-        return data;
-      })
-      ?.filter((item) => item?.status === 'APPROVED' || item?.status === 'REJECTED');
+
+    const formattedData = (response?.data?.data || []).map((item) => ({
+      id: item?._id,
+      title: item?.formId?.title || item?.title || '-',
+      status: item?.status,
+      date: moment(item?.submittedAt).format('L'),
+      age: item?.data?.Age || '-'
+    }));
+
     setTotalRows(pagination?.total);
     setRows(formattedData);
     setLoading(false);
   };
+
+  useEffect(() => {
+    // Reset to page 0 when tab changes so counts are correct
+    setPaginationModel((prev) => ({ ...prev, page: 0 }));
+  }, [tabValue]);
+
   useEffect(() => {
     getAllResponse();
-  }, [nameFilter, searchQuery, dateOpenedFilter, status, startDate, endDate, paginationModel, tabValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nameFilter, searchQuery, dateOpenedFilter, startDate, endDate, paginationModel, tabStatus]);
 
   const getResponse = async () => {
     const url = `${urls?.responses?.submit}?limit=10000`;
     const response = await getApi(url);
-    const options = response?.data?.data
-      ?.map((item) => ({
-        value: item?.formId?.title,
-        label: item?.formId?.title,
-        status: item?.status
-      }))
-      ?.filter((item) => item?.status === 'APPROVED' || item?.status === 'REJECTED');
+    const seen = new Set();
+    const options = (response?.data?.data || [])
+      .filter((item) => item?.status === 'APPROVED' || item?.status === 'REJECTED')
+      .reduce((acc, item) => {
+        const label = item?.formId?.title || item?.title;
+        if (label && !seen.has(label)) {
+          seen.add(label);
+          acc.push({ value: label, label });
+        }
+        return acc;
+      }, []);
     setNamesFilter(options);
   };
   useEffect(() => {
@@ -181,7 +182,9 @@ export default function TabbedDataGrid() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" m={1}>
-        <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">History</Typography>
+        <Typography fontWeight="600" fontSize="16px" display="flex" alignItems="center">
+          History
+        </Typography>
         <Box
           sx={{
             display: 'flex',
@@ -232,9 +235,6 @@ export default function TabbedDataGrid() {
       <Grid container spacing={2}>
         <FilterPanel
           showFilter={showFilter}
-          statuses={statusFilter}
-          statusFilter={status}
-          setStatusFilter={setStatus}
           dateAddedFilters={dateAddedFilters}
           dateOpenedFilter={dateOpenedFilter}
           setDateOpenedFilter={(value) => setDateOpenedFilter(value)}
@@ -245,7 +245,14 @@ export default function TabbedDataGrid() {
           setStartDate={setStartDate}
           endDate={endDate}
           setEndDate={setEndDate}
-          selectedFilters={['nameFilter', 'statusFilter', 'dateRange']}
+          selectedFilters={['nameFilter', 'dateRange']}
+          onReset={() => {
+            setNameFilter('');
+            setDateOpenedFilter('');
+            setStartDate(null);
+            setEndDate(null);
+            setSearchQuery('');
+          }}
         />
         <Grid item xs={9}>
           <Box sx={{ width: '100%' }}>
@@ -254,10 +261,10 @@ export default function TabbedDataGrid() {
                 rows={
                   loading
                     ? []
-                    : filteredRows.map((row, index) => ({
-                      ...row,
-                      sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                    }))
+                    : allRows.map((row, index) => ({
+                        ...row,
+                        sNo: paginationModel.page * paginationModel.pageSize + index + 1
+                      }))
                 }
                 loading={loading}
                 columns={columns}

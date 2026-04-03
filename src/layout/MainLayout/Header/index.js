@@ -102,11 +102,7 @@ const Header = ({ handleLeftDrawerToggle }) => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         >
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <StaticDatePicker
-              displayStaticWrapperAs="desktop"
-              value={selectedDate}
-              onChange={handleDateChange}
-            />
+            <StaticDatePicker displayStaticWrapperAs="desktop" value={selectedDate} onChange={handleDateChange} renderInput={() => null} />
           </LocalizationProvider>
         </Popover>
       </Box>

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import {
   Popover,
@@ -21,8 +22,7 @@ import {
 
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import CancelIcon from '@mui/icons-material/Cancel';
-import { IconTrash, IconPencil } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 import { useNavigate } from 'react-router-dom';
 import { urls } from 'common/urls';
 import toast from 'react-hot-toast';

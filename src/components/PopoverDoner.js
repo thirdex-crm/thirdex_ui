@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconTrash, IconPencil } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 import {
   Box,
   Typography,
@@ -21,11 +22,9 @@ import {
   InputLabel
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import MergeTypeIcon from '@mui/icons-material/MergeType';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { urls } from 'common/urls';
 import { updateApi } from 'common/apiClient';
+
 import toast from 'react-hot-toast';
 
 const OptionsPopoverDonor = ({ anchorEl, open, onClose, data }) => {

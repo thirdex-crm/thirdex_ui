@@ -2,14 +2,15 @@ import React from 'react';
 import { Box, Typography, Grid, Button, Divider, IconButton } from '@mui/material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useNavigate, useLocation } from 'react-router-dom';
-import WestIcon from '@mui/icons-material/West';
+
 import EastIcon from '@mui/icons-material/East';
 import { urls } from 'common/urls';
 import { updateApi } from 'common/apiClient';
+import toast from 'react-hot-toast';
 const DuplicateDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { ids, names, emails, phones, dobs, added } = location.state || {};
+  const { ids, names, emails, phones, dobs, added, matchType } = location.state || {};
 
   const rowLabelStyle = { fontWeight: 'bold', color: '#555', fontSize: '12px' };
   const rowDataStyle = { color: '#333', fontSize: '12px' };
@@ -21,12 +22,14 @@ const DuplicateDetails = () => {
 
     try {
       for (const id of toDeleteIds) {
-        const res = await updateApi(urls.serviceuser.deleteUser.replace(':userId', id));
+        await updateApi(urls.serviceuser.deleteUser.replace(':userId', id));
       }
 
-      navigate(-1);
+      toast.success('Records merged successfully');
+      setTimeout(() => navigate(-1), 1000);
     } catch (error) {
       console.error('Error while deleting users:', error);
+      toast.error('Merge failed. Please try again.');
     }
   };
 
@@ -45,7 +48,7 @@ const DuplicateDetails = () => {
             <Grid container sx={{ bgcolor: '#f9f9f9', p: 2 }}>
               <Grid item xs={3}>
                 <Typography sx={{ fontWeight: 500, fontSize: '12px' }}>
-                  Matched on <strong>Email, Name, DOB</strong>
+                  Matched on <strong>{matchType || 'Email'}</strong>
                 </Typography>
               </Grid>
 

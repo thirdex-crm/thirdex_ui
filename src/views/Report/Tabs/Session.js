@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
-import { Box, Tabs, Tab, Grid } from '@mui/material';
+import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
+import { Box, Tabs, Tab, Grid, Tooltip, IconButton } from '@mui/material';
 import Chart from './SessionChart.js';
 import SessionList from './SessionList';
 import FilterPanel from 'components/FilterPanel.js';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import PrintStyles from 'themes/print.js';
+import { getApi } from 'common/apiClient.js';
+import { urls } from 'common/urls.js';
 const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
+  const [totalSessions, setTotalSessions] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  useEffect(() => {
+    getApi(urls.dashboard.getTotalSession)
+      .then((res) => setTotalSessions(res?.data?.totalSession ?? 0))
+      .catch(() => {});
+  }, []);
 
   return (
     <Grid>
@@ -46,97 +54,91 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
       <Box>
         {value === 0 && (
           <>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              px: 2,
-              mb: 2.5,
-              flexWrap: 'wrap',
-              gap: 1
-            }}
-          >
             <Box
               sx={{
                 display: 'flex',
-                gap: 2,
-                flexWrap: 'wrap'
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                px: 2,
+                mb: 2.5,
+                flexWrap: 'wrap',
+                gap: 1
               }}
             >
               <Box
                 sx={{
-                  backgroundColor: '#fff',
-                  borderRadius: '24px',
-                  px: 2.5,
-                  py: 1.5,
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.04)',
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  fontWeight: 500
+                  gap: 2,
+                  flexWrap: 'wrap'
                 }}
               >
-                <span>Total Sessions Delivered</span>
-                <span style={{ color: '#00B8D9', fontWeight: '600' }}>36</span>
+                <Box
+                  sx={{
+                    backgroundColor: '#fff',
+                    borderRadius: '24px',
+                    px: 2.5,
+                    py: 1.5,
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.04)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    fontWeight: 500
+                  }}
+                >
+                  <span>Total Sessions Delivered</span>
+                  <span style={{ color: '#00B8D9', fontWeight: '600' }}>{totalSessions}</span>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Tooltip title="Print">
+                  <IconButton size="small" onClick={() => window.print()}>
+                    <PrintOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <PrintOutlinedIcon
-                sx={{ cursor: 'pointer' }}
-                onClick={() => window.print()}
-              />
-              <SaveAltOutlinedIcon
-                sx={{ cursor: 'pointer' }}
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = '/api/report/download-csv'; 
-                  link.download = 'report.csv';
-                  link.click();
+            <Box
+              sx={{
+                px: 0,
+                display: 'flex',
+                gap: 4,
+                alignItems: 'flex-start',
+                width: '100%',
+                flexWrap: 'nowrap'
+              }}
+            >
+              <Box
+                sx={{
+                  mt: 1,
+                  width: 300,
+                  flexShrink: 0,
+                  '& .MuiGrid-root': {
+                    width: '100% !important',
+                    minWidth: '300px !important'
+                  }
                 }}
-              />
-              <OpenInNewIcon
-                sx={{ cursor: 'pointer' }}
-                onClick={() => window.open(window.location.href, '_blank')}
-              />
+              >
+                <FilterPanel {...FilterPanelProp} />
+              </Box>
+              <PrintStyles targetId="print-chart" />
+              <Box
+                id="print-chart"
+                sx={{
+                  flexGrow: 2,
+                  flexShrink: 1,
+                  minWidth: 0
+                }}
+              >
+                <Chart
+                  countryOfOriginFilter={countryOfOriginFilter}
+                  selectedName={selectedName}
+                  status={status}
+                  caseId={caseId}
+                  dateOpenedFilter={dateOpenedFilter}
+                />
+              </Box>
             </Box>
-          </Box>
-          <Box
-            sx={{
-              px: 0,
-              display: 'flex',
-              gap: 4,
-              alignItems: 'flex-start',
-              width: '100%',
-              flexWrap: 'nowrap'
-            }}
-            >
-            <Box
-              sx={{
-                mt: 1,
-                width: 300,
-                flexShrink: 0,
-                '& .MuiGrid-root': {
-                  width: '100% !important',
-                  minWidth: '300px !important'
-                }
-              }}
-            >
-              <FilterPanel {...FilterPanelProp} />
-            </Box>
-             <PrintStyles targetId="print-chart" />
-            <Box
-             id="print-chart"
-              sx={{
-                flexGrow: 2,
-                flexShrink: 1,
-                minWidth: 0
-              }}
-            >
-              <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
-            </Box>
-          </Box>
-              </>
+          </>
         )}
         {value === 1 && (
           <Box
@@ -180,6 +182,15 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
       </Box>
     </Grid>
   );
+};
+
+Service.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string,
+  FilterPanelProp: PropTypes.any
 };
 
 export default Service;

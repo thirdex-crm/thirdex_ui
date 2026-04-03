@@ -1,5 +1,3 @@
-import { height, lineHeight } from "@mui/system";
-
 export default function componentStyleOverrides(theme) {
   const bgColor = theme.colors?.grey50;
   return {
@@ -21,7 +19,7 @@ export default function componentStyleOverrides(theme) {
         },
         rounded: {
           // borderRadius: `${theme?.customization?.borderRadius}px`
-          borderRadius:'8px'
+          borderRadius: '8px'
         }
       }
     },
@@ -97,7 +95,7 @@ export default function componentStyleOverrides(theme) {
           color: theme.textDark,
           '&::placeholder': {
             color: theme.darkTextSecondary,
-            fontSize: '0.875rem',
+            fontSize: '0.875rem'
           }
         }
       }
@@ -107,7 +105,7 @@ export default function componentStyleOverrides(theme) {
         root: {
           background: bgColor,
           // borderRadius: `${theme?.customization?.borderRadius}px`,
-          borderRadius:'8px',
+          borderRadius: '8px',
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.colors?.grey400
           },
@@ -123,7 +121,7 @@ export default function componentStyleOverrides(theme) {
           background: bgColor,
           padding: '15.5px 14px',
           // borderRadius: `${theme?.customization?.borderRadius}px`,
-          borderRadius:'8px',
+          borderRadius: '8px',
           '&.MuiInputBase-inputSizeSmall': {
             padding: '10px 14px',
             '&.MuiInputBase-inputAdornedStart': {
@@ -135,7 +133,7 @@ export default function componentStyleOverrides(theme) {
           paddingLeft: 4
         },
         notchedOutline: {
-          borderRadius:'8px'
+          borderRadius: '8px'
           // borderRadius: `${theme?.customization?.borderRadius}px`
         }
       }

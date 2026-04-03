@@ -1,353 +1,424 @@
-import React from 'react'
-import { useFormik } from "formik";
+/* eslint-disable react/prop-types */
+import React from 'react';
+import { useFormik } from 'formik';
 import {
-    Box,
-    Button,
-    Checkbox,
-    Divider,
-    FormControl,
-    FormControlLabel,
-    FormGroup,
-    FormLabel,
-    MenuItem,
-    Radio,
-    RadioGroup,
-    Select,
-    TextField,
-    Typography
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  TextField,
+  Typography
 } from '@mui/material';
 import { urls } from 'common/urls';
-import { postApi } from 'common/apiClient';
+import { postApi, updateApi } from 'common/apiClient';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import toast from 'react-hot-toast';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-const TemplateOne = ({ formData, setFormData, setPreview, setSelectedTemplate, onClose, getAllForms, setPreset, formValues }) => {
+const TemplateOne = ({
+  formData,
+  setFormData,
+  setPreview,
+  setSelectedTemplate,
+  onClose,
+  getAllForms,
+  setPreset,
+  formValues,
+  isEdit,
+  formId
+}) => {
+  //temporary solution
+  const formDataUpdated = formData.map((field) => {
+    let updatedField = { ...field };
 
-    //temporary solution
-    const formDataUpdated = formData.map(field => {
-        let updatedField = { ...field };
-
-        if (updatedField.label === "Phone" || updatedField.label === "Phone Number" || updatedField.label === "Contact Number") {
-            updatedField.validation = "isNumber";
-        } else if (updatedField.label === "Email" || updatedField.label === "Email Address") {
-            updatedField.validation = "isEmail";
-        }
-        return updatedField;
-    });
-
-    const initialValues = {}
-    const validationSchema = {}
-    const formik = useFormik({
-        initialValues,
-        onSubmit: async () => {
-            const apiUrl = urls?.forms?.add
-            await postApi(apiUrl, { formDataUpdated, formValues })
-            formik.resetForm();
-            onClose()
-            setPreview(false)
-            setPreset(true)
-            setSelectedTemplate(null)
-            toast.success('Form Added Successfully')
-            localStorage.removeItem('formData')
-            setFormData(null)
-            getAllForms()
-            // window.location.reload()
-        }
-    })
-
-    const generateForm = (fields) => {
-
-        return fields?.map((field) => {
-            let fieldHTML = null;
-
-            switch (field?.type) {
-                case "textarea":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{
-                                minWidth: '50%'
-                            }}>
-                                <FormLabel>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='outlined'
-                                    multiline
-                                    rows={3}
-                                    placeholder={field?.placeholder}
-                                // name={field?.name}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange} 
-                                />
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "select":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            padding: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{ minWidth: 250 }}>
-                                <FormLabel htmlFor={field?.name}>{field?.label}</FormLabel>
-                                <Select
-                                    // name={field?.name}
-                                    // value={formik?.values[field?.name]}
-                                    // onChange={formik?.handleChange}
-                                    size='small'
-                                >
-                                    <MenuItem value=''><em> Please Select </em></MenuItem>
-                                    {
-                                        field?.values && field?.values?.map((option, index) => (
-                                            <MenuItem key={index} value={option?.value}>{option?.label}</MenuItem>))
-                                    }
-                                </Select>
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "radio-group":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            padding: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl>
-                                <FormLabel>{field?.label}</FormLabel>
-                                <RadioGroup
-                                    row
-                                // name={field?.name}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange}
-                                >{
-                                        field?.values && field?.values?.map((checkbox, index) => (
-                                            <FormControlLabel key={index} control={<Radio />} label={checkbox?.label} value={checkbox?.label} />
-                                        ))}
-                                </RadioGroup>
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "number":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{ minWidth: '50%' }}>
-                                <FormLabel>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='standard'
-                                    type='number'
-                                    placeholder={field?.placeholder}
-                                // name={field?.name}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange} 
-                                />
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "file":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{ minWidth: '50%' }}>
-                                <FormLabel>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='standard'
-                                    type='file'
-                                    placeholder={field?.placeholder}
-                                // name={field?.name}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange} 
-                                />
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "date":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{ minWidth: '50%' }}>
-                                <FormLabel>{field?.label}</FormLabel>
-                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                    <DatePicker
-                                                                        value={formik?.values[field?.name] ? dayjs(formik.values[field.name]) : null}
-                                                                        onChange={(newValue) => {
-                                                                            formik.setFieldValue(field?.name, newValue ? dayjs(newValue).format('YYYY-MM-DD') : '');
-                                                                        }}
-                                                                        renderInput={(params) => <TextField {...params} variant="standard" name={field?.name} />}
-                                                                    />
-                                                                </LocalizationProvider>
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "checkbox-group":
-                    fieldHTML = (
-                        <FormControl fullWidth sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormLabel>{field?.label}</FormLabel>
-                            <FormGroup>
-                                {field?.values && field?.values?.map((checkbox, index) => (
-                                    <FormControlLabel
-                                        key={index}
-                                        control={<Checkbox
-                                        // name={checkbox?.label} 
-                                        // value={formik?.values[field?.name]} 
-                                        // onChange={formik?.handleChange} 
-                                        />} label={checkbox?.label} />))}
-                            </FormGroup>
-                        </FormControl>
-                    );
-                    break;
-
-                case "button":
-                    fieldHTML = (
-                        <div className="" style={{
-                            display: 'flex',
-                            justifyContent: 'center'
-                        }}>
-                            <button className={field?.className} name={field.name} style={{
-                                background: '#1e88e5',
-                                height: '40px',
-                                width: '100px',
-                                borderRadius: '10px',
-                                color: '#fff',
-                                border: 'none'
-                            }}>
-                                {field?.label}
-                            </button>
-                        </div>
-                    );
-                    break;
-
-                case "text":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <FormControl sx={{ minWidth: '50%' }}>
-                                <FormLabel>{field?.label}</FormLabel>
-                                <TextField
-                                    variant='standard'
-                                    placeholder={field?.placeholder}
-                                // name={field?.name}
-                                // value={formik?.values[field?.name]}
-                                // onChange={formik?.handleChange} 
-                                />
-                            </FormControl>
-                        </Box>
-                    );
-                    break;
-
-                case "paragraph":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            padding: '20px',
-                            borderRadius: '10px'
-                        }}>
-                            <Typography className={field?.className} style={{ fontSize: '10px' }}>{field?.label}</Typography>
-                        </Box>
-                    );
-                    break;
-
-                case "header":
-                    fieldHTML = (
-                        <Box sx={{
-                            bgcolor: '#fff',
-                            p: '20px',
-                            borderRadius: '10px',
-                            borderTop: '10px solid #673ab7'
-                        }}>
-                            <Typography variant='h2' sx={{ fontSize: '30px' }}>{field?.label}</Typography>
-                        </Box>
-                    );
-                    break;
-
-                default:
-                    break;
-            }
-
-            return fieldHTML;
-        });
-    };
-
-    const home = () => {
-        setPreview(false)
-        setSelectedTemplate(null)
+    if (updatedField.label === 'Phone' || updatedField.label === 'Phone Number' || updatedField.label === 'Contact Number') {
+      updatedField.validation = 'isNumber';
+    } else if (updatedField.label === 'Email' || updatedField.label === 'Email Address') {
+      updatedField.validation = 'isEmail';
     }
+    return updatedField;
+  });
 
-    const prev = () => {
-        setPreview(true)
-        setSelectedTemplate(null)
+  const initialValues = {};
+
+  const formik = useFormik({
+    initialValues,
+    onSubmit: async () => {
+      if (isEdit && formId) {
+        await updateApi(`${urls?.forms?.update}/${formId}`, { formDataUpdated, formValues });
+        toast.success('Form Updated Successfully');
+      } else {
+        const apiUrl = urls?.forms?.add;
+        await postApi(apiUrl, { formDataUpdated, formValues });
+        toast.success('Form Added Successfully');
+      }
+      formik.resetForm();
+      onClose();
+      setPreview(false);
+      setPreset(true);
+      setSelectedTemplate(null);
+      localStorage.removeItem('formData');
+      setFormData(null);
+      getAllForms();
     }
+  });
 
-    return (
-        <div style={{
-            backgroundColor: '#f0ebf8',
-            height: 'auto'
-        }}>
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 2,
+  const generateForm = (fields) => {
+    return fields?.map((field) => {
+      let fieldHTML = null;
+
+      switch (field?.type) {
+        case 'textarea':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
                 p: '20px',
-                width: '80%',
-                margin: 'auto'
-            }}>
-                <KeyboardDoubleArrowLeftIcon sx={{ cursor: 'pointer' }} onClick={prev} />
-                <Button variant='outlined' onClick={home}>Edit Form</Button>
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl
+                sx={{
+                  minWidth: '50%'
+                }}
+              >
+                <FormLabel>{field?.label}</FormLabel>
+                <TextField
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  placeholder={field?.placeholder}
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                />
+              </FormControl>
             </Box>
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '70%',
-                margin: 'auto',
-                // padding: '50px',
-                gap: '20px'
-            }}>
-                {generateForm(formData)}
-            </div>
-            <Divider sx={{ mt: '10px' }} />
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 2,
-                p: '20px'
-            }}>
-                <Button variant='contained' onClick={formik.handleSubmit}>Save Form</Button>
-            </Box>
-        </div>
-    )
-}
+          );
+          break;
 
-export default TemplateOne
+        case 'select':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                padding: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl sx={{ minWidth: 250 }}>
+                <FormLabel htmlFor={field?.name}>{field?.label}</FormLabel>
+                <Select
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                  size="small"
+                >
+                  <MenuItem value="">
+                    <em> Please Select </em>
+                  </MenuItem>
+                  {field?.values &&
+                    field?.values?.map((option, index) => (
+                      <MenuItem key={index} value={option?.value}>
+                        {option?.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'radio-group':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                padding: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl>
+                <FormLabel>{field?.label}</FormLabel>
+                <RadioGroup
+                  row
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                >
+                  {field?.values &&
+                    field?.values?.map((checkbox, index) => (
+                      <FormControlLabel key={index} control={<Radio />} label={checkbox?.label} value={checkbox?.label} />
+                    ))}
+                </RadioGroup>
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'number':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl sx={{ minWidth: '50%' }}>
+                <FormLabel>{field?.label}</FormLabel>
+                <TextField
+                  variant="standard"
+                  type="number"
+                  placeholder={field?.placeholder}
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                />
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'file':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl sx={{ minWidth: '50%' }}>
+                <FormLabel>{field?.label}</FormLabel>
+                <TextField
+                  variant="standard"
+                  type="file"
+                  placeholder={field?.placeholder}
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                />
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'date':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl sx={{ minWidth: '50%' }}>
+                <FormLabel>{field?.label}</FormLabel>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={formik?.values[field?.name] ? dayjs(formik.values[field.name]) : null}
+                    onChange={(newValue) => {
+                      formik.setFieldValue(field?.name, newValue ? dayjs(newValue).format('YYYY-MM-DD') : '');
+                    }}
+                    renderInput={(params) => <TextField {...params} variant="standard" name={field?.name} />}
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'checkbox-group':
+          fieldHTML = (
+            <FormControl
+              fullWidth
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormLabel>{field?.label}</FormLabel>
+              <FormGroup>
+                {field?.values &&
+                  field?.values?.map((checkbox, index) => (
+                    <FormControlLabel
+                      key={index}
+                      control={
+                        <Checkbox
+                        // name={checkbox?.label}
+                        // value={formik?.values[field?.name]}
+                        // onChange={formik?.handleChange}
+                        />
+                      }
+                      label={checkbox?.label}
+                    />
+                  ))}
+              </FormGroup>
+            </FormControl>
+          );
+          break;
+
+        case 'button':
+          fieldHTML = (
+            <div
+              className=""
+              style={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              <button
+                className={field?.className}
+                name={field.name}
+                style={{
+                  background: '#1e88e5',
+                  height: '40px',
+                  width: '100px',
+                  borderRadius: '10px',
+                  color: '#fff',
+                  border: 'none'
+                }}
+              >
+                {field?.label}
+              </button>
+            </div>
+          );
+          break;
+
+        case 'text':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <FormControl sx={{ minWidth: '50%' }}>
+                <FormLabel>{field?.label}</FormLabel>
+                <TextField
+                  variant="standard"
+                  placeholder={field?.placeholder}
+                  // name={field?.name}
+                  // value={formik?.values[field?.name]}
+                  // onChange={formik?.handleChange}
+                />
+              </FormControl>
+            </Box>
+          );
+          break;
+
+        case 'paragraph':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                padding: '20px',
+                borderRadius: '10px'
+              }}
+            >
+              <Typography className={field?.className} style={{ fontSize: '10px' }}>
+                {field?.label}
+              </Typography>
+            </Box>
+          );
+          break;
+
+        case 'header':
+          fieldHTML = (
+            <Box
+              sx={{
+                bgcolor: '#fff',
+                p: '20px',
+                borderRadius: '10px',
+                borderTop: '10px solid #673ab7'
+              }}
+            >
+              <Typography variant="h2" sx={{ fontSize: '30px' }}>
+                {field?.label}
+              </Typography>
+            </Box>
+          );
+          break;
+
+        default:
+          break;
+      }
+
+      return fieldHTML;
+    });
+  };
+
+  const home = () => {
+    setPreview(false);
+    setSelectedTemplate(null);
+  };
+
+  const prev = () => {
+    setPreview(true);
+    setSelectedTemplate(null);
+  };
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#f0ebf8',
+        height: 'auto'
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 2,
+          p: '20px',
+          width: '80%',
+          margin: 'auto'
+        }}
+      >
+        <KeyboardDoubleArrowLeftIcon sx={{ cursor: 'pointer' }} onClick={prev} />
+        <Button variant="outlined" onClick={home}>
+          Edit Form
+        </Button>
+      </Box>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '70%',
+          margin: 'auto',
+          // padding: '50px',
+          gap: '20px'
+        }}
+      >
+        {generateForm(formData)}
+      </div>
+      <Divider sx={{ mt: '10px' }} />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 2,
+          p: '20px'
+        }}
+      >
+        <Button variant="contained" onClick={formik.handleSubmit}>
+          Save Form
+        </Button>
+      </Box>
+    </div>
+  );
+};
+
+export default TemplateOne;

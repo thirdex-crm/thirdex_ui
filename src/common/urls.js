@@ -64,7 +64,8 @@ export const urls = Object.freeze({
     fetch: `${baseUrl}/transaction/getalltransaction`,
     filterType: `${baseUrl}/transaction/filter`,
     fetchWithPagination: `${baseUrl}/transaction/allwithpagination`,
-    fetchTransactionById: `${baseUrl}/transaction/transactionbyid`
+    fetchTransactionById: `${baseUrl}/transaction/transactionbyid`,
+    bulkUpload: `${baseUrl}/transaction/bulkUpload`
   },
   comman: {
     getAllTagData: `${baseUrl}/CommanFuntions`
@@ -103,7 +104,10 @@ export const urls = Object.freeze({
   },
   forms: {
     add: `${baseUrl}/forms`,
-    getAll: `${baseUrl}/forms/getallforms`
+    getAll: `${baseUrl}/forms/getallforms`,
+    getById: `${baseUrl}/forms`,
+    update: `${baseUrl}/forms`,
+    delete: `${baseUrl}/forms`
   },
   responses: {
     submit: `${baseUrl}/responses`,

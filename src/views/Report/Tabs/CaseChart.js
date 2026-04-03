@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
@@ -150,6 +151,7 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter]);
   const staticEthnicityConfig = [
     { id: 1, label: 'Black / Black British - Caribbean / African', color: '#133144', labelColor: '#fff' },
@@ -167,13 +169,6 @@ const Chart = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpened
     { id: 3, label: '55 - 69', color: '#61CFF4' },
     { id: 4, label: '70+', color: '#44B5DD' }
   ];
-  const genderCount = {
-    Male: 0,
-    Female: 0,
-    Binary: 0,
-    'Not Prefer to Say': 0,
-    Other: 0
-  };
 
   return (
     <Grid container spacing={3}>

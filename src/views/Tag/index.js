@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, Tooltip, IconButton, InputBase } from '@mui/material';
+import { Stack, Grid, Typography, Box, Card, Tooltip, IconButton, InputBase } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AntSwitch from 'components/AntSwitch.js';
 import FilterPanel from 'components/FilterPanel.js';
@@ -16,7 +16,7 @@ import AddTagCategoryDialog from './AddTagCategoryDialog';
 
 const Tag = () => {
   const navigate = useNavigate();
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [status, setStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [configurationNameFilter, setConfigurationNameFilter] = useState('');
@@ -125,6 +125,7 @@ const Tag = () => {
     if (configurationNameFilter || status || searchQuery || isFiltered) {
       handleFilter();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configurationNameFilter, status, searchQuery]);
 
   const handleReset = () => {
@@ -146,7 +147,9 @@ const Tag = () => {
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const response = await getApi(`${urls.tagCategory.fetchWithPagination}?page=${paginationModel.page + 1}&limit=${paginationModel.pageSize}`);
+      const response = await getApi(
+        `${urls.tagCategory.fetchWithPagination}?page=${paginationModel.page + 1}&limit=${paginationModel.pageSize}`
+      );
       const allTags = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
 
@@ -166,6 +169,7 @@ const Tag = () => {
 
   useEffect(() => {
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
 
   const handleStatusChange = async (tagId, newStatus) => {
@@ -184,11 +188,11 @@ const Tag = () => {
       const res = await postApi(urls.tagCategory.create, data);
       if (res.success == true) {
         fetchTags();
-        toast.success("Tags Category Created");
+        toast.success('Tags Category Created');
       }
     } catch (error) {
-      console.error("Error while creating tags category => ", error);
-      toast.error("Internal Server Error");
+      console.error('Error while creating tags category => ', error);
+      toast.error('Internal Server Error');
     }
   };
 
@@ -200,7 +204,7 @@ const Tag = () => {
             <IconButton
               onClick={() => setOpen(true)}
               sx={{
-                 backgroundColor: '#009fc7',
+                backgroundColor: '#009fc7',
                 textTransform: 'none',
                 whiteSpace: 'nowrap',
                 paddingInline: '15px',
@@ -300,9 +304,9 @@ const Tag = () => {
                       loading
                         ? []
                         : tagCategory.map((row, index) => ({
-                          ...row,
-                          sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                        }))
+                            ...row,
+                            sNo: paginationModel.page * paginationModel.pageSize + index + 1
+                          }))
                     }
                     columns={columns}
                     rowCount={totalRows}
@@ -346,11 +350,7 @@ const Tag = () => {
           </Grid>
         </Grid>
       </Grid>
-      <AddTagCategoryDialog
-        open={open}
-        onClose={() => setOpen(false)}
-        onSave={handleTagCategorySave}
-      />
+      <AddTagCategoryDialog open={open} onClose={() => setOpen(false)} onSave={handleTagCategorySave} />
     </Card>
   );
 };

@@ -1,21 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Typography,
-  IconButton,
-  Card,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Stack,
-  Autocomplete,
-  TextField
-} from '@mui/material';
+import { Box, Grid, Typography, IconButton, Card, Button, FormControl, Tooltip, Stack, Autocomplete, TextField } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -181,10 +166,12 @@ export default function SessionRegisterPage() {
 
   useEffect(() => {
     fetchpeopleAttendee();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
 
   useEffect(() => {
     fetchAvailableUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   return (

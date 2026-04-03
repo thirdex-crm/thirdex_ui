@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import { getApi } from 'common/apiClient';
@@ -21,6 +22,7 @@ const SubmissionDialog = ({ open, onClose, onAccept, onDecline, id }) => {
     if (id) {
       fetchUserById();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
   return (
     <Dialog

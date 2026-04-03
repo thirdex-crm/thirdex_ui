@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, ListItemSecondaryAction, Typography, Grid, useTheme } from '@mui/material';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, Typography, useTheme } from '@mui/material';
 
 import { styled } from '@mui/material/styles';
 
@@ -78,8 +78,7 @@ const NotificationList = () => {
             >
               {groupKey.charAt(0).toUpperCase() + groupKey.slice(1)}
             </Typography>
-
-            {grouped[groupKey].map((item, index) => (
+            {grouped[groupKey].map((item) => (
               <ListItemWrapper key={item.id} sx={{ py: 0.5 }}>
                 <ListItem alignItems="flex-start" disableGutters>
                   <ListItemText

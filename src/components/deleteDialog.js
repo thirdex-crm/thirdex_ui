@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { IconTrash } from '@tabler/icons';
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, IconButton } from '@mui/material';

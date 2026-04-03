@@ -1,8 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { Box, Card, CardContent, Typography, Button, Grid, Dialog, DialogTitle, DialogContent, Stack } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, Dialog, DialogContent, Stack } from '@mui/material';
 import UserBg from 'assets/images/form.png';
 import ServiceUser from 'assets/images/serviceUser.png';
-import { fontSize } from '@mui/system';
 
 const ViewReferralDialog = ({ open, onClose, onAccept, onDecline }) => {
   return (

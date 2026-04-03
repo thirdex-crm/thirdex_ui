@@ -1,53 +1,33 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import {
   Avatar,
   Box,
-  Button,
   ButtonBase,
   CardActions,
-  Chip,
   ClickAwayListener,
   Divider,
   Grid,
   Paper,
   Popper,
   Stack,
-  TextField,
   Typography,
   useMediaQuery
 } from '@mui/material';
 import PerfectScrollbar from 'react-perfect-scrollbar';
+
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
+
 import NotificationList from './NotificationList';
 import { IconBell } from '@tabler/icons';
-const status = [
-  {
-    value: 'all',
-    label: 'All Notification'
-  },
-  {
-    value: 'new',
-    label: 'New'
-  },
-  {
-    value: 'unread',
-    label: 'Unread'
-  },
-  {
-    value: 'other',
-    label: 'Other'
-  }
-];
 
 const NotificationSection = () => {
   const theme = useTheme();
+
   const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
 
   const anchorRef = useRef(null);
 
@@ -63,16 +43,14 @@ const NotificationSection = () => {
   };
 
   const prevOpen = useRef(open);
+
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
       anchorRef.current.focus();
     }
+
     prevOpen.current = open;
   }, [open]);
-
-  const handleChange = (event) => {
-    if (event?.target.value) setValue(event?.target.value);
-  };
 
   return (
     <>

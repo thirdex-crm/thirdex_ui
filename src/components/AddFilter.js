@@ -1,5 +1,5 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useNavigate } from 'react-router-dom';
 import {
   Popover,
@@ -22,12 +22,11 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import MergeTypeIcon from '@mui/icons-material/MergeType';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { urls } from 'common/urls';
 import { updateApi } from 'common/apiClient';
+
 import toast from 'react-hot-toast';
-import { IconTrash} from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 
 const OptionsPopover = ({ anchorEl, open, onClose, data }) => {
   const UserId = data?._id;

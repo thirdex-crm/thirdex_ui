@@ -1,8 +1,8 @@
-import { Button, Grid, MenuItem, TextField, Typography, IconButton, InputBase } from '@mui/material';
-import { Box, Stack } from '@mui/system';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import PropTypes from 'prop-types';
+import { Grid, Typography, IconButton, Tooltip } from '@mui/material';
+import { Box } from '@mui/system';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 import { useState, useEffect } from 'react';
@@ -17,7 +17,6 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
     page: 0,
     pageSize: 10
   });
-  const [totalRows, setTotalRows] = useState(0);
   const [rows, setRows] = useState([]);
 
   const columns = [
@@ -111,8 +110,8 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
       try {
         setLoading(true);
         const queryParams = new URLSearchParams({
-          page: paginationModel.page + 1,
-          limit: paginationModel.pageSize
+          page: 1,
+          limit: 1000
         });
 
         if (selectedName) {
@@ -126,8 +125,6 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
 
         const allTransaction = response?.data?.data || [];
 
-        const pagination = response?.data?.meta || { total: 0 };
-        setTotalRows(pagination?.total);
         const formattedTransactions = allTransaction?.map((item, index) => ({
           id: item?._id || index,
           title: item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-',
@@ -151,7 +148,7 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
     };
 
     fetchDonor();
-  }, [paginationModel, selectedName, status, startDate, endDate]);
+  }, [selectedName, status, startDate, endDate]);
   const CustomHeader = () => {
     const apiRef = useGridApiContext();
 
@@ -160,7 +157,10 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
     };
 
     const handlePrint = () => {
-      apiRef.current.exportDataAsPrint();
+      apiRef.current.exportDataAsPrint({
+        pageStyle:
+          '@page { size: landscape; margin: 10mm; } body { -webkit-print-color-adjust: exact; } .MuiDataGrid-footerContainer { display: none !important; } .MuiDataGrid-scrollbar { display: none !important; } .MuiIconButton-root { display: none !important; }'
+      });
     };
     return (
       <Box sx={{ height: '50px', display: 'flex', alignItems: 'center' }}>
@@ -194,10 +194,22 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
               gap: 1
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handlePrint} />
-              <SaveAltOutlinedIcon sx={{ cursor: 'pointer' }} onClick={handleExportCSV} />
-              <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Print">
+                <IconButton size="small" onClick={handlePrint}>
+                  <PrintOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Download CSV">
+                <IconButton size="small" onClick={handleExportCSV}>
+                  <SaveAltOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Open in New Tab">
+                <IconButton size="small" onClick={() => window.open(window.location.href, '_blank')}>
+                  <OpenInNewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         </GridToolbarContainer>
@@ -208,27 +220,18 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
   return (
     <>
       <Grid container>
-        <Box sx={{ backgroundColor: '#fff', borderRadius: 2 }} height="100vh" width="100%">
+        <Box sx={{ backgroundColor: '#fff', borderRadius: 2, width: '100%' }}>
           <DataGrid
-            rows={
-              loading
-                ? []
-                : rows.map((row, index) => ({
-                    ...row,
-                    sNo: paginationModel.page * paginationModel.pageSize + index + 1
-                  }))
-            }
+            autoHeight
+            rows={loading ? [] : rows}
             columns={columns}
-            rowCount={totalRows}
-            rowHeight={65}
+            rowHeight={55}
             loading={loading}
             getRowId={(row) => row.id}
             checkboxSelection
-            pagination
-            paginationMode="server"
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10, 25, 50]}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
             slots={{
               toolbar: () => <CustomHeader />,
               loadingOverlay: () => (
@@ -265,6 +268,13 @@ const CaseList = ({ selectedName, status, startDate, endDate }) => {
       </Grid>
     </>
   );
+};
+
+CaseList.propTypes = {
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  startDate: PropTypes.string,
+  endDate: PropTypes.string
 };
 
 export default CaseList;

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, IconButton, Tooltip, InputBase, Tab } from '@mui/material';
+import { Stack, Grid, Typography, Box, Card, IconButton, Tooltip, InputBase, Tab } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
-import ApartmentIcon from '@mui/icons-material/Apartment';
+
 import FilterPanel from 'components/FilterPanel';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
@@ -22,7 +22,7 @@ const Mail = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [value, setValue] = useState('1');
   const [tag, setTag] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,11 +37,6 @@ const Mail = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-
-  const tags = [
-    { value: 'urgent', label: 'Urgent' },
-    { value: 'follow-up', label: 'Follow-up' }
-  ];
 
   const columns = [
     {
@@ -122,6 +117,7 @@ const Mail = () => {
 
   useEffect(() => {
     handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeArchives]);
 
   const handleReset = () => {
@@ -135,7 +131,8 @@ const Mail = () => {
     if (listName || searchQuery || isFiltered || tag || startDate || endDate) {
       handleFilter();
     }
-  }, [listName , searchQuery , tag , value , startDate , endDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listName, searchQuery, tag, value, startDate, endDate]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -198,6 +195,7 @@ const Mail = () => {
   useEffect(() => {
     fetchMails();
     fetchtTagData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
 
   const handleChange = (event, newValue) => {
@@ -366,8 +364,8 @@ const Mail = () => {
               setEndDate={setEndDate}
               setTagFilter={(value) => setTag(value)}
               includeArchives={includeArchives}
-            setIncludeArchives={setIncludeArchives}
-              selectedFilters={['dateRange','includeArchives']}
+              setIncludeArchives={setIncludeArchives}
+              selectedFilters={['dateRange', 'includeArchives']}
               onReset={handleReset}
             />
             <Grid item xs={9}>

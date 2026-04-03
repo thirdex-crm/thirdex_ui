@@ -1,11 +1,10 @@
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Box, Tabs, Tab, Grid } from '@mui/material';
+import { Box, Tabs, Tab, Grid, Tooltip, IconButton } from '@mui/material';
 import Chart from './Chart';
 import ServiceList from './ServiceList';
 import FilterPanel from 'components/FilterPanel';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
 import PrintStyles from 'themes/print.js';
 const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpenedFilter, FilterPanelProp }) => {
   const [value, setValue] = useState(0);
@@ -57,18 +56,12 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
                 gap: 1
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, ml: 'auto' }}>
-                <PrintOutlinedIcon sx={{ cursor: 'pointer' }} onClick={() => window.print()} />
-                <SaveAltOutlinedIcon
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = '/api/report/download-csv';
-                    link.download = 'report.csv';
-                    link.click();
-                  }}
-                />
-                <OpenInNewIcon sx={{ cursor: 'pointer' }} onClick={() => window.open(window.location.href, '_blank')} />
+              <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, ml: 'auto' }}>
+                <Tooltip title="Print">
+                  <IconButton size="small" onClick={() => window.print()}>
+                    <PrintOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
 
@@ -95,16 +88,22 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
               >
                 <FilterPanel {...FilterPanelProp} />
               </Box>
-               <PrintStyles targetId="print-chart" />
+              <PrintStyles targetId="print-chart" />
               <Box
-               id="print-chart"
+                id="print-chart"
                 sx={{
                   flexGrow: 2,
                   flexShrink: 1,
                   minWidth: 0
                 }}
               >
-                <Chart countryOfOriginFilter={countryOfOriginFilter} selectedName={selectedName} status={status} caseId={caseId} dateOpenedFilter={dateOpenedFilter} />
+                <Chart
+                  countryOfOriginFilter={countryOfOriginFilter}
+                  selectedName={selectedName}
+                  status={status}
+                  caseId={caseId}
+                  dateOpenedFilter={dateOpenedFilter}
+                />
               </Box>
             </Box>
           </>
@@ -152,6 +151,15 @@ const Service = ({ countryOfOriginFilter, selectedName, status, caseId, dateOpen
       </Box>
     </Grid>
   );
+};
+
+Service.propTypes = {
+  countryOfOriginFilter: PropTypes.string,
+  selectedName: PropTypes.string,
+  status: PropTypes.string,
+  caseId: PropTypes.string,
+  dateOpenedFilter: PropTypes.string,
+  FilterPanelProp: PropTypes.any
 };
 
 export default Service;

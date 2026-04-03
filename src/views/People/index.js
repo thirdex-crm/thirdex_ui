@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-no-undef */
 import { useState, useEffect, useMemo } from 'react';
-import { Stack, Grid, Typography, Box, Card, TextField, IconButton, Tooltip, InputBase, Button, Menu, MenuItem } from '@mui/material';
+import { Stack, Grid, Typography, Box, Card, IconButton, Tooltip, InputBase } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
@@ -10,11 +10,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import FilterPanel from 'components/FilterPanel';
 import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
-import LibraryAddCheckOutlinedIcon from '@mui/icons-material/LibraryAddCheckOutlined';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import { IconTrash } from '@tabler/icons';
+
 import SingleRowLoader from 'ui-component/Loader/SingleRowLoader';
-import Service from 'views/Report/Tabs/Service';
+
 import CustomHeader from 'components/CustomHeader';
 
 const districts = [
@@ -28,13 +26,6 @@ const districts = [
   { label: 'Basildon Borough', value: 'basildon_borough' }
 ];
 
-const dateAddedFilters = [
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'Last 7 Days' },
-  { value: 'month', label: 'Last 30 Days' },
-  { value: 'year', label: 'Last 1 Year' }
-];
-
 const genders = [
   { value: 'Male', label: 'Male' },
   { value: 'Female', label: 'Female' },
@@ -46,7 +37,7 @@ const PeopleManagement = () => {
   const navigate = useNavigate();
   const [districtFilter, setDistrictFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [isFiltered, setIsFiltered] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -134,9 +125,12 @@ const PeopleManagement = () => {
       const response = await getApi(url);
 
       const allUser = response?.data?.data || [];
+
       const pagination = response?.data?.meta || { total: 0 };
-      const formattedUsers = allUser?.map((user, index) => ({
+
+      const formattedUsers = allUser?.map((user) => ({
         id: user._id,
+
         serialNumber: `#${user?.uniqueId}`,
         firstName: user.personalInfo?.firstName || '',
         lastName: user.personalInfo?.lastName || '',
@@ -158,10 +152,12 @@ const PeopleManagement = () => {
     if (districtFilter || genderFilter || startDate || endDate || searchQuery || isFiltered) {
       handleFilter();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [districtFilter, genderFilter, startDate, endDate, searchQuery]);
 
   useEffect(() => {
     handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [includeArchives]);
 
   const handleReset = () => {
@@ -195,7 +191,8 @@ const PeopleManagement = () => {
       const response = await getApi(`${urls.serviceuser.fetchWithPagination}?${queryParams.toString()}`);
       const allUser = response?.data?.data || [];
       const pagination = response?.data?.meta || { total: 0 };
-      const formattedUsers = allUser?.map((user, index) => ({
+
+      const formattedUsers = allUser?.map((user) => ({
         id: user._id,
         serialNumber: `#${user?.uniqueId}`,
         firstName: user.personalInfo?.firstName || '',
@@ -217,6 +214,7 @@ const PeopleManagement = () => {
 
   useEffect(() => {
     fetchpeople();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
 
   return (

@@ -1,15 +1,14 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import {
   Grid,
   MenuItem,
   Card,
-  CardHeader,
   CardContent,
   Tabs,
   Tab,
   Box,
-  Switch,
   Paper,
   TextField,
   InputAdornment,
@@ -17,10 +16,8 @@ import {
   Button,
   FormControlLabel,
   Autocomplete,
-  FormHelperText,
   IconButton,
-  Chip,
-  FormControl
+  Chip
 } from '@mui/material';
 import { CircularProgress } from '@mui/material';
 import { useLocation } from 'react-router-dom';
@@ -34,28 +31,28 @@ import Link from '@mui/material/Link';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import AntSwitch from 'components/AntSwitch.js';
+
 import dayjs from 'dayjs';
 import { postApi, updateApiPatch, getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
+
 import config from '../../config';
 import { contactMethodInitial, districts, ethnicityOptions, stateStyles } from 'common/constants';
 import { validateFile } from 'utils/filevalidator';
 
-const AddCaseForm = ({ onCancel }) => {
+const AddCaseForm = () => {
   const navigate = useNavigate();
   const [contactMethodStates, setContactMethodStates] = useState(contactMethodInitial);
   const [tabIndex, setTabIndex] = useState(0);
   const [countryList, setCountryList] = useState([]);
   const [isLoading, setIsloading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [contactpurpose, setContactpurpose] = useState([]);
   const [reason, setReason] = useState([]);
-  const [contactmethod, setContactmethod] = useState([]);
-  const [allTags, setAllTages] = useState([]);
+  const [, setContactmethod] = useState([]);
   const [allCategory, setAllCategory] = useState([]);
-  const [serviceData, setServiceData] = useState([]);
   const [serviceNames, setServiceNames] = useState([]);
-  const [serviceNameSearchQuery, setServiceNameSearchQuery] = useState('');
+  const [serviceNameSearchQuery] = useState('');
   const [keyIndicator, setKeyIndicator] = useState([]);
 
   const initialPurposeStates = contactpurpose?.reduce((acc, curr) => {
@@ -135,33 +132,33 @@ const AddCaseForm = ({ onCancel }) => {
       })) || [],
     serviceSections: editdata?.Service?.length
       ? editdata.Service.map((item) => ({
-        serviceName: item.serviceName?._id || '',
-        startDate: item.startDate || null,
-        lastDate: item.lastDate || null,
-        referrerName: item.referrerName || '',
-        referrerJob: item.referrerJob || '',
-        referrerPhone: item.referrerPhone || '',
-        referrerEmail: item.referrerEmail || '',
-        emergencyPhone: item.emergencyPhone || '',
-        emergencyEmail: item.emergencyEmail || '',
-        referralType: item.referralType || '',
-        referredDate: item.referredDate || null
-      }))
+          serviceName: item.serviceName?._id || '',
+          startDate: item.startDate || null,
+          lastDate: item.lastDate || null,
+          referrerName: item.referrerName || '',
+          referrerJob: item.referrerJob || '',
+          referrerPhone: item.referrerPhone || '',
+          referrerEmail: item.referrerEmail || '',
+          emergencyPhone: item.emergencyPhone || '',
+          emergencyEmail: item.emergencyEmail || '',
+          referralType: item.referralType || '',
+          referredDate: item.referredDate || null
+        }))
       : [
-        {
-          serviceName: '',
-          startDate: null,
-          lastDate: null,
-          referrerName: '',
-          referrerJob: '',
-          referrerPhone: '',
-          referrerEmail: '',
-          emergencyPhone: '',
-          emergencyEmail: '',
-          referralType: '',
-          referredDate: null
-        }
-      ]
+          {
+            serviceName: '',
+            startDate: null,
+            lastDate: null,
+            referrerName: '',
+            referrerJob: '',
+            referrerPhone: '',
+            referrerEmail: '',
+            emergencyPhone: '',
+            emergencyEmail: '',
+            referralType: '',
+            referredDate: null
+          }
+        ]
   };
   console.log('defaultFormValues------------------', defaultFormValues);
   const {
@@ -170,7 +167,6 @@ const AddCaseForm = ({ onCancel }) => {
     control,
     setValue,
     watch,
-    reset,
     trigger,
     formState: { errors }
   } = useForm({
@@ -226,9 +222,7 @@ const AddCaseForm = ({ onCancel }) => {
 
   const fileInputRef = useRef(null);
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-  };
+  const handleFileChange = () => {};
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -353,36 +347,6 @@ const AddCaseForm = ({ onCancel }) => {
           />
         );
       }}
-    />
-  );
-  const renderAutocomplete2 = (name, label, options, errorObject, errorMessage, control) => (
-    <Controller
-      name={name}
-      control={control}
-      rules={{ required: 'This field is required' }}
-      render={({ field }) => (
-        <Autocomplete
-          multiple
-          options={options}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          value={field.value || []}
-          onChange={(_, newValue) => field.onChange(newValue)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={label}
-              error={!!errorObject}
-              helperText={errorMessage}
-              sx={{
-                backgroundColor: '#f9f9f9',
-                borderRadius: '8px',
-                minWidth: '300px'
-              }}
-            />
-          )}
-        />
-      )}
     />
   );
 
@@ -537,10 +501,6 @@ const AddCaseForm = ({ onCancel }) => {
     }
   };
 
-  const handleReset = () => {
-    reset();
-  };
-
   const onlyNumbers = /^[0-9]*$/;
   const onlyLetters = /^[A-Za-z\s]*$/;
   const onlyLetterNumberSpace = /^[a-zA-Z0-9 ]+$/;
@@ -572,12 +532,6 @@ const AddCaseForm = ({ onCancel }) => {
     });
   };
 
-  const booleanToState = (value) => {
-    if (value === true) return 1;
-    if (value === false) return 2;
-    return 0;
-  };
-
   useEffect(() => {
     if (contactpurpose?.length && editdata?.contactPreferences?.contactPurposes) {
       const selectedIds = editdata.contactPreferences.contactPurposes.map((item) => item._id);
@@ -591,6 +545,7 @@ const AddCaseForm = ({ onCancel }) => {
       setValue('contactPurposeStates', initStates);
       setValue('contactPurpose', selectedIds);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactpurpose, editdata]);
   return (
     <Grid>
@@ -626,16 +581,19 @@ const AddCaseForm = ({ onCancel }) => {
               sx={{
                 display: 'flex',
                 gap: 2,
+
                 borderBottom: '1px solid #4792d3'
               }}
             >
               <Tab
                 label="Details"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 0 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
+
                   fontSize: '14px',
+
                   minWidth: 120,
                   fontWeight: 'bold',
                   textTransform: 'none'
@@ -643,9 +601,10 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Emergency Contact"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 1 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
+
                   marginRight: 2,
                   fontSize: '14px',
                   minWidth: 120,
@@ -655,8 +614,9 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Risk Assessment"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 2 ? '#e3f2fd' : 'transparent',
+
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
                   fontSize: '14px',
@@ -667,7 +627,7 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Service"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 3 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -679,7 +639,7 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Contact Preferences"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 4 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -855,8 +815,8 @@ const AddCaseForm = ({ onCancel }) => {
                                         ? typeof field.value === 'object'
                                           ? field.value.name || ''
                                           : typeof field.value === 'string'
-                                            ? field.value.split('/').pop() // extract file name from string
-                                            : ''
+                                          ? field.value.split('/').pop() // extract file name from string
+                                          : ''
                                         : ''
                                     }
                                     placeholder="Profile image"
@@ -956,24 +916,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         fullWidth
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1281,24 +1243,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1445,8 +1409,8 @@ const AddCaseForm = ({ onCancel }) => {
                                         ? typeof field.value === 'object' && field.value.name
                                           ? field.value.name
                                           : typeof field.value === 'string'
-                                            ? field.value.split('/').pop()
-                                            : ''
+                                          ? field.value.split('/').pop()
+                                          : ''
                                         : ''
                                     }
                                     placeholder="Attachments"
@@ -1920,24 +1884,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -2083,16 +2049,16 @@ const AddCaseForm = ({ onCancel }) => {
                             // Normalize value: if it's array of IDs → convert to objects from options
                             const selected = Array.isArray(field.value)
                               ? field.value
-                                .map((val) => {
-                                  if (typeof val === 'string' || typeof val === 'number') {
-                                    return options.find((opt) => opt.value === val);
-                                  }
-                                  return {
-                                    label: val?.name,
-                                    value: val?._id
-                                  };
-                                })
-                                .filter(Boolean)
+                                  .map((val) => {
+                                    if (typeof val === 'string' || typeof val === 'number') {
+                                      return options.find((opt) => opt.value === val);
+                                    }
+                                    return {
+                                      label: val?.name,
+                                      value: val?._id
+                                    };
+                                  })
+                                  .filter(Boolean)
                               : [];
 
                             return (

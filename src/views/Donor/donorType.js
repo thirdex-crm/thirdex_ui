@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, Typography, Grid, IconButton, Paper, Box } from '@mui/material';
+/* eslint-disable react/prop-types */
+
+import React from 'react';
+import { Dialog, DialogContent, Typography, Grid, IconButton, Paper } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
 import GroupsIcon from '@mui/icons-material/Groups';

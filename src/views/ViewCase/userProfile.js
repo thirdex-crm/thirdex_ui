@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, Typography, Avatar, Grid, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Typography, Grid, Box } from '@mui/material';
 import userProfile from 'assets/images/UserProfile.png';
 
 export default function UserProfileDialog({ open, handleClose, user, userView }) {

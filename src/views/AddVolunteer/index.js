@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -5,13 +6,11 @@ import {
   Grid,
   MenuItem,
   Card,
-  CardHeader,
   CardContent,
   IconButton,
   Tabs,
   Tab,
   Box,
-  Switch,
   Paper,
   TextField,
   InputAdornment,
@@ -19,7 +18,6 @@ import {
   Button,
   FormControlLabel,
   Autocomplete,
-  FormHelperText,
   Chip
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -47,29 +45,24 @@ const stateStyles = [
 ];
 const contactMethodInitial = {
   Telephone: 0,
+
   Email: 0,
   Letter: 0,
   SMS: 0,
+
   Whatsapp: 0
 };
 
-const AddCaseForm = ({ onCancel }) => {
+const AddCaseForm = () => {
   const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [countryList, setCountryList] = useState([]);
   const [contactMethodStates, setContactMethodStates] = useState(contactMethodInitial);
-  const [restrictAccess, setRestrictAccess] = useState(false);
   const [isLoading, setIsloading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [contactpurpose, setContactpurpose] = useState([]);
   const [reason, setReason] = useState([]);
-  const [contactmethod, setContactmethod] = useState([]);
-  const [benificiary, setBenificiary] = useState([]);
-  const [Campaigns, setCampaigns] = useState([]);
-  const [engagement, setengagement] = useState([]);
-  const [eventsAttended, seteventsAttended] = useState([]);
-  const [fundingInterests, setfundingInterests] = useState([]);
-  const [fundraisingActivities, setfundraisingActivities] = useState([]);
+  const [, setContactmethod] = useState([]);
   const [allCategory, setAllCategory] = useState([]);
 
   const location = useLocation();
@@ -96,7 +89,6 @@ const AddCaseForm = ({ onCancel }) => {
     control,
     setValue,
     watch,
-    reset,
     trigger,
     formState: { errors }
   } = useForm({
@@ -259,12 +251,7 @@ const AddCaseForm = ({ onCancel }) => {
 
   const fileInputRef = useRef(null);
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-  };
+  const handleFileChange = () => {};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -366,7 +353,7 @@ const AddCaseForm = ({ onCancel }) => {
       }}
     />
   );
-  const handleToggle = () => setRestrictAccess(!restrictAccess);
+
   const onSubmit = async (formData) => {
     const isValid = await trigger();
 
@@ -462,6 +449,7 @@ const AddCaseForm = ({ onCancel }) => {
       }
 
       setIsloading(false);
+
       navigate('/volunteer');
     } catch (error) {
       console.error('Error creating user:', error);
@@ -469,15 +457,11 @@ const AddCaseForm = ({ onCancel }) => {
     }
   };
 
-  const handleReset = () => {
-    reset();
-  };
 
   const onlyNumbers = /^[0-9]*$/;
   const onlyLetters = /^[A-Za-z\s]*$/;
   const onlyLetterNumberSpace = /^[a-zA-Z0-9 ]+$/;
   const onlyLettersAndNumbers = /^[A-Za-z0-9\s]*$/;
-
 
   const handleTabChange = (newIndex) => {
     setTabIndex(newIndex);
@@ -504,11 +488,6 @@ const AddCaseForm = ({ onCancel }) => {
     });
   };
 
-  const booleanToState = (value) => {
-    if (value === true) return 1;
-    if (value === false) return 2;
-    return 0;
-  };
 
   useEffect(() => {
     if (contactpurpose?.length && editdata?.contactPreferences?.contactPurposes) {
@@ -523,6 +502,7 @@ const AddCaseForm = ({ onCancel }) => {
       setValue('contactPurposeStates', initStates);
       setValue('contactPurpose', selectedIds);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactpurpose, editdata]);
   return (
     <Grid>
@@ -565,7 +545,7 @@ const AddCaseForm = ({ onCancel }) => {
             >
               <Tab
                 label="Details"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 0 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -577,19 +557,20 @@ const AddCaseForm = ({ onCancel }) => {
               />
               <Tab
                 label="Emergency Contact"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 1 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
                   fontSize: '14px',
                   minWidth: 120,
                   fontWeight: 'bold',
+
                   textTransform: 'none'
                 })}
               />
               <Tab
                 label="Contact Preferences"
-                sx={(theme) => ({
+                sx={() => ({
                   backgroundColor: tabIndex === 2 ? '#e3f2fd' : 'transparent',
                   transition: 'background-color 0.3s ease',
                   marginRight: 2,
@@ -865,24 +846,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         fullWidth
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1190,24 +1173,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1850,24 +1835,26 @@ const AddCaseForm = ({ onCancel }) => {
                                         helperText={error ? error.message : ''}
                                       />
                                     )}
-                                    PopperProps={{
-                                      modifiers: [
-                                        {
-                                          name: 'preventOverflow',
-                                          options: {
-                                            altBoundary: true,
-                                            rootBoundary: 'viewport',
-                                            tether: false
+                                    slotProps={{
+                                      popper: {
+                                        modifiers: [
+                                          {
+                                            name: 'preventOverflow',
+                                            options: {
+                                              altBoundary: true,
+                                              rootBoundary: 'viewport',
+                                              tether: false
+                                            }
+                                          },
+                                          {
+                                            name: 'flip',
+                                            options: {
+                                              fallbackPlacements: ['bottom-start']
+                                            }
                                           }
-                                        },
-                                        {
-                                          name: 'flip',
-                                          options: {
-                                            fallbackPlacements: ['bottom-start']
-                                          }
-                                        }
-                                      ],
-                                      placement: 'bottom-start'
+                                        ],
+                                        placement: 'bottom-start'
+                                      }
                                     }}
                                     ListboxProps={{
                                       style: {
@@ -1977,7 +1964,7 @@ const AddCaseForm = ({ onCancel }) => {
                       }}
                     >
                       <Typography variant="subtitle2" mb={1}>
-                       Channels
+                        Channels
                       </Typography>
                       <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
                         {Object.keys(contactMethodStates).map((label) => {

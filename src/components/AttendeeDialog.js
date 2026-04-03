@@ -1,13 +1,9 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
   Button,
   Grid,
-  MenuItem,
-  Select,
   FormControl,
-  InputLabel,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -16,10 +12,10 @@ import {
   TextField,
   Divider
 } from '@mui/material';
-import { getApi, postApi } from 'common/apiClient';
+import { getApi } from 'common/apiClient';
 import { urls } from 'common/urls';
 
-const RegisterAttendance = ({ open, handleClose, userId }) => {
+const RegisterAttendance = ({ open, handleClose }) => {
   const [services, setServices] = useState([]);
   const [searchQueryService, setSearchQueryService] = useState('');
   const [sessions, setSessions] = useState([]);
@@ -32,19 +28,20 @@ const RegisterAttendance = ({ open, handleClose, userId }) => {
     if (open) {
       fetchServices();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, searchQueryService]);
   const fetchServices = async () => {
     const queryParams = new URLSearchParams();
     if (searchQueryService) {
       queryParams.append('search', searchQueryService);
     }
-    const response = await getApi(`${urls.service.fetchWithPagination}?${queryParams.toString()}`);
     setServices(response?.data?.data || []);
   };
 
   const fetchSessionOptions = async (serviceId) => {
     try {
       const queryParams = new URLSearchParams();
+
       queryParams.append('serviceId', serviceId);
 
       const res = await getApi(`${urls.session.fetchWithPagination}?${queryParams.toString()}`);
@@ -54,18 +51,8 @@ const RegisterAttendance = ({ open, handleClose, userId }) => {
     }
   };
 
-  const handleChange = (field) => (event) => {
-    setFormData({ ...formData, [field]: event.target.value });
-  };
-
   const handleSubmit = async () => {
     try {
-      const body = {
-        serviceId: formData.serviceId,
-        sessionId: formData.sessionId
-      };
-
-      const response = await postApi(urls.timeline.attendeesCreate.replace(':id', userId), body);
       handleClose();
     } catch (error) {
       console.error('Error submitting attendance:', error);

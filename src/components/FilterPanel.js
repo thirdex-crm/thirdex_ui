@@ -1,6 +1,22 @@
 /* eslint-disable prettier/prettier */
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import { Grid, Card, Typography, Box, MenuItem, Chip, TextField, Button, Autocomplete, FormControlLabel, Checkbox, InputAdornment, Popover, IconButton } from '@mui/material';
+import {
+  Grid,
+  Card,
+  Typography,
+  Box,
+  MenuItem,
+  Chip,
+  TextField,
+  Button,
+  Autocomplete,
+  FormControlLabel,
+  Checkbox,
+  InputAdornment,
+  Popover,
+  IconButton
+} from '@mui/material';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -8,7 +24,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateRangePicker } from 'react-date-range';
 import { enGB } from 'date-fns/locale';
 import 'react-date-range/dist/styles.css';
@@ -111,7 +126,6 @@ const FilterPanel = ({
   setIncludeArchives,
   selectedFilters = [],
   customDateLabel,
-  listTypeFilter,
   listType,
   setListType,
   includeServiceuser,
@@ -127,11 +141,12 @@ const FilterPanel = ({
   const [dateRanges, setDateRanges] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [activeFilterKey, setActiveFilterKey] = useState(null);
-  const [selectionRange, setSelectionRange] = useState({
+  const [, setSelectionRange] = useState({
     startDate: new Date(),
     endDate: new Date(),
     key: 'selection'
   });
+
   const [tempSelectionRange, setTempSelectionRange] = useState({
     startDate: new Date(),
     endDate: new Date(),
@@ -476,525 +491,619 @@ const FilterPanel = ({
             border: '1px solid #e0e0e0'
           }}
         >
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Box display="flex" alignItems="center">
-            <FilterAltOutlinedIcon sx={{ color: '#808191' }} />
-            <Typography variant="subtitle1" color="#808191">
-              Filters
-            </Typography>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+            <Box display="flex" alignItems="center">
+              <FilterAltOutlinedIcon sx={{ color: '#808191' }} />
+              <Typography variant="subtitle1" color="#808191">
+                Filters
+              </Typography>
+            </Box>
+            <Button
+              startIcon={<RestartAltIcon />}
+              onClick={handleReset}
+              size="small"
+              sx={{
+                color: '#4ba1f8',
+                '&:hover': {
+                  backgroundColor: 'rgba(75, 161, 248, 0.1)'
+                }
+              }}
+            >
+              Reset
+            </Button>
           </Box>
-          <Button
-            startIcon={<RestartAltIcon />}
-            onClick={handleReset}
-            size="small"
-            sx={{
-              color: '#4ba1f8',
-              '&:hover': {
-                backgroundColor: 'rgba(75, 161, 248, 0.1)'
+
+          <Box display="flex" flexDirection="column" gap={2}>
+            {selectedFilters?.map((filterKey) => {
+              const filter = filterMapping[filterKey];
+              if (!filter) return null;
+
+              // Skip startDate and endDate separately if dateRange is in the list
+              if ((filterKey === 'startDate' || filterKey === 'endDate') && selectedFilters.includes('dateRange')) {
+                return null;
               }
-            }}
-          >
-            Reset
-          </Button>
-        </Box>
 
-        <Box display="flex" flexDirection="column" gap={2}>
-          {selectedFilters?.map((filterKey) => {
-            const filter = filterMapping[filterKey];
-            if (!filter) return null;
+              // Handle combined date range picker
+              if (filter.type === 'dateRange') {
+                const startValue = parseDate(startDate);
+                const endValue = parseDate(endDate);
 
-            // Skip startDate and endDate separately if dateRange is in the list
-            if ((filterKey === 'startDate' || filterKey === 'endDate') && selectedFilters.includes('dateRange')) {
-              return null;
-            }
-
-            // Handle combined date range picker
-            if (filter.type === 'dateRange') {
-              const startValue = parseDate(startDate);
-              const endValue = parseDate(endDate);
-
-              const getDisplayValue = () => {
-                if (startValue && endValue) {
-                  return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
-                } else if (startValue) {
-                  return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
-                }
-                return '';
-              };
-
-              const handleOpenPicker = (event) => {
-                setActiveFilterKey(filterKey);
-                const range = {
-                  startDate: startValue || new Date(),
-                  endDate: endValue || new Date(),
-                  key: 'selection'
-                };
-                setSelectionRange(range);
-                setTempSelectionRange(range);
-                setAnchorEl(event.currentTarget);
-              };
-
-              const handleClosePicker = () => {
-                setAnchorEl(null);
-                setActiveFilterKey(null);
-              };
-
-              const handleDateChange = (ranges) => {
-                const { selection } = ranges;
-                setTempSelectionRange(selection);
-              };
-
-              const handleApply = () => {
-                setSelectionRange(tempSelectionRange);
-                const formattedStart = formatDate(tempSelectionRange.startDate);
-                const formattedEnd = formatDate(tempSelectionRange.endDate);
-
-                if (setStartDate) setStartDate(formattedStart || '');
-                if (setEndDate) setEndDate(formattedEnd || '');
-                handleClosePicker();
-              };
-
-              const handleClearDates = (e) => {
-                e.stopPropagation();
-                if (setStartDate) setStartDate('');
-                if (setEndDate) setEndDate('');
-                setSelectionRange({
-                  startDate: new Date(),
-                  endDate: new Date(),
-                  key: 'selection'
-                });
-                setTempSelectionRange({
-                  startDate: new Date(),
-                  endDate: new Date(),
-                  key: 'selection'
-                });
-              };
-
-              return (
-                <Box key={filterKey}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={filter.label}
-                    value={getDisplayValue()}
-                    placeholder="Select date range"
-                    onClick={handleOpenPicker}
-                    InputProps={{
-                      readOnly: true,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {(startValue || endValue) && (
-                            <IconButton
-                              size="small"
-                              onClick={handleClearDates}
-                              sx={{ mr: 0.5, p: 0.5 }}
-                            >
-                              <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
-                            </IconButton>
-                          )}
-                          <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
-                        </InputAdornment>
-                      ),
-                      sx: { cursor: 'pointer' }
-                    }}
-                  />
-                  <Popover
-                    open={Boolean(anchorEl) && activeFilterKey === filterKey}
-                    anchorEl={anchorEl}
-                    onClose={handleClosePicker}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }}
-                    PaperProps={{
-                      sx: {
-                        mt: 1,
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                        borderRadius: 2,
-                      }
-                    }}
-                  >
-                    <Box>
-                      <DateRangePicker
-                        ranges={[tempSelectionRange]}
-                        onChange={handleDateChange}
-                        months={2}
-                        direction="horizontal"
-                        showSelectionPreview={true}
-                        moveRangeOnFirstSelection={false}
-                        rangeColors={['#4ba1f8']}
-                        color="#4ba1f8"
-                        locale={enGB}
-                      />
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
-                        <Button
-                          variant="outlined"
-                          onClick={handleClosePicker}
-                          sx={{ color: '#808191', borderColor: '#e0e0e0' }}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          variant="contained"
-                          onClick={handleApply}
-                          sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
-                        >
-                          Apply
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Popover>
-                </Box>
-              );
-            }
-
-            if (filter.type === 'date') {
-              const supportsGlobalRange = typeof setStartDate === 'function' && typeof setEndDate === 'function';
-              const localRange = dateRanges[filterKey] || { from: null, to: null };
-
-              const startValue = supportsGlobalRange ? parseDate(startDate) : parseDate(localRange.from);
-              const endValue = supportsGlobalRange ? parseDate(endDate) : parseDate(localRange.to || filter.value);
-
-              // Format display value for single input
-              const getDisplayValue = () => {
-                if (startValue && endValue) {
-                  return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
-                } else if (startValue) {
-                  return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
-                }
-                return '';
-              };
-
-              const handleOpenPicker = (event) => {
-                setActiveFilterKey(filterKey);
-                const range = {
-                  startDate: startValue || new Date(),
-                  endDate: endValue || new Date(),
-                  key: 'selection'
-                };
-                setSelectionRange(range);
-                setTempSelectionRange(range);
-                setAnchorEl(event.currentTarget);
-              };
-
-              const handleClosePicker = () => {
-                setAnchorEl(null);
-                setActiveFilterKey(null);
-              };
-
-              const handleDateChange = (ranges) => {
-                const { selection } = ranges;
-                setTempSelectionRange(selection);
-              };
-
-              const handleApply = () => {
-                setSelectionRange(tempSelectionRange);
-                const formattedStart = formatDate(tempSelectionRange.startDate);
-                const formattedEnd = formatDate(tempSelectionRange.endDate);
-
-                if (supportsGlobalRange) {
-                  setStartDate(formattedStart || '');
-                  setEndDate(formattedEnd || '');
-                }
-
-                setDateRanges((prev) => ({
-                  ...prev,
-                  [filterKey]: {
-                    from: formattedStart || '',
-                    to: formattedEnd || ''
+                const getDisplayValue = () => {
+                  if (startValue && endValue) {
+                    return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
+                  } else if (startValue) {
+                    return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
                   }
-                }));
-
-                if (typeof filter.onChange === 'function') {
-                  filter.onChange(formattedEnd || null);
-                }
-                handleClosePicker();
-              };
-
-              const handleClearDates = (e) => {
-                e.stopPropagation();
-                if (supportsGlobalRange) {
-                  setStartDate('');
-                  setEndDate('');
-                }
-                setDateRanges((prev) => ({
-                  ...prev,
-                  [filterKey]: { from: '', to: '' }
-                }));
-                if (typeof filter.onChange === 'function') {
-                  filter.onChange(null);
-                }
-                const emptyRange = {
-                  startDate: new Date(),
-                  endDate: new Date(),
-                  key: 'selection'
+                  return '';
                 };
-                setSelectionRange(emptyRange);
-                setTempSelectionRange(emptyRange);
-              };
 
-              return (
-                <Box key={filterKey}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={filter.label}
-                    value={getDisplayValue()}
-                    placeholder="Select date range"
-                    onClick={handleOpenPicker}
-                    InputProps={{
-                      readOnly: true,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {(startValue || endValue) && (
-                            <IconButton
-                              size="small"
-                              onClick={handleClearDates}
-                              sx={{ mr: 0.5, p: 0.5 }}
-                            >
-                              <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
-                            </IconButton>
-                          )}
-                          <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
-                        </InputAdornment>
-                      ),
-                      sx: { cursor: 'pointer' }
-                    }}
-                  />
-                  <Popover
-                    open={Boolean(anchorEl) && activeFilterKey === filterKey}
-                    anchorEl={anchorEl}
-                    onClose={handleClosePicker}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }}
-                    PaperProps={{
-                      sx: {
-                        mt: 1,
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                        borderRadius: 2,
-                      }
-                    }}
-                  >
-                    <Box>
-                      <DateRangePicker
-                        ranges={[tempSelectionRange]}
-                        onChange={handleDateChange}
-                        months={2}
-                        direction="horizontal"
-                        showSelectionPreview={true}
-                        moveRangeOnFirstSelection={false}
-                        rangeColors={['#4ba1f8']}
-                        color="#4ba1f8"
-                        locale={enGB}
-                      />
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
-                        <Button
-                          variant="outlined"
-                          onClick={handleClosePicker}
-                          sx={{ color: '#808191', borderColor: '#e0e0e0' }}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          variant="contained"
-                          onClick={handleApply}
-                          sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
-                        >
-                          Apply
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Popover>
-                </Box>
-              );
-            }
+                const handleOpenPicker = (event) => {
+                  setActiveFilterKey(filterKey);
+                  const range = {
+                    startDate: startValue || new Date(),
+                    endDate: endValue || new Date(),
+                    key: 'selection'
+                  };
+                  setSelectionRange(range);
+                  setTempSelectionRange(range);
+                  setAnchorEl(event.currentTarget);
+                };
 
-            if (filter.type === 'select') {
-              if (filterKey === 'statusFilter') {
+                const handleClosePicker = () => {
+                  setAnchorEl(null);
+                  setActiveFilterKey(null);
+                };
+
+                const handleDateChange = (ranges) => {
+                  const { selection } = ranges;
+                  setTempSelectionRange(selection);
+                };
+
+                const handleApply = () => {
+                  setSelectionRange(tempSelectionRange);
+                  const formattedStart = formatDate(tempSelectionRange.startDate);
+                  const formattedEnd = formatDate(tempSelectionRange.endDate);
+
+                  if (setStartDate) setStartDate(formattedStart || '');
+                  if (setEndDate) setEndDate(formattedEnd || '');
+                  handleClosePicker();
+                };
+
+                const handleClearDates = (e) => {
+                  e.stopPropagation();
+                  if (setStartDate) setStartDate('');
+                  if (setEndDate) setEndDate('');
+                  setSelectionRange({
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    key: 'selection'
+                  });
+                  setTempSelectionRange({
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    key: 'selection'
+                  });
+                };
+
                 return (
-                  <TextField
-                    key={filterKey}
-                    select
-                    label={filter.label}
-                    fullWidth
-                    size="small"
-                    value={filter.value || ''}
-                    onChange={(e) => filter.onChange(e.target.value)}
-                    SelectProps={{
-                      renderValue: (selected) =>
-                        selected ? (
+                  <Box key={filterKey}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label={filter.label}
+                      value={getDisplayValue()}
+                      placeholder="Select date range"
+                      onClick={handleOpenPicker}
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {(startValue || endValue) && (
+                              <IconButton size="small" onClick={handleClearDates} sx={{ mr: 0.5, p: 0.5 }}>
+                                <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
+                              </IconButton>
+                            )}
+                            <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
+                          </InputAdornment>
+                        ),
+                        sx: { cursor: 'pointer' }
+                      }}
+                    />
+                    <Popover
+                      open={Boolean(anchorEl) && activeFilterKey === filterKey}
+                      anchorEl={anchorEl}
+                      onClose={handleClosePicker}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                      }}
+                      PaperProps={{
+                        sx: {
+                          mt: 1,
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                          borderRadius: 2
+                        }
+                      }}
+                    >
+                      <Box>
+                        <DateRangePicker
+                          ranges={[tempSelectionRange]}
+                          onChange={handleDateChange}
+                          months={2}
+                          direction="horizontal"
+                          showSelectionPreview={true}
+                          moveRangeOnFirstSelection={false}
+                          rangeColors={['#4ba1f8']}
+                          color="#4ba1f8"
+                          locale={enGB}
+                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
+                          <Button variant="outlined" onClick={handleClosePicker} sx={{ color: '#808191', borderColor: '#e0e0e0' }}>
+                            Close
+                          </Button>
+                          <Button
+                            variant="contained"
+                            onClick={handleApply}
+                            sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
+                          >
+                            Apply
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Popover>
+                  </Box>
+                );
+              }
+
+              if (filter.type === 'date') {
+                const supportsGlobalRange = typeof setStartDate === 'function' && typeof setEndDate === 'function';
+                const localRange = dateRanges[filterKey] || { from: null, to: null };
+
+                const startValue = supportsGlobalRange ? parseDate(startDate) : parseDate(localRange.from);
+                const endValue = supportsGlobalRange ? parseDate(endDate) : parseDate(localRange.to || filter.value);
+
+                // Format display value for single input
+                const getDisplayValue = () => {
+                  if (startValue && endValue) {
+                    return `${dayjs(startValue).format('DD/MM/YYYY')} - ${dayjs(endValue).format('DD/MM/YYYY')}`;
+                  } else if (startValue) {
+                    return `${dayjs(startValue).format('DD/MM/YYYY')} - Select end date`;
+                  }
+                  return '';
+                };
+
+                const handleOpenPicker = (event) => {
+                  setActiveFilterKey(filterKey);
+                  const range = {
+                    startDate: startValue || new Date(),
+                    endDate: endValue || new Date(),
+                    key: 'selection'
+                  };
+                  setSelectionRange(range);
+                  setTempSelectionRange(range);
+                  setAnchorEl(event.currentTarget);
+                };
+
+                const handleClosePicker = () => {
+                  setAnchorEl(null);
+                  setActiveFilterKey(null);
+                };
+
+                const handleDateChange = (ranges) => {
+                  const { selection } = ranges;
+                  setTempSelectionRange(selection);
+                };
+
+                const handleApply = () => {
+                  setSelectionRange(tempSelectionRange);
+                  const formattedStart = formatDate(tempSelectionRange.startDate);
+                  const formattedEnd = formatDate(tempSelectionRange.endDate);
+
+                  if (supportsGlobalRange) {
+                    setStartDate(formattedStart || '');
+                    setEndDate(formattedEnd || '');
+                  }
+
+                  setDateRanges((prev) => ({
+                    ...prev,
+                    [filterKey]: {
+                      from: formattedStart || '',
+                      to: formattedEnd || ''
+                    }
+                  }));
+
+                  if (typeof filter.onChange === 'function') {
+                    filter.onChange(formattedEnd || null);
+                  }
+                  handleClosePicker();
+                };
+
+                const handleClearDates = (e) => {
+                  e.stopPropagation();
+                  if (supportsGlobalRange) {
+                    setStartDate('');
+                    setEndDate('');
+                  }
+                  setDateRanges((prev) => ({
+                    ...prev,
+                    [filterKey]: { from: '', to: '' }
+                  }));
+                  if (typeof filter.onChange === 'function') {
+                    filter.onChange(null);
+                  }
+                  const emptyRange = {
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    key: 'selection'
+                  };
+                  setSelectionRange(emptyRange);
+                  setTempSelectionRange(emptyRange);
+                };
+
+                return (
+                  <Box key={filterKey}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label={filter.label}
+                      value={getDisplayValue()}
+                      placeholder="Select date range"
+                      onClick={handleOpenPicker}
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {(startValue || endValue) && (
+                              <IconButton size="small" onClick={handleClearDates} sx={{ mr: 0.5, p: 0.5 }}>
+                                <ClearIcon sx={{ fontSize: 18, color: '#808191' }} />
+                              </IconButton>
+                            )}
+                            <CalendarMonthIcon sx={{ color: '#808191', cursor: 'pointer' }} />
+                          </InputAdornment>
+                        ),
+                        sx: { cursor: 'pointer' }
+                      }}
+                    />
+                    <Popover
+                      open={Boolean(anchorEl) && activeFilterKey === filterKey}
+                      anchorEl={anchorEl}
+                      onClose={handleClosePicker}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                      }}
+                      PaperProps={{
+                        sx: {
+                          mt: 1,
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                          borderRadius: 2
+                        }
+                      }}
+                    >
+                      <Box>
+                        <DateRangePicker
+                          ranges={[tempSelectionRange]}
+                          onChange={handleDateChange}
+                          months={2}
+                          direction="horizontal"
+                          showSelectionPreview={true}
+                          moveRangeOnFirstSelection={false}
+                          rangeColors={['#4ba1f8']}
+                          color="#4ba1f8"
+                          locale={enGB}
+                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: 2, borderTop: '1px solid #e0e0e0' }}>
+                          <Button variant="outlined" onClick={handleClosePicker} sx={{ color: '#808191', borderColor: '#e0e0e0' }}>
+                            Close
+                          </Button>
+                          <Button
+                            variant="contained"
+                            onClick={handleApply}
+                            sx={{ backgroundColor: '#4ba1f8', '&:hover': { backgroundColor: '#2196f3' } }}
+                          >
+                            Apply
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Popover>
+                  </Box>
+                );
+              }
+
+              if (filter.type === 'select') {
+                if (filterKey === 'statusFilter') {
+                  return (
+                    <TextField
+                      key={filterKey}
+                      select
+                      label={filter.label}
+                      fullWidth
+                      size="small"
+                      value={filter.value || ''}
+                      onChange={(e) => filter.onChange(e.target.value)}
+                      SelectProps={{
+                        renderValue: (selected) =>
+                          selected ? (
+                            <Chip
+                              label={filter.data?.find((status) => status.value === selected)?.label || selected}
+                              sx={{
+                                color:
+                                  selected?.toLowerCase() === 'active'
+                                    ? '#79dbfb'
+                                    : selected?.toLowerCase() === 'inactive'
+                                    ? '#ff6a67'
+                                    : selected?.toLowerCase() === 'open'
+                                    ? '#2e7d32'
+                                    : selected?.toLowerCase() === 'close'
+                                    ? '#c62828'
+                                    : selected?.toLowerCase() === 'pending'
+                                    ? '#f9a825'
+                                    : selected?.toLowerCase() === 'approved'
+                                    ? '#41c048'
+                                    : selected?.toLowerCase() === 'rejected'
+                                    ? '#d32f2f'
+                                    : '#333',
+                                backgroundColor:
+                                  selected?.toLowerCase() === 'active'
+                                    ? '#e5f8fe'
+                                    : selected?.toLowerCase() === 'inactive'
+                                    ? '#ffeae9'
+                                    : selected?.toLowerCase() === 'open'
+                                    ? '#91FD91'
+                                    : selected?.toLowerCase() === 'close'
+                                    ? '#FDA191'
+                                    : selected?.toLowerCase() === 'pending'
+                                    ? '#FFF68D'
+                                    : selected?.toLowerCase() === 'approved'
+                                    ? '#eefbe5'
+                                    : selected?.toLowerCase() === 'rejected'
+                                    ? '#ffeae9'
+                                    : '#e0e0e0',
+
+                                fontWeight: 500,
+                                px: 1
+                              }}
+                            />
+                          ) : (
+                            ''
+                          )
+                      }}
+                    >
+                      {filter.data?.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
                           <Chip
-                            label={filter.data?.find((status) => status.value === selected)?.label || selected}
+                            label={option.label}
                             sx={{
                               color:
-                                selected?.toLowerCase() === 'active'
+                                option.value?.toLowerCase() === 'active'
                                   ? '#79dbfb'
-                                  : selected?.toLowerCase() === 'inactive'
+                                  : option.value?.toLowerCase() === 'inactive'
                                   ? '#ff6a67'
-                                  : selected?.toLowerCase() === 'open'
+                                  : option.value?.toLowerCase() === 'open'
                                   ? '#2e7d32'
-                                  : selected?.toLowerCase() === 'close'
+                                  : option.value?.toLowerCase() === 'close'
                                   ? '#c62828'
-                                  : selected?.toLowerCase() === 'pending'
+                                  : option.value?.toLowerCase() === 'pending'
                                   ? '#f9a825'
-                                  : selected?.toLowerCase() === 'approved'
+                                  : option.value?.toLowerCase() === 'approved'
                                   ? '#41c048'
-                                  : selected?.toLowerCase() === 'rejected'
+                                  : option.value?.toLowerCase() === 'rejected'
                                   ? '#d32f2f'
                                   : '#333',
                               backgroundColor:
-                                selected?.toLowerCase() === 'active'
+                                option.value?.toLowerCase() === 'active'
                                   ? '#e5f8fe'
-                                  : selected?.toLowerCase() === 'inactive'
+                                  : option.value?.toLowerCase() === 'inactive'
                                   ? '#ffeae9'
-                                  : selected?.toLowerCase() === 'open'
+                                  : option.value?.toLowerCase() === 'open'
                                   ? '#91FD91'
-                                  : selected?.toLowerCase() === 'close'
+                                  : option.value?.toLowerCase() === 'close'
                                   ? '#FDA191'
-                                  : selected?.toLowerCase() === 'pending'
+                                  : option.value?.toLowerCase() === 'pending'
                                   ? '#FFF68D'
-                                  : selected?.toLowerCase() === 'approved'
+                                  : option.value?.toLowerCase() === 'approved'
                                   ? '#eefbe5'
-                                  : selected?.toLowerCase() === 'rejected'
+                                  : option.value?.toLowerCase() === 'rejected'
                                   ? '#ffeae9'
                                   : '#e0e0e0',
 
-                              fontWeight: 500,
-                              px: 1
+                              fontWeight: 500
                             }}
                           />
-                        ) : (
-                          ''
-                        )
-                    }}
-                  >
-                    {filter.data?.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        <Chip
-                          label={option.label}
-                          sx={{
-                            color:
-                              option.value?.toLowerCase() === 'active'
-                                ? '#79dbfb'
-                                : option.value?.toLowerCase() === 'inactive'
-                                ? '#ff6a67'
-                                : option.value?.toLowerCase() === 'open'
-                                ? '#2e7d32'
-                                : option.value?.toLowerCase() === 'close'
-                                ? '#c62828'
-                                : option.value?.toLowerCase() === 'pending'
-                                ? '#f9a825'
-                                : option.value?.toLowerCase() === 'approved'
-                                ? '#41c048'
-                                : option.value?.toLowerCase() === 'rejected'
-                                ? '#d32f2f'
-                                : '#333',
-                            backgroundColor:
-                              option.value?.toLowerCase() === 'active'
-                                ? '#e5f8fe'
-                                : option.value?.toLowerCase() === 'inactive'
-                                ? '#ffeae9'
-                                : option.value?.toLowerCase() === 'open'
-                                ? '#91FD91'
-                                : option.value?.toLowerCase() === 'close'
-                                ? '#FDA191'
-                                : option.value?.toLowerCase() === 'pending'
-                                ? '#FFF68D'
-                                : option.value?.toLowerCase() === 'approved'
-                                ? '#eefbe5'
-                                : option.value?.toLowerCase() === 'rejected'
-                                ? '#ffeae9'
-                                : '#e0e0e0',
-
-                            fontWeight: 500
-                          }}
-                        />
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                );
-              }
-              return (
-                <Box key={filterKey}>
-                  <Autocomplete
-                    options={filter.data || []}
-                    getOptionLabel={(option) => option.label}
-                    value={filter.data?.find((option) => option.value === filter.value) || null}
-                    onChange={(_, newValue) => filter.onChange(newValue?.value || '')}
-                    renderInput={(params) => <TextField {...params} label={filter.label} size="small" fullWidth />}
-                    renderOption={(props, option) => (
-                      <li {...props}>
-                        {option.flag && <img src={option.flag} alt={option.label} style={{ width: 20, height: 15, marginRight: 8 }} />}
-                        {option.label}
-                      </li>
-                    )}
-                    ListboxProps={{
-                      style: {
-                        maxHeight: '200px'
-                      }
-                    }}
-                    PopperProps={{
-                      placement: 'bottom-start'
-                    }}
-                  />
-                </Box>
-              );
-            }
-
-            if (filter.type === 'time') {
-              return (
-                <>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <TextField
-                      label={filter.label}
-                      type="time"
-                      variant="outlined"
-                      size="small"
-                      fullWidth
-                      InputLabelProps={{ shrink: true }}
-                      inputProps={{ step: 300 }}
-                      value={filter.value || ''}
-                      onChange={(e) => filter.onChange(e.target.value)}
-                      format="hh:mm A"
-                      renderInput={(params) => <TextField {...params} fullWidth size="small" />}
-                      sx={{
-                        '& .MuiInputBase-root.Mui-focused': {
-                          backgroundColor: '#e0e0e0'
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  );
+                }
+                return (
+                  <Box key={filterKey}>
+                    <Autocomplete
+                      options={filter.data || []}
+                      getOptionLabel={(option) => option.label}
+                      value={filter.data?.find((option) => option.value === filter.value) || null}
+                      onChange={(_, newValue) => filter.onChange(newValue?.value || '')}
+                      renderInput={(params) => <TextField {...params} label={filter.label} size="small" fullWidth />}
+                      renderOption={(props, option) => (
+                        <li {...props}>
+                          {option.flag && <img src={option.flag} alt={option.label} style={{ width: 20, height: 15, marginRight: 8 }} />}
+                          {option.label}
+                        </li>
+                      )}
+                      ListboxProps={{
+                        style: {
+                          maxHeight: '200px'
                         }
                       }}
+                      slotProps={{
+                        popper: { placement: 'bottom-start' }
+                      }}
                     />
-                  </LocalizationProvider>
-                </>
-              );
-            }
+                  </Box>
+                );
+              }
 
-            if (filter.type === 'checkbox') {
-              return (
-                <FormControlLabel
-                  key={filterKey}
-                  control={<Checkbox checked={filter.value || false} onChange={(e) => filter.onChange(e.target.checked)} />}
-                  label={filter.label}
-                />
-              );
-            }
+              if (filter.type === 'time') {
+                return (
+                  <>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TextField
+                        label={filter.label}
+                        type="time"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ step: 300 }}
+                        value={filter.value || ''}
+                        onChange={(e) => filter.onChange(e.target.value)}
+                        format="hh:mm A"
+                        renderInput={(params) => <TextField {...params} fullWidth size="small" />}
+                        sx={{
+                          '& .MuiInputBase-root.Mui-focused': {
+                            backgroundColor: '#e0e0e0'
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </>
+                );
+              }
 
-            return null;
-          })}
-        </Box>
-      </Card>
-    </Grid>
+              if (filter.type === 'checkbox') {
+                return (
+                  <FormControlLabel
+                    key={filterKey}
+                    control={<Checkbox checked={filter.value || false} onChange={(e) => filter.onChange(e.target.checked)} />}
+                    label={filter.label}
+                  />
+                );
+              }
+
+              return null;
+            })}
+          </Box>
+        </Card>
+      </Grid>
     </>
   );
+};
+
+FilterPanel.propTypes = {
+  startDate: PropTypes.any,
+  setStartDate: PropTypes.func,
+  endDate: PropTypes.any,
+  setEndDate: PropTypes.func,
+  showFilter: PropTypes.bool,
+  formTypes: PropTypes.array,
+  formType: PropTypes.string,
+  setFormType: PropTypes.func,
+  dateFilters: PropTypes.array,
+  dateFilter: PropTypes.string,
+  setDateFilter: PropTypes.func,
+  districts: PropTypes.array,
+  districtFilter: PropTypes.string,
+  setDistrictFilter: PropTypes.func,
+  genders: PropTypes.array,
+  genderFilter: PropTypes.string,
+  setGenderFilter: PropTypes.func,
+  statuses: PropTypes.array,
+  statusFilter: PropTypes.string,
+  setStatusFilter: PropTypes.func,
+  serviceTypes: PropTypes.array,
+  serviceTypeFilter: PropTypes.string,
+  setServiceTypeFilter: PropTypes.func,
+  createdBy: PropTypes.array,
+  createdByFilter: PropTypes.string,
+  setCreatedByFilter: PropTypes.func,
+  service: PropTypes.array,
+  serviceFilter: PropTypes.string,
+  setServiceFilter: PropTypes.func,
+  dateOpenedFilters: PropTypes.array,
+  dateOpenedFilter: PropTypes.string,
+  setDateOpenedFilter: PropTypes.func,
+  owners: PropTypes.array,
+  ownerFilter: PropTypes.string,
+  setOwnerFilter: PropTypes.func,
+  locations: PropTypes.array,
+  locationFilter: PropTypes.string,
+  setLocationFilter: PropTypes.func,
+  dateAddedFilters: PropTypes.array,
+  dateAddedFilter: PropTypes.string,
+  setDateAddedFilter: PropTypes.func,
+  listNames: PropTypes.array,
+  listNameFilter: PropTypes.string,
+  setListNameFilter: PropTypes.func,
+  formNames: PropTypes.array,
+  formNameFilter: PropTypes.string,
+  setFormNameFilter: PropTypes.func,
+  tags: PropTypes.array,
+  tagFilter: PropTypes.string,
+  setTagFilter: PropTypes.func,
+  names: PropTypes.array,
+  nameFilter: PropTypes.string,
+  setNameFilter: PropTypes.func,
+  receipts: PropTypes.array,
+  receiptIdFilter: PropTypes.string,
+  setReceiptIdFilter: PropTypes.func,
+  campaigns: PropTypes.array,
+  campaignFilter: PropTypes.string,
+  setCampaignFilter: PropTypes.func,
+  caseIds: PropTypes.array,
+  caseIdFilter: PropTypes.string,
+  setCaseIdFilter: PropTypes.func,
+  countriesWithFlags: PropTypes.array,
+  countryOfOriginFilter: PropTypes.string,
+  setCountryOfOriginFilter: PropTypes.func,
+  donorTypes: PropTypes.array,
+  donorTypeFilter: PropTypes.string,
+  setDonorTypeFilter: PropTypes.func,
+  durationOptions: PropTypes.array,
+  durationFilter: PropTypes.string,
+  setDurationFilter: PropTypes.func,
+  amountRanges: PropTypes.array,
+  amountRangeFilter: PropTypes.string,
+  setAmountRangeFilter: PropTypes.func,
+  recruitmentCampaigns: PropTypes.array,
+  recruitmentCampaignFilter: PropTypes.string,
+  setRecruitmentCampaignFilter: PropTypes.func,
+  activityTypes: PropTypes.array,
+  activityTypeFilter: PropTypes.string,
+  setActivityTypeFilter: PropTypes.func,
+  sessionNames: PropTypes.array,
+  sessionNameFilter: PropTypes.string,
+  setSessionNameFilter: PropTypes.func,
+  configurationNames: PropTypes.array,
+  configurationNameFilter: PropTypes.string,
+  setConfigurationNameFilter: PropTypes.func,
+  timeOptions: PropTypes.array,
+  timeFilter: PropTypes.string,
+  setTimeFilter: PropTypes.func,
+  sessionLeads: PropTypes.array,
+  sessionLeadFilter: PropTypes.string,
+  setSessionLeadFilter: PropTypes.func,
+  includeArchives: PropTypes.bool,
+  setIncludeArchives: PropTypes.func,
+  selectedFilters: PropTypes.array,
+  customDateLabel: PropTypes.string,
+  listType: PropTypes.string,
+  setListType: PropTypes.func,
+  includeServiceuser: PropTypes.bool,
+  setIncludeServiceuser: PropTypes.func,
+  formTitles: PropTypes.array,
+  formTitle: PropTypes.string,
+  setFormTitle: PropTypes.func,
+  dateCreated: PropTypes.string,
+  setDateCreated: PropTypes.func,
+  dateSubmitted: PropTypes.string,
+  setDateSubmitted: PropTypes.func
 };
 
 export default FilterPanel;

@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Grid,
   Box,
   Button,
@@ -25,7 +25,7 @@ export default function AddAttendeeDialog({ open, onClose, sessionId, fetchpeopl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate= useNavigate();
+  const navigate = useNavigate();
 
   const fetchAvailableUsers = async () => {
     try {
@@ -49,6 +49,7 @@ export default function AddAttendeeDialog({ open, onClose, sessionId, fetchpeopl
 
   useEffect(() => {
     fetchAvailableUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, open]);
 
   const handleSubmit = async () => {

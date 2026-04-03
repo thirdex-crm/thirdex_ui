@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, Grid, Avatar, IconButton, MenuItem, Stack } from '@mui/material';
+import { Modal, Box, TextField, Button, Grid, Avatar, MenuItem, Stack } from '@mui/material';
 import ProfileLogo from 'assets/images/profile.png';
 import { urls } from 'common/urls';
 import { updateApi } from 'common/apiClient';

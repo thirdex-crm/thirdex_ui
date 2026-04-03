@@ -1,4 +1,3 @@
-
 import { jwtDecode } from 'jwt-decode';
 
 const token = localStorage.getItem('token');
@@ -8,6 +7,6 @@ if (token) {
   try {
     decodedToken = jwtDecode(token);
   } catch (e) {
-    console.error("Token invalid", e);
+    console.error('Token invalid', e);
   }
 }
