@@ -22,7 +22,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import AddFormModal from './AddForm.js';
 
-import EditFormModal from './EditFormModal.js';
+import EditFormModal from './EditFormModal';
 import { DataGrid } from '@mui/x-data-grid';
 import React, { useState } from 'react';
 import FilterPanel from 'components/FilterPanel';
