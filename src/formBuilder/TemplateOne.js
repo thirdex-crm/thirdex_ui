@@ -48,7 +48,19 @@ const TemplateOne = ({
     return updatedField;
   });
 
-  const initialValues = {};
+  const initialValues = formDataUpdated.reduce((acc, field) => {
+    if (!field?.name) {
+      return acc;
+    }
+
+    if (field.type === 'checkbox-group') {
+      acc[field.name] = [];
+      return acc;
+    }
+
+    acc[field.name] = '';
+    return acc;
+  }, {});
 
   const formik = useFormik({
     initialValues,
@@ -73,8 +85,9 @@ const TemplateOne = ({
   });
 
   const generateForm = (fields) => {
-    return fields?.map((field) => {
+    return fields?.map((field, fieldIndex) => {
       let fieldHTML = null;
+      const fieldKey = field?.name || field?.id || `${field?.type || 'field'}-${field?.label || 'label'}-${fieldIndex}`;
 
       switch (field?.type) {
         case 'textarea':
@@ -118,17 +131,17 @@ const TemplateOne = ({
               <FormControl sx={{ minWidth: 250 }}>
                 <FormLabel htmlFor={field?.name}>{field?.label}</FormLabel>
                 <Select
-                  // name={field?.name}
-                  // value={formik?.values[field?.name]}
-                  // onChange={formik?.handleChange}
+                  name={field?.name || `select-${fieldIndex}`}
+                  value={field?.name ? formik?.values[field?.name] ?? '' : ''}
+                  onChange={formik?.handleChange}
                   size="small"
                 >
                   <MenuItem value="">
                     <em> Please Select </em>
                   </MenuItem>
                   {field?.values &&
-                    field?.values?.map((option, index) => (
-                      <MenuItem key={index} value={option?.value}>
+                    field?.values?.map((option, optionIndex) => (
+                      <MenuItem key={option?.value || option?.label || `${fieldKey}-option-${optionIndex}`} value={option?.value || ''}>
                         {option?.label}
                       </MenuItem>
                     ))}
@@ -151,13 +164,18 @@ const TemplateOne = ({
                 <FormLabel>{field?.label}</FormLabel>
                 <RadioGroup
                   row
-                  // name={field?.name}
-                  // value={formik?.values[field?.name]}
-                  // onChange={formik?.handleChange}
+                  name={field?.name || `radio-${fieldIndex}`}
+                  value={field?.name ? formik?.values[field?.name] ?? '' : ''}
+                  onChange={formik?.handleChange}
                 >
                   {field?.values &&
-                    field?.values?.map((checkbox, index) => (
-                      <FormControlLabel key={index} control={<Radio />} label={checkbox?.label} value={checkbox?.label} />
+                    field?.values?.map((checkbox, optionIndex) => (
+                      <FormControlLabel
+                        key={checkbox?.value || checkbox?.label || `${fieldKey}-radio-${optionIndex}`}
+                        control={<Radio />}
+                        label={checkbox?.label}
+                        value={checkbox?.value || checkbox?.label || ''}
+                      />
                     ))}
                 </RadioGroup>
               </FormControl>
@@ -251,14 +269,29 @@ const TemplateOne = ({
               <FormLabel>{field?.label}</FormLabel>
               <FormGroup>
                 {field?.values &&
-                  field?.values?.map((checkbox, index) => (
+                  field?.values?.map((checkbox, optionIndex) => (
                     <FormControlLabel
-                      key={index}
+                      key={checkbox?.value || checkbox?.label || `${fieldKey}-checkbox-${optionIndex}`}
                       control={
                         <Checkbox
-                        // name={checkbox?.label}
-                        // value={formik?.values[field?.name]}
-                        // onChange={formik?.handleChange}
+                          checked={field?.name ? (formik?.values[field?.name] || []).includes(checkbox?.value || checkbox?.label) : false}
+                          onChange={(event) => {
+                            if (!field?.name) {
+                              return;
+                            }
+
+                            const optionValue = checkbox?.value || checkbox?.label;
+                            const currentValues = formik?.values[field?.name] || [];
+
+                            if (event.target.checked) {
+                              formik.setFieldValue(field.name, [...currentValues, optionValue]);
+                            } else {
+                              formik.setFieldValue(
+                                field.name,
+                                currentValues.filter((item) => item !== optionValue)
+                              );
+                            }
+                          }}
                         />
                       }
                       label={checkbox?.label}
@@ -356,7 +389,7 @@ const TemplateOne = ({
           break;
       }
 
-      return fieldHTML;
+      return <React.Fragment key={fieldKey}>{fieldHTML}</React.Fragment>;
     });
   };
 

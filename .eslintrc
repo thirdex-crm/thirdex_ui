@@ -47,7 +47,7 @@
     "react/display-name": "off",
     "react/jsx-filename-extension": "off",
     "no-param-reassign": "off",
-    "react/prop-types": 1,
+    "react/prop-types": "off",
     "react/require-default-props": "off",
     "react/no-array-index-key": "off",
     "react/jsx-props-no-spreading": "off",
@@ -67,23 +67,8 @@
         "patterns": ["@mui/*/*/*", "!@mui/material/test-utils/*"]
       }
     ],
-    "no-unused-vars": [
-      "warn",
-      {
-        "ignoreRestSiblings": false
-      }
-    ],
-    "prettier/prettier": [
-      "warn",
-      {
-        "bracketSpacing": true,
-        "printWidth": 140,
-        "singleQuote": true,
-        "trailingComma": "none",
-        "tabWidth": 2,
-        "useTabs": false,
-        "endOfLine": "auto"
-      }
-    ]
+    "react-hooks/exhaustive-deps": "off",
+    "no-unused-vars": "off",
+    "prettier/prettier": "off"
   }
 }

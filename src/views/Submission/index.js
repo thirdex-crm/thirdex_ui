@@ -67,6 +67,9 @@ const Lead = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleOpenDialog = (params) => {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
     setSelectedRowId(params.row.id);
     setDialogOpen(true);
   };

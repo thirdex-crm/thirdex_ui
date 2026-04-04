@@ -50,32 +50,34 @@ const CasePopover = ({ open, anchorEl, onClose, data, closeNote }) => {
     }
   ];
 
+  const caseNoteId = data?.id || data?._id || '';
+  const parentCaseId = data?.caseId?._id || data?.caseId?.id || data?.caseId || '';
+
   const handleOptionClick = (label) => {
     switch (label) {
       case 'Edit':
         setOpenCaseDialog(true);
         onClose();
-        closeNote();
         break;
       case 'Archive':
         setConfirmArchiveOpen(true);
         onClose();
-        closeNote();
+        closeNote?.();
         break;
       case 'Delete':
         setConfirmDeleteOpen(true);
         onClose();
-        closeNote();
+        closeNote?.();
         break;
       default:
         onClose();
-        closeNote();
+        closeNote?.();
     }
   };
 
   const handleConfirmDelete = async () => {
     try {
-      await updateApiPatch(`${urls.casenote.delete}${data?.id}`);
+      await updateApiPatch(`${urls.casenote.delete}${caseNoteId}`);
       setConfirmDeleteOpen(false);
       onClose();
       toast.success('case deleted successfully!');
@@ -88,7 +90,7 @@ const CasePopover = ({ open, anchorEl, onClose, data, closeNote }) => {
 
   const handleConfirmArchive = async () => {
     try {
-      await postApi(`${urls.casenote.toggleArchive}${data?.id}`, {
+      await postApi(`${urls.casenote.toggleArchive}${caseNoteId}`, {
         archiveReason: archiveReason,
         isArchive: true
       });
@@ -236,7 +238,8 @@ const CasePopover = ({ open, anchorEl, onClose, data, closeNote }) => {
         onSubmit={() => setOpenCaseDialog(false)}
         title="Edit Case Note"
         initialData={data}
-        caseid={data?.id}
+        caseid={parentCaseId}
+        caseNoteId={caseNoteId}
       />
     </>
   );

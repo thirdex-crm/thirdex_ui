@@ -128,6 +128,11 @@ const AddCaseForm = () => {
             getOptionLabel={(option) => option?.name || 'Unknown'}
             groupBy={(option) => option.categoryName ?? label}
             isOptionEqualToValue={(option, value) => option._id === value._id}
+            renderOption={(props, option) => (
+              <li {...props} key={option._id}>
+                {option?.name || 'Unknown'}
+              </li>
+            )}
             value={prefilledTags}
             onChange={(_, selectedOptions) => {
               const updatedTags = selectedOptions.map((opt) => ({
@@ -307,6 +312,11 @@ const AddCaseForm = () => {
                               options={rows}
                               getOptionLabel={(option) => option.name || ''}
                               isOptionEqualToValue={(option, value) => option.id === value.id}
+                              renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                  {option.name || 'Unknown'}
+                                </li>
+                              )}
                               renderInput={(params) => (
                                 <TextField
                                   {...params}
@@ -345,6 +355,11 @@ const AddCaseForm = () => {
                               options={services || []}
                               getOptionLabel={(option) => option.name || ''}
                               isOptionEqualToValue={(option, value) => option._id === value._id}
+                              renderOption={(props, option) => (
+                                <li {...props} key={option._id}>
+                                  {option.name || 'Unknown'}
+                                </li>
+                              )}
                               renderInput={(params) => (
                                 <TextField {...params} label="Service" variant="outlined" size="small" error={!!errors.serviceId} />
                               )}
@@ -377,6 +392,11 @@ const AddCaseForm = () => {
                               options={caseOwner}
                               getOptionLabel={(option) => option.name || ''}
                               isOptionEqualToValue={(option, value) => option.id === value.id}
+                              renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                  {option.name || 'Unknown'}
+                                </li>
+                              )}
                               renderInput={(params) => (
                                 <TextField {...params} label="Case Owner" variant="outlined" size="small" error={!!errors.caseOwner} />
                               )}

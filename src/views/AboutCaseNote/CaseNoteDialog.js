@@ -38,8 +38,6 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
   };
   const handleClose = () => {
     setAnchorEl(null);
-    setCaseNoteData(null);
-    setSelectedCaseNote(null);
   };
   const handleCloseTow = () => {
     setAnchorEl(null);
@@ -214,7 +212,7 @@ const AboutCaseNote = ({ open, onClose, caseData, setSelectedCaseNote }) => {
           </Stack>
         </DialogContent>
       </Dialog>
-      <CasePopover open={openDialog} anchorEl={anchorEl} onClose={handleClose} data={caseData} closeNote={handleCloseTow} />
+      <CasePopover open={openDialog} anchorEl={anchorEl} onClose={handleClose} data={caseNoteData || caseData} closeNote={handleCloseTow} />
     </>
   );
 };

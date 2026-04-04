@@ -22,7 +22,7 @@ const formatHoursOption = (value) => {
   return `${wholeHours} hr${wholeHours === 1 ? '' : 's'} ${minutes} min`;
 };
 
-const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add Case Note', caseid }) => {
+const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add Case Note', caseid, caseNoteId, initialData }) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
     subject: '',
     toggle: false,
     file: null,
-    caseId: caseid
+    caseId: initialData?.caseId?._id || initialData?.caseId || caseid || ''
   });
 
   const [contactTypeEntry, setContactTypeEntry] = useState([]);
@@ -44,19 +44,25 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
   const fileInputRef = useRef();
 
   useEffect(() => {
+    if (initialData) {
+      setCaseNoteData(initialData);
+    }
+
     const fetchCaseNoteData = async () => {
       try {
-        const res = await getApi(urls.casenote.getById.replace(':id', caseid));
+        const res = await getApi(urls.casenote.getById.replace(':id', caseNoteId));
         setCaseNoteData(res?.data?.caseNoteData);
       } catch (err) {
         console.error('Error fetching case note data:', err);
       }
     };
 
-    if (caseid) {
+    if (caseNoteId) {
       fetchCaseNoteData();
+    } else if (!initialData) {
+      setCaseNoteData(undefined);
     }
-  }, [caseid]);
+  }, [caseNoteId, initialData]);
 
   useEffect(() => {
     if (caseNoteData) {
@@ -81,10 +87,10 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
         contactPurpose: '',
         toggle: false,
         file: null,
-        caseId: caseid
+        caseId: initialData?.caseId?._id || initialData?.caseId || caseid || ''
       }));
     }
-  }, [caseNoteData, caseid]);
+  }, [caseNoteData, caseid, initialData]);
 
   useEffect(() => {
     const fetchContactTypes = async () => {
@@ -161,7 +167,7 @@ const CaseNoteDialog = ({ open, fetchdata, handleClose, onSubmit, title = 'Add C
         subject: '',
         toggle: false,
         file: null,
-        caseId: caseid
+        caseId: initialData?.caseId?._id || initialData?.caseId || caseid || ''
       });
 
       if (fileInputRef.current) fileInputRef.current.value = null;
@@ -287,7 +293,9 @@ CaseNoteDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   title: PropTypes.string,
-  caseid: PropTypes.string
+  caseid: PropTypes.string,
+  caseNoteId: PropTypes.string,
+  initialData: PropTypes.object
 };
 
 export default CaseNoteDialog;
