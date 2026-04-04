@@ -218,6 +218,24 @@ const FilterPanel = ({
     return dayjs(value).format('YYYY-MM-DD');
   };
 
+  const getOptionValue = (option) => {
+    if (option == null) return '';
+    if (typeof option === 'string' || typeof option === 'number') return String(option);
+    if (typeof option === 'object') {
+      return String(option.value ?? option.id ?? option._id ?? option.name ?? option.label ?? '');
+    }
+    return '';
+  };
+
+  const getOptionLabelSafe = (option) => {
+    if (option == null) return '';
+    if (typeof option === 'string' || typeof option === 'number') return String(option);
+    if (typeof option === 'object') {
+      return String(option.label ?? option.name ?? option.title ?? option.value ?? option.id ?? option._id ?? '');
+    }
+    return '';
+  };
+
   const filterMapping = {
     dateRange: {
       label: 'Date Range',
@@ -927,14 +945,20 @@ const FilterPanel = ({
                   <Box key={filterKey}>
                     <Autocomplete
                       options={filter.data || []}
-                      getOptionLabel={(option) => option.label}
-                      value={filter.data?.find((option) => option.value === filter.value) || null}
-                      onChange={(_, newValue) => filter.onChange(newValue?.value || '')}
+                      getOptionLabel={(option) => getOptionLabelSafe(option)}
+                      isOptionEqualToValue={(option, value) => getOptionValue(option) === getOptionValue(value)}
+                      value={
+                        filter.data?.find((option) => getOptionValue(option) === String(filter.value ?? '')) ||
+                        (filter.value && typeof filter.value === 'object' ? filter.value : null)
+                      }
+                      onChange={(_, newValue) => filter.onChange(getOptionValue(newValue))}
                       renderInput={(params) => <TextField {...params} label={filter.label} size="small" fullWidth />}
-                      renderOption={(props, option) => (
-                        <li {...props}>
-                          {option.flag && <img src={option.flag} alt={option.label} style={{ width: 20, height: 15, marginRight: 8 }} />}
-                          {option.label}
+                      renderOption={(props, option, state) => (
+                        <li {...props} key={`${filterKey}-${getOptionValue(option) || getOptionLabelSafe(option) || state.index}`}>
+                          {option?.flag && (
+                            <img src={option.flag} alt={getOptionLabelSafe(option)} style={{ width: 20, height: 15, marginRight: 8 }} />
+                          )}
+                          {getOptionLabelSafe(option)}
                         </li>
                       )}
                       ListboxProps={{

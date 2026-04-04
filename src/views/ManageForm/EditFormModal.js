@@ -20,7 +20,7 @@ const EditFormModal = ({ open = false, onClose = () => {}, getAllForms, editForm
       setPreset(false);
       setPreview(false);
       setSelectedTemplate(null);
-      setFormData([]);
+
       // Map DB fields to formBuilder-compatible format
       const fields = (editFormData.fields || []).map((f) => ({
         type: f.type,
@@ -29,8 +29,12 @@ const EditFormModal = ({ open = false, onClose = () => {}, getAllForms, editForm
         required: f.required,
         values: f.values,
         validation: f.validation,
-        subtype: f.subtype
+        subtype:
+          f.subtype ||
+          (f.type === 'text' ? 'text' : f.type === 'textarea' ? 'textarea' : f.type === 'header' ? 'h1' : undefined)
       }));
+
+      setFormData(fields);
       setTemplateData(fields);
       setFormValues({
         formType: editFormData.type || '',

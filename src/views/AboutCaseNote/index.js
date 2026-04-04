@@ -197,7 +197,7 @@ const AboutCaseNote = () => {
         <Grid item xs={12} md={6}></Grid>
       </Grid>
 
-      <CasePopover open={open} anchorEl={anchorEl} onClose={handleClose} data={caseData} />
+      <CasePopover open={open} anchorEl={anchorEl} onClose={handleClose} data={caseNoteData || caseData} />
     </>
   );
 };

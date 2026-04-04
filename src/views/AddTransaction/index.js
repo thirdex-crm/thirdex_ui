@@ -16,6 +16,8 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
   const [currency, setCurrency] = useState([]);
   const [donorData, setDonorData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [assignedToInputValue, setAssignedToInputValue] = useState('');
+  const [selectedAssignedToOption, setSelectedAssignedToOption] = useState(null);
 
   const {
     handleSubmit,
@@ -28,7 +30,22 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
     trigger,
 
     formState: { errors }
-  } = useForm({ mode: 'all' });
+  } = useForm({
+    mode: 'all',
+    defaultValues: {
+      assignedTo: '',
+      campaign: '',
+      amountPaid: '',
+      paymentMethod: '',
+      processingCost: '',
+      currency: '',
+      receiptNumber: '',
+      transactionId: '',
+      product: '',
+      quantity: '',
+      amountDue: ''
+    }
+  });
 
   useEffect(() => {
     const fetchDonors = async () => {
@@ -188,23 +205,48 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                           name="assignedTo"
                           control={control}
                           rules={{ required: 'Assigned To is required' }}
-                          render={({ field }) => (
-                            <Autocomplete
-                              {...field}
-                              options={donorData}
-                              getOptionLabel={(option) => option.label || ''}
-                              onChange={(event, value) => setValue('assignedTo', value ? value.value : '')}
-                              onInputChange={(_, newInputValue) => setSearchQuery(newInputValue)}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Assigned to"
-                                  error={!!errors.assignedTo}
-                                  helperText={errors.assignedTo?.message}
-                                />
-                              )}
-                            />
-                          )}
+                          render={({ field }) => {
+                            const selectedDonor =
+                              donorData.find((option) => option.value === field.value) ||
+                              (selectedAssignedToOption?.value === field.value ? selectedAssignedToOption : null);
+
+                            return (
+                              <Autocomplete
+                                options={donorData}
+                                value={selectedDonor}
+                                inputValue={assignedToInputValue}
+                                getOptionLabel={(option) => option?.label || ''}
+                                isOptionEqualToValue={(option, value) => option.value === value.value}
+                                onChange={(_, value) => {
+                                  setSelectedAssignedToOption(value || null);
+                                  setAssignedToInputValue(value?.label || '');
+                                  field.onChange(value ? value.value : '');
+                                }}
+                                onInputChange={(_, newInputValue, reason) => {
+                                  setAssignedToInputValue(newInputValue || '');
+                                  if (reason === 'input') {
+                                    setSearchQuery(newInputValue || '');
+                                  }
+                                  if (reason === 'clear') {
+                                    setSearchQuery('');
+                                  }
+                                }}
+                                renderOption={(props, option) => (
+                                  <li {...props} key={option.value}>
+                                    {option.label}
+                                  </li>
+                                )}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Assigned to"
+                                    error={!!errors.assignedTo}
+                                    helperText={errors.assignedTo?.message}
+                                  />
+                                )}
+                              />
+                            );
+                          }}
                         />
                       </FormControl>
                     </Grid>
@@ -221,6 +263,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                             size="small"
                             label="Campaign"
                             {...field}
+                            value={field.value ?? ''}
                             error={!!errors.campaign}
                             helperText={errors.campaign?.message}
                           >
@@ -258,6 +301,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                         render={({ field }) => (
                           <TextField
                             {...field}
+                            value={field.value ?? ''}
                             select
                             fullWidth
                             label="Payment Method"
@@ -302,6 +346,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                             size="small"
                             label="Currency"
                             {...field}
+                            value={field.value ?? ''}
                             error={!!errors.currency}
                             helperText={errors.currency?.message}
                           >
@@ -364,6 +409,7 @@ const AddCaseForm = ({ onCancel, fetchTransections }) => {
                           render={({ field }) => (
                             <TextField
                               {...field}
+                              value={field.value ?? ''}
                               select
                               fullWidth
                               label="Product"

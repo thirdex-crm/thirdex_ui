@@ -7,7 +7,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AntSwitch from 'components/AntSwitch.js';
 import { useForm, Controller } from 'react-hook-form';
-import { getApi } from 'common/apiClient';
+import { getApi, postApi } from 'common/apiClient';
 import toast from 'react-hot-toast';
 import { urls } from 'common/urls';
 import { useEffect } from 'react';
@@ -28,9 +28,10 @@ const MailingListForm = () => {
     mode: 'all',
     defaultValues: {
       userType,
+      listName: '',
       tags: [],
-      channelSettings: '',
-      purposeSettings: '',
+      channelSettings: [],
+      purposeSettings: [],
       includeArchived: false
     }
   });
@@ -77,6 +78,7 @@ const MailingListForm = () => {
 
   const fetchtTagData = async () => {
     try {
+      const response = await getApi(urls.tag.getAllTags);
       setTagOptions(response?.data?.allTags);
     } catch (error) {
       console.error('Error fetching config:', error);
@@ -127,8 +129,25 @@ const MailingListForm = () => {
     }
 
     try {
-      void data;
-      void validatedFilters;
+      const payload = {
+        name: data.listName,
+        userType: data.userType,
+        tags: data.tags || [],
+        channelSettings: data.channelSettings || [],
+        purposeSettings: data.purposeSettings || [],
+        includeArchived: Boolean(data.includeArchived),
+        filters: validatedFilters.map((item) => ({
+          id: item.id,
+          field: item.field,
+          comparison: item.comparison,
+          value: item.value,
+          operator_to_next: item.operator_to_next || 'AND'
+        }))
+      };
+
+      await postApi(urls.mail.create, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       toast.success('Mail added successfully');
       navigate('/mail');
@@ -221,6 +240,11 @@ const MailingListForm = () => {
                   isOptionEqualToValue={(option, value) => option._id === value._id}
                   value={tagOptions.filter((opt) => field.value?.includes(opt._id)) || []}
                   onChange={(_, selectedOptions) => field.onChange(selectedOptions.map((opt) => opt._id))}
+                  renderOption={(props, option, state) => (
+                    <li {...props} key={option._id || option.id || `${option.name}-${state.index}`}>
+                      {option?.name || ''}
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -246,6 +270,11 @@ const MailingListForm = () => {
                   options={channelOptions}
                   value={field.value || []}
                   onChange={(_, value) => field.onChange(value)}
+                  renderOption={(props, option, state) => (
+                    <li {...props} key={`${String(option)}-${state.index}`}>
+                      {String(option)}
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -270,10 +299,15 @@ const MailingListForm = () => {
                 <Autocomplete
                   multiple
                   options={contactPurposeEntry}
-                  getOptionLabel={(option) => option?.name}
+                  getOptionLabel={(option) => option?.name || ''}
                   isOptionEqualToValue={(option, value) => option._id === value._id}
                   value={contactPurposeEntry.filter((opt) => field.value?.includes(opt._id)) || []}
                   onChange={(_, selectedOptions) => field.onChange(selectedOptions.map((opt) => opt._id))}
+                  renderOption={(props, option, state) => (
+                    <li {...props} key={option._id || option.id || `${option.name}-${state.index}`}>
+                      {option?.name || ''}
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -338,6 +372,11 @@ const MailingListForm = () => {
                       disableClearable
                       isOptionEqualToValue={(option, value) => option?.value === (typeof value === 'string' ? value : value?.value)}
                       getOptionLabel={(option) => getLabel(option)}
+                      renderOption={(props, option, state) => (
+                        <li {...props} key={option.value || `${option.label}-${state.index}`}>
+                          {getLabel(option)}
+                        </li>
+                      )}
                       renderInput={(params) => (
                         <TextField
                           {...params}

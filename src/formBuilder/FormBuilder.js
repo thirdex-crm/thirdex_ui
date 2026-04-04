@@ -98,6 +98,10 @@ const FormBuilder = ({ setFormData, formData, setPreview, templateData, isEdit }
               `;
               document.head.appendChild(style);
               const options = {
+                i18n: {
+                  locale: 'en-US',
+                  location: 'https://formbuilder.online/assets/lang/'
+                },
                 disableFields: [
                   'textDefault',
                   'autocomplete',

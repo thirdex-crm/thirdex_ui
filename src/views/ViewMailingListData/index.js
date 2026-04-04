@@ -32,7 +32,8 @@ const ViewMailingListData = () => {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
   const location = useLocation();
-  const id = location?.state?.id;
+  const queryId = new URLSearchParams(location.search).get('id');
+  const id = location?.state?.id || queryId;
   const [selectedIds, setSelectedIds] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [paginationModel, setPaginationModel] = useState({
@@ -46,6 +47,11 @@ const ViewMailingListData = () => {
   const [addToTimeline, setAddToTimeline] = useState(false);
 
   const handlePrepareDownload = async () => {
+    if (!id) {
+      toast.error('Mailing list id not found');
+      return;
+    }
+
     try {
       const response = await getApi(`${urls.mail.fetchMailingListData}/${id}?page=1&limit=100000`);
       const allUsers = response?.data?.users || [];
@@ -91,6 +97,13 @@ const ViewMailingListData = () => {
   };
 
   const fetchMails = async () => {
+    if (!id) {
+      setRows([]);
+      setTotalRows(0);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -109,7 +122,7 @@ const ViewMailingListData = () => {
       const formattedUsers = users.map((user, index) => ({
         id: user._id,
         serialNumber: `#C-${(index + 1).toString().padStart(3, '0')}`,
-        name: `${user.personalInfo.firstName} ${user.personalInfo.lastName}` || ''
+        name: `${user?.personalInfo?.firstName || ''} ${user?.personalInfo?.lastName || ''}`.trim() || '-'
       }));
 
       setMailData(response?.data?.mailData);
@@ -126,7 +139,7 @@ const ViewMailingListData = () => {
   useEffect(() => {
     fetchMails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id, paginationModel.page, paginationModel.pageSize]);
 
   const columns = [
     {
@@ -145,7 +158,15 @@ const ViewMailingListData = () => {
           </Stack>
 
           <Tooltip title="Info" arrow>
-            <IconButton onClick={() => navigate('/view-people', { state: { id: params.row.id } })}>
+            <IconButton
+              onClick={() => {
+                if (!params?.row?.id) {
+                  toast.error('User not found');
+                  return;
+                }
+                navigate('/view-people', { state: { id: params.row.id } });
+              }}
+            >
               <InfoIcon sx={{ color: '#49494c' }} />
             </IconButton>
           </Tooltip>
@@ -324,7 +345,7 @@ const ViewMailingListData = () => {
                     title={mailData?.name}
                     selectedIds={selectedIds}
                     enableBulkActions={false}
-                    exportEnabled={true}
+                    exportEnabled={false}
                     extraActions={null}
                     refetchData={fetchMails}
                   />

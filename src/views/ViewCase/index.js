@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Card, CardContent, Grid, Typography, InputBase, Stack, Button, IconButton, Chip, Tooltip } from '@mui/material';
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import FilterPanel from 'components/FilterPanel';
 import SearchIcon from '@mui/icons-material/Search';
@@ -72,6 +72,31 @@ const CaseDetailsPage = () => {
   const { id } = location.state || {};
   const hasActiveFilters = Boolean(dateOpenedFilter || searchQuery || createdByFilter);
 
+  const handleDownloadCsv = () => {
+    const headers = ['Date', 'Subject', 'Contact Type', 'Created By', 'Hours'];
+    const escapeCsv = (value) => {
+      const text = value == null ? '' : String(value);
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const lines = [
+      headers.join(','),
+      ...(row || []).map((item) =>
+        [item.date, item.subject, item.configurationName, item.createdBy, item.hours].map((cell) => escapeCsv(cell)).join(',')
+      )
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `case-notes-${dayjs().format('YYYY-MM-DD')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const CustomHeader = () => {
     return (
       <Box sx={{ height: '50px', display: 'flex', alignItems: 'center' }}>
@@ -98,7 +123,9 @@ const CaseDetailsPage = () => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <GridToolbarExport />
+            <Button size="small" onClick={handleDownloadCsv} sx={{ color: '#009fc7' }}>
+              Download CSV
+            </Button>
             <Button
               variant="contained"
               size="small"
